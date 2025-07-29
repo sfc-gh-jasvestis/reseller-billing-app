@@ -175,19 +175,37 @@ The dashboard is optimized for various screen sizes:
 
 ### Common Issues
 
-1. **Connection Errors**:
+1. **Caching Errors**:
+   - **UnserializableReturnValueError**: If you see `Cannot serialize the return value (of type snowflake.snowpark.session.Session)`, ensure you're using `@st.cache_resource` for database connections, not `@st.cache_data`
+   - **Solution**: Use `@st.cache_resource` for Snowflake sessions and `@st.cache_data` for serializable data like pandas DataFrames
+
+2. **Connection Errors**:
    - Verify Snowflake session is active
    - Check warehouse is running
    - Confirm network connectivity
 
-2. **Permission Denied**:
+3. **Permission Denied**:
    - Ensure ACCOUNTADMIN role or proper grants
    - Verify access to BILLING_USAGE schema
 
-3. **No Data Available**:
+4. **No Data Available**:
    - Check date range selection
    - Verify customer has usage in period
    - Confirm contract is active
+
+### Streamlit Caching Guidelines
+
+```python
+# ✅ Correct: Use st.cache_resource for connections
+@st.cache_resource
+def get_database_connection():
+    return create_connection()
+
+# ✅ Correct: Use st.cache_data for serializable data
+@st.cache_data
+def load_data():
+    return pd.DataFrame(data)
+```
 
 ### Error Handling
 The application includes comprehensive error handling:
