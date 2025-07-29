@@ -70,7 +70,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-@st.cache_data
+@st.cache_resource
 def get_snowflake_session():
     """Get active Snowflake session with error handling"""
     try:
