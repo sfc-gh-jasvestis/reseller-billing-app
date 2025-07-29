@@ -38,8 +38,7 @@ cd snowflake-billing-dashboard
 ```
 
 2. **Download all application files** to this directory:
-   - `streamlit_app.py` (basic version)
-   - `streamlit_app_enhanced.py` (enhanced version)
+   - `streamlit_app.py` (main application)
    - `requirements.txt`
    - `config/app_config.py`
    - `config/__init__.py`
@@ -88,24 +87,14 @@ snowsql -c myconnection -q "PUT file://utils/__init__.py @billing_dashboard_stag
 
 ### Step 5: Create Streamlit Application
 
-Choose one of the following based on your preference:
+Create the Streamlit application with the following SQL command:
 
-**Basic Version:**
 ```sql
 CREATE OR REPLACE STREAMLIT billing_dashboard
     ROOT_LOCATION = '@billing_dashboard_stage'
     MAIN_FILE = 'streamlit_app.py'
     QUERY_WAREHOUSE = 'BILLING_DASHBOARD_WH'
     COMMENT = 'Snowflake Credit Usage Dashboard for Reseller Customers';
-```
-
-**Enhanced Version:**
-```sql
-CREATE OR REPLACE STREAMLIT billing_dashboard_enhanced
-    ROOT_LOCATION = '@billing_dashboard_stage'
-    MAIN_FILE = 'streamlit_app_enhanced.py'
-    QUERY_WAREHOUSE = 'BILLING_DASHBOARD_WH'
-    COMMENT = 'Enhanced Snowflake Credit Usage Dashboard';
 ```
 
 ### Step 6: Configure Permissions

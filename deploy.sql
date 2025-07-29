@@ -50,13 +50,6 @@ CREATE OR REPLACE STREAMLIT billing_dashboard
     QUERY_WAREHOUSE = 'BILLING_DASHBOARD_WH'
     COMMENT = 'Snowflake Credit Usage Dashboard for Reseller Customers';
 
--- Alternative: Create with enhanced version
--- CREATE OR REPLACE STREAMLIT billing_dashboard_enhanced
---     ROOT_LOCATION = '@billing_dashboard_stage'
---     MAIN_FILE = 'streamlit_app_enhanced.py'
---     QUERY_WAREHOUSE = 'BILLING_DASHBOARD_WH'
---     COMMENT = 'Enhanced Snowflake Credit Usage Dashboard for Reseller Customers';
-
 -- Grant usage on the Streamlit app
 GRANT USAGE ON STREAMLIT billing_dashboard TO ROLE PUBLIC;
 

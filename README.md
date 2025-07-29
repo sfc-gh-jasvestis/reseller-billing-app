@@ -99,11 +99,17 @@ ORDER BY USAGE_DATE DESC;
 ### File Structure
 ```
 reseller-billing/
-├── streamlit_app.py          # Main application file
+├── streamlit_app.py          # Main application file (enhanced version)
 ├── requirements.txt          # Python dependencies
 ├── README.md                # Documentation
-└── config/
-    └── app_config.py        # Configuration settings
+├── DEPLOYMENT_GUIDE.md      # Step-by-step deployment instructions
+├── deploy.sql               # Snowflake deployment script
+├── config/
+│   ├── __init__.py          # Package initialization
+│   └── app_config.py        # Configuration settings
+└── utils/
+    ├── __init__.py          # Package initialization
+    └── data_utils.py        # Data processing utilities
 ```
 
 ## 📊 Usage Types Tracked
