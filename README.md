@@ -183,6 +183,7 @@ The dashboard is optimized for various screen sizes:
 
 1. **Caching Errors**:
    - **UnserializableReturnValueError**: If you see `Cannot serialize the return value (of type snowflake.snowpark.session.Session)`, ensure you're using `@st.cache_resource` for database connections, not `@st.cache_data`
+   - **UnhashableParamError**: If you see `Cannot hash argument 'session'`, add a leading underscore to the session parameter: `def function(_session):`
    - **Solution**: Use `@st.cache_resource` for Snowflake sessions and `@st.cache_data` for serializable data like pandas DataFrames
 
 2. **Connection Errors**:
@@ -211,6 +212,11 @@ def get_database_connection():
 @st.cache_data
 def load_data():
     return pd.DataFrame(data)
+
+# ✅ Correct: Add underscore to unhashable parameters
+@st.cache_data
+def load_from_db(_session, query_params):
+    return _session.sql(query).to_pandas()
 ```
 
 ### Error Handling

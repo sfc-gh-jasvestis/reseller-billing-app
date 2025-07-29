@@ -83,7 +83,7 @@ def get_snowflake_session():
         return None
 
 @st.cache_data(ttl=CACHE_TTL_SECONDS)
-def load_usage_data(session, start_date, end_date, customer_filter=None, usage_type_filter=None):
+def load_usage_data(_session, start_date, end_date, customer_filter=None, usage_type_filter=None):
     """Enhanced usage data loading with additional filters"""
     try:
         query = f"""
@@ -114,7 +114,7 @@ def load_usage_data(session, start_date, end_date, customer_filter=None, usage_t
             
         query += f" ORDER BY USAGE_DATE DESC, SOLD_TO_CUSTOMER_NAME LIMIT {QUERY_LIMITS['max_rows']}"
         
-        df = session.sql(query).to_pandas()
+        df = _session.sql(query).to_pandas()
         return clean_usage_data(df)
         
     except Exception as e:
@@ -122,7 +122,7 @@ def load_usage_data(session, start_date, end_date, customer_filter=None, usage_t
         return pd.DataFrame()
 
 @st.cache_data(ttl=CACHE_TTL_SECONDS)
-def load_balance_data(session, start_date, end_date, customer_filter=None):
+def load_balance_data(_session, start_date, end_date, customer_filter=None):
     """Enhanced balance data loading"""
     try:
         query = f"""
@@ -145,7 +145,7 @@ def load_balance_data(session, start_date, end_date, customer_filter=None):
             
         query += " ORDER BY DATE DESC, SOLD_TO_CUSTOMER_NAME"
         
-        df = session.sql(query).to_pandas()
+        df = _session.sql(query).to_pandas()
         return clean_balance_data(df)
         
     except Exception as e:
@@ -153,7 +153,7 @@ def load_balance_data(session, start_date, end_date, customer_filter=None):
         return pd.DataFrame()
 
 @st.cache_data(ttl=CACHE_TTL_SECONDS)
-def load_customer_list(session):
+def load_customer_list(_session):
     """Load available customers dynamically"""
     try:
         query = f"""
@@ -163,7 +163,7 @@ def load_customer_list(session):
         ORDER BY SOLD_TO_CUSTOMER_NAME
         """
         
-        df = session.sql(query).to_pandas()
+        df = _session.sql(query).to_pandas()
         return ["All Customers"] + df['SOLD_TO_CUSTOMER_NAME'].tolist()
         
     except Exception as e:
