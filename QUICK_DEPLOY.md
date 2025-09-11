@@ -15,16 +15,12 @@ cd /path/to/reseller-billing-app
 snowsql -c your_connection -q "CREATE OR REPLACE STAGE billing_dashboard_stage DIRECTORY = (ENABLE = TRUE);"
 snowsql -c your_connection -q "PUT file://streamlit_app.py @billing_dashboard_stage;"
 snowsql -c your_connection -q "PUT file://requirements.txt @billing_dashboard_stage;"
-snowsql -c your_connection -q "PUT file://config/app_config.py @billing_dashboard_stage/config/;"
-snowsql -c your_connection -q "PUT file://config/__init__.py @billing_dashboard_stage/config/;"
-snowsql -c your_connection -q "PUT file://utils/data_utils.py @billing_dashboard_stage/utils/;"
-snowsql -c your_connection -q "PUT file://utils/__init__.py @billing_dashboard_stage/utils/;"
 ```
 
 **Option B: Using Snowflake Web UI**
 1. Go to **Data** → **Databases** → Create or select a database/schema
 2. Go to **Stages** → **Create Stage** → Name it `billing_dashboard_stage`
-3. Upload all files using the web interface
+3. Upload `streamlit_app.py` and `requirements.txt` using the web interface
 
 ### **Step 2: Run Minimal Deployment Script**
 
