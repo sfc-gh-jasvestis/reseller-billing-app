@@ -1,6 +1,6 @@
 # Snowflake Credit Usage Dashboard for Resellers
 
-A comprehensive Streamlit application that enables Snowflake reseller customers to view their credit consumption, billing usage, and account balances using Snowflake's BILLING_USAGE schema.
+A comprehensive **Streamlit in Snowflake** application that enables Snowflake reseller customers to view their credit consumption, billing usage, and account balances using Snowflake's BILLING_USAGE schema.
 
 ## 🌟 Features
 
@@ -67,9 +67,9 @@ ORDER BY USAGE_DATE DESC;
 ## 🚀 Deployment
 
 ### Prerequisites
-- Snowflake account with access to BILLING_USAGE schema
+- Snowflake account with **Streamlit in Snowflake** enabled
+- Access to BILLING_USAGE schema (Private Preview feature)
 - ACCOUNTADMIN role or appropriate permissions
-- Streamlit in Snowflake environment
 
 ### Installation Steps
 
@@ -187,9 +187,9 @@ The dashboard is optimized for various screen sizes:
    - **Solution**: Use `@st.cache_resource` for Snowflake sessions and `@st.cache_data` for serializable data like pandas DataFrames
 
 2. **Connection Errors**:
-   - Verify Snowflake session is active
-   - Check warehouse is running
-   - Confirm network connectivity
+   - Ensure you're running in **Streamlit in Snowflake** environment
+   - Verify warehouse is running and accessible
+   - Check that `st.connection('snowflake')` is available (Streamlit in Snowflake feature)
 
 3. **Permission Denied**:
    - Ensure ACCOUNTADMIN role or proper grants
@@ -203,10 +203,10 @@ The dashboard is optimized for various screen sizes:
 ### Streamlit Caching Guidelines
 
 ```python
-# ✅ Correct: Use st.cache_resource for connections
+# ✅ Correct: Use st.cache_resource for Streamlit in Snowflake connections
 @st.cache_resource
-def get_database_connection():
-    return create_connection()
+def get_snowflake_session():
+    return st.connection('snowflake').session()
 
 # ✅ Correct: Use st.cache_data for serializable data
 @st.cache_data

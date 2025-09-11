@@ -1,18 +1,18 @@
 # Deployment Guide: Snowflake Credit Usage Dashboard
 
-This guide provides step-by-step instructions to deploy the Snowflake Credit Usage Dashboard for reseller customers.
+This guide provides step-by-step instructions to deploy the **Streamlit in Snowflake** Credit Usage Dashboard for reseller customers.
 
 ## 📋 Prerequisites
 
 ### 1. Snowflake Account Requirements
 - Snowflake account with **ACCOUNTADMIN** role access
+- **Streamlit in Snowflake** feature enabled
 - Access to **BILLING_USAGE** schema (Private Preview feature)
-- Streamlit in Snowflake enabled
 - Active warehouse for running queries
 
 ### 2. Feature Access
 - **BILLING_USAGE** schema access (contact Snowflake support if not available)
-- Streamlit in Snowflake feature enabled
+- **Streamlit in Snowflake** feature enabled (uses `st.connection('snowflake')`)
 - Appropriate user permissions
 
 ## 🚀 Step-by-Step Deployment

@@ -10,7 +10,7 @@ import os
 # Add local modules to path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from snowflake.snowpark.context import get_active_session
+# Removed snowflake.snowpark.context import - using st.connection instead
 from config.app_config import *
 from utils.data_utils import *
 
@@ -72,9 +72,10 @@ st.markdown("""
 
 @st.cache_resource
 def get_snowflake_session():
-    """Get active Snowflake session with error handling"""
+    """Get Snowflake session for Streamlit in Snowflake"""
     try:
-        session = get_active_session()
+        # Use Streamlit's built-in Snowflake connection for Streamlit in Snowflake
+        session = st.connection('snowflake').session()
         # Test connection
         session.sql("SELECT CURRENT_USER()").collect()
         return session
