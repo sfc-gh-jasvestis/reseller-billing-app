@@ -6,15 +6,15 @@ APP_ICON = "❄️"
 DEFAULT_DATE_RANGE_DAYS = 30
 
 # Database settings
-BILLING_SCHEMA = "SNOWFLAKE.BILLING_USAGE"
+BILLING_SCHEMA = "SNOWFLAKE.BILLING"
 CACHE_TTL_SECONDS = 3600  # 1 hour
 
 # View names
 VIEWS = {
-    "USAGE": "USAGE_IN_CURRENCY_DAILY",
-    "BALANCE": "REMAINING_BALANCE_DAILY", 
-    "CONTRACT": "CONTRACT_ITEMS",
-    "RATES": "RATE_SHEET_DAILY"
+    "USAGE": "PARTNER_USAGE_IN_CURRENCY_DAILY",
+    "BALANCE": "PARTNER_REMAINING_BALANCE_DAILY", 
+    "CONTRACT": "PARTNER_CONTRACT_ITEMS",
+    "RATES": "PARTNER_RATE_SHEET_DAILY"
 }
 
 # Chart configuration
@@ -60,7 +60,7 @@ MESSAGES = {
     "no_data": "No data found for the selected criteria.",
     "loading": "Loading data...",
     "connection_error": "Unable to connect to Snowflake. Please check your connection.",
-    "permission_error": "Access denied. Please check your permissions for the BILLING_USAGE schema.",
+    "permission_error": "Access denied. Please check your permissions for the BILLING schema.",
     "data_refresh": "Data refreshed every hour. For the most current information, please refresh the page."
 }
 

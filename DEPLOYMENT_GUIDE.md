@@ -7,11 +7,11 @@ This guide provides step-by-step instructions to deploy the **Streamlit in Snowf
 ### 1. Snowflake Account Requirements
 - Snowflake account with **ACCOUNTADMIN** role access
 - **Streamlit in Snowflake** feature enabled
-- Access to **BILLING_USAGE** schema (Private Preview feature)
+- Access to **BILLING** schema (available for resellers and distributors)
 - Active warehouse for running queries
 
 ### 2. Feature Access
-- **BILLING_USAGE** schema access (contact Snowflake support if not available)
+- **BILLING** schema access (contact Snowflake support if not available)
 - **Streamlit in Snowflake** feature enabled (uses `st.connection('snowflake')`)
 - Appropriate user permissions
 
@@ -22,8 +22,8 @@ This guide provides step-by-step instructions to deploy the **Streamlit in Snowf
 First, verify you have access to the required features:
 
 ```sql
--- Test BILLING_USAGE schema access
-SELECT COUNT(*) FROM SNOWFLAKE.BILLING_USAGE.USAGE_IN_CURRENCY_DAILY;
+-- Test BILLING schema access
+SELECT COUNT(*) FROM SNOWFLAKE.BILLING.PARTNER_USAGE_IN_CURRENCY_DAILY;
 
 -- Check Streamlit support
 SHOW STREAMLIT APPS;
@@ -49,10 +49,11 @@ cd snowflake-billing-dashboard
 
 1. **Connect to Snowflake** using SnowSQL, Snowflake Web UI, or your preferred client.
 
-2. **Run the deployment script**:
+2. **Run the comprehensive deployment script**:
 ```sql
 -- Execute the contents of deploy.sql
--- This creates database, schema, warehouse, and necessary permissions
+-- This creates database, schema, warehouse, security roles, helper views, and all necessary permissions
+-- The unified script includes everything needed for a complete deployment
 ```
 
 3. **Create the stage and upload files**:
@@ -104,10 +105,10 @@ CREATE OR REPLACE STREAMLIT billing_dashboard
 -- Grant to PUBLIC role (broad access)
 GRANT USAGE ON STREAMLIT billing_dashboard TO ROLE PUBLIC;
 
--- Grant access to BILLING_USAGE schema
+-- Grant access to BILLING schema
 GRANT USAGE ON DATABASE SNOWFLAKE TO ROLE PUBLIC;
-GRANT USAGE ON SCHEMA SNOWFLAKE.BILLING_USAGE TO ROLE PUBLIC;
-GRANT SELECT ON ALL VIEWS IN SCHEMA SNOWFLAKE.BILLING_USAGE TO ROLE PUBLIC;
+GRANT USAGE ON SCHEMA SNOWFLAKE.BILLING TO ROLE PUBLIC;
+GRANT SELECT ON ALL VIEWS IN SCHEMA SNOWFLAKE.BILLING TO ROLE PUBLIC;
 ```
 
 **Create specific role (recommended):**
@@ -117,8 +118,8 @@ CREATE ROLE IF NOT EXISTS BILLING_DASHBOARD_USER;
 
 -- Grant necessary permissions
 GRANT USAGE ON DATABASE SNOWFLAKE TO ROLE BILLING_DASHBOARD_USER;
-GRANT USAGE ON SCHEMA SNOWFLAKE.BILLING_USAGE TO ROLE BILLING_DASHBOARD_USER;
-GRANT SELECT ON ALL VIEWS IN SCHEMA SNOWFLAKE.BILLING_USAGE TO ROLE BILLING_DASHBOARD_USER;
+GRANT USAGE ON SCHEMA SNOWFLAKE.BILLING TO ROLE BILLING_DASHBOARD_USER;
+GRANT SELECT ON ALL VIEWS IN SCHEMA SNOWFLAKE.BILLING TO ROLE BILLING_DASHBOARD_USER;
 GRANT USAGE ON WAREHOUSE BILLING_DASHBOARD_WH TO ROLE BILLING_DASHBOARD_USER;
 GRANT USAGE ON STREAMLIT billing_dashboard TO ROLE BILLING_DASHBOARD_USER;
 
@@ -179,14 +180,14 @@ ALTER WAREHOUSE BILLING_DASHBOARD_WH SET WAREHOUSE_SIZE = 'MEDIUM';
 ### Common Issues and Solutions
 
 #### 1. "Access Denied" Errors
-**Problem**: Users cannot access BILLING_USAGE views
+**Problem**: Users cannot access BILLING views
 **Solution**:
 ```sql
 -- Verify permissions
 SHOW GRANTS TO ROLE your_role;
 
 -- Re-grant if necessary
-GRANT SELECT ON ALL VIEWS IN SCHEMA SNOWFLAKE.BILLING_USAGE TO ROLE your_role;
+GRANT SELECT ON ALL VIEWS IN SCHEMA SNOWFLAKE.BILLING TO ROLE your_role;
 ```
 
 #### 2. "No Data Found" Messages
@@ -195,7 +196,7 @@ GRANT SELECT ON ALL VIEWS IN SCHEMA SNOWFLAKE.BILLING_USAGE TO ROLE your_role;
 - Verify you have recent billing data
 - Check date range selection
 - Confirm customer filter settings
-- Ensure data exists in BILLING_USAGE views
+- Ensure data exists in BILLING views
 
 #### 3. Slow Performance
 **Problem**: Dashboard loads slowly
@@ -221,16 +222,16 @@ SELECT
     MIN(USAGE_DATE) as earliest_date,
     MAX(USAGE_DATE) as latest_date,
     COUNT(*) as total_records
-FROM SNOWFLAKE.BILLING_USAGE.USAGE_IN_CURRENCY_DAILY;
+FROM SNOWFLAKE.BILLING.PARTNER_USAGE_IN_CURRENCY_DAILY;
 
 -- Verify customer data
 SELECT DISTINCT SOLD_TO_CUSTOMER_NAME 
-FROM SNOWFLAKE.BILLING_USAGE.USAGE_IN_CURRENCY_DAILY 
+FROM SNOWFLAKE.BILLING.PARTNER_USAGE_IN_CURRENCY_DAILY 
 WHERE USAGE_DATE >= CURRENT_DATE - 30;
 
 -- Check balance data
 SELECT COUNT(*) 
-FROM SNOWFLAKE.BILLING_USAGE.REMAINING_BALANCE_DAILY
+FROM SNOWFLAKE.BILLING.PARTNER_REMAINING_BALANCE_DAILY
 WHERE DATE >= CURRENT_DATE - 30;
 ```
 
@@ -302,7 +303,7 @@ CREATE OR REPLACE STREAMLIT billing_dashboard_backup
 ### Getting Help
 
 1. **Snowflake Documentation**:
-   - [BILLING_USAGE Documentation](https://docs.snowflake.com/en/LIMITEDACCESS/billing-usage-resellers)
+   - [BILLING Documentation](https://docs.snowflake.com/en/sql-reference/billing)
    - [Streamlit in Snowflake Guide](https://docs.snowflake.com/en/developer-guide/streamlit/about-streamlit)
 
 2. **Common Resources**:
@@ -311,7 +312,7 @@ CREATE OR REPLACE STREAMLIT billing_dashboard_backup
    - Internal IT/Admin team
 
 3. **Contact Information**:
-   - For BILLING_USAGE access: Contact Snowflake Support
+   - For BILLING access: Contact Snowflake Support
    - For application issues: Check error logs in Streamlit
    - For permissions: Work with Snowflake ACCOUNTADMIN
 
@@ -319,7 +320,7 @@ CREATE OR REPLACE STREAMLIT billing_dashboard_backup
 
 ## 🎉 Completion Checklist
 
-- [ ] Verified BILLING_USAGE schema access
+- [ ] Verified BILLING schema access
 - [ ] Created database and schema structure
 - [ ] Uploaded all application files
 - [ ] Created Streamlit application

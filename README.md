@@ -1,6 +1,6 @@
 # Snowflake Credit Usage Dashboard for Resellers
 
-A comprehensive **Streamlit in Snowflake** application that enables Snowflake reseller customers to view their credit consumption, billing usage, and account balances using Snowflake's BILLING_USAGE schema.
+A comprehensive **Streamlit in Snowflake** application that enables Snowflake reseller customers to view their credit consumption, billing usage, and account balances using Snowflake's BILLING schema.
 
 ## 🌟 Features
 
@@ -33,12 +33,12 @@ A comprehensive **Streamlit in Snowflake** application that enables Snowflake re
 ## 🛠️ Technical Implementation
 
 ### Data Sources
-The application leverages Snowflake's BILLING_USAGE schema views:
+The application leverages Snowflake's BILLING schema views:
 
-1. **USAGE_IN_CURRENCY_DAILY**: Daily credit and currency usage
-2. **REMAINING_BALANCE_DAILY**: Daily balance information
-3. **CONTRACT_ITEMS**: Contract terms and capacity information
-4. **RATE_SHEET_DAILY**: Effective rates for usage calculation
+1. **PARTNER_USAGE_IN_CURRENCY_DAILY**: Daily credit and currency usage
+2. **PARTNER_REMAINING_BALANCE_DAILY**: Daily balance information
+3. **PARTNER_CONTRACT_ITEMS**: Contract terms and capacity information
+4. **PARTNER_RATE_SHEET_DAILY**: Effective rates for usage calculation
 
 ### Key Components
 
@@ -54,7 +54,7 @@ SELECT
     USAGE as CREDITS_USED,
     USAGE_IN_CURRENCY,
     BALANCE_SOURCE
-FROM SNOWFLAKE.BILLING_USAGE.USAGE_IN_CURRENCY_DAILY
+FROM SNOWFLAKE.BILLING.PARTNER_USAGE_IN_CURRENCY_DAILY
 WHERE USAGE_DATE BETWEEN '2024-01-01' AND '2024-01-31'
 ORDER BY USAGE_DATE DESC;
 ```
@@ -68,7 +68,7 @@ ORDER BY USAGE_DATE DESC;
 
 ### Prerequisites
 - Snowflake account with **Streamlit in Snowflake** enabled
-- Access to BILLING_USAGE schema (Private Preview feature)
+- Access to BILLING schema (available for resellers and distributors)
 - ACCOUNTADMIN role or appropriate permissions
 
 ### Installation Steps
@@ -84,10 +84,10 @@ ORDER BY USAGE_DATE DESC;
 
 2. **Grant Permissions**:
    ```sql
-   -- Grant access to BILLING_USAGE schema
+   -- Grant access to BILLING schema
    GRANT USAGE ON DATABASE SNOWFLAKE TO ROLE your_role;
-   GRANT USAGE ON SCHEMA SNOWFLAKE.BILLING_USAGE TO ROLE your_role;
-   GRANT SELECT ON ALL VIEWS IN SCHEMA SNOWFLAKE.BILLING_USAGE TO ROLE your_role;
+   GRANT USAGE ON SCHEMA SNOWFLAKE.BILLING TO ROLE your_role;
+   GRANT SELECT ON ALL VIEWS IN SCHEMA SNOWFLAKE.BILLING TO ROLE your_role;
    ```
 
 3. **Run the Application**:
@@ -103,7 +103,7 @@ reseller-billing/
 ├── requirements.txt          # Python dependencies
 ├── README.md                # Documentation
 ├── DEPLOYMENT_GUIDE.md      # Step-by-step deployment instructions
-├── deploy.sql               # Snowflake deployment script
+├── deploy.sql               # Comprehensive Snowflake deployment script
 ├── config/
 │   ├── __init__.py          # Package initialization
 │   └── app_config.py        # Configuration settings

@@ -1,6 +1,6 @@
-# Quick Deployment Guide - BILLING_USAGE Already Enabled
+# Quick Deployment Guide - BILLING Already Enabled
 
-Since Snowflake Support has already enabled the BILLING_USAGE feature for your account, you can use this streamlined deployment process.
+Since Snowflake Support has already enabled the BILLING feature for your account, you can use this streamlined deployment process.
 
 ## 🚀 **3-Step Quick Deployment**
 
@@ -22,14 +22,14 @@ snowsql -c your_connection -q "PUT file://requirements.txt @billing_dashboard_st
 2. Go to **Stages** → **Create Stage** → Name it `billing_dashboard_stage`
 3. Upload `streamlit_app.py` and `requirements.txt` using the web interface
 
-### **Step 2: Run Minimal Deployment Script**
+### **Step 2: Run Deployment Script**
 
-Execute the `deploy_minimal.sql` script in Snowflake:
+Execute the `deploy.sql` script in Snowflake:
 
 ```sql
--- Copy and paste the contents of deploy_minimal.sql into Snowflake worksheet
+-- Copy and paste the contents of deploy.sql into Snowflake worksheet
 -- Or run via SnowSQL:
--- snowsql -c your_connection -f deploy_minimal.sql
+-- snowsql -c your_connection -f deploy.sql
 ```
 
 ### **Step 3: Access Your Dashboard**
@@ -41,7 +41,7 @@ Execute the `deploy_minimal.sql` script in Snowflake:
 
 ## ✅ **Verification Checklist**
 
-- [ ] BILLING_USAGE access confirmed: `SELECT COUNT(*) FROM SNOWFLAKE.BILLING_USAGE.USAGE_IN_CURRENCY_DAILY;`
+- [ ] BILLING access confirmed: `SELECT COUNT(*) FROM SNOWFLAKE.BILLING.PARTNER_USAGE_IN_CURRENCY_DAILY;`
 - [ ] Files uploaded to stage successfully
 - [ ] Streamlit app created: `SHOW STREAMLIT APPS;`
 - [ ] Dashboard accessible via Snowflake UI
@@ -69,7 +69,7 @@ Once deployed, your dashboard will provide:
 ### **Common Issues:**
 
 1. **"Table doesn't exist" error**
-   - Verify BILLING_USAGE is enabled: Contact Snowflake Support if needed
+   - Verify BILLING is enabled: Contact Snowflake Support if needed
 
 2. **"Permission denied" error**
    - Ensure you have ACCOUNTADMIN role or appropriate grants
@@ -87,8 +87,8 @@ Once deployed, your dashboard will provide:
 -- Check stage contents
 LIST @billing_dashboard_stage;
 
--- Verify BILLING_USAGE access
-SELECT COUNT(*) FROM SNOWFLAKE.BILLING_USAGE.USAGE_IN_CURRENCY_DAILY;
+-- Verify BILLING access
+SELECT COUNT(*) FROM SNOWFLAKE.BILLING.PARTNER_USAGE_IN_CURRENCY_DAILY;
 
 -- Check Streamlit app status
 SHOW STREAMLIT APPS;
@@ -97,7 +97,7 @@ DESC STREAMLIT billing_dashboard;
 
 ## 📞 **Support**
 
-- **BILLING_USAGE Issues**: Contact Snowflake Support
+- **BILLING Issues**: Contact Snowflake Support
 - **App Issues**: Check error logs in Streamlit interface
 - **Permissions**: Work with your Snowflake ACCOUNTADMIN
 
