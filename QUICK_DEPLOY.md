@@ -1,108 +1,73 @@
-# Quick Deployment Guide - BILLING Already Enabled
+# ⚡ Quick Deploy - 3 Simple Steps!
 
-Since Snowflake Support has already enabled the BILLING feature for your account, you can use this streamlined deployment process.
+Deploy your Snowflake Reseller Billing Dashboard in under 5 minutes!
 
-## 🚀 **3-Step Quick Deployment**
+## 🎯 **Super Simple Deployment**
 
-### **Step 1: Upload Files to Snowflake**
+### **Step 1: Copy Python Code** 📋
+1. Open `streamlit_app.py` 
+2. **Copy ALL the code** (Ctrl+A, Ctrl+C)
 
-**Option A: Using SnowSQL (Recommended)**
-```bash
-# Navigate to your project directory
-cd /path/to/reseller-billing-app
+### **Step 2: Deploy in Snowflake** 🚀
+1. Open `deploy.sql` in Snowflake worksheet
+2. **Paste the Python code** into the `CREATE STREAMLIT` section
+3. **Run the script** ▶️
 
-# Upload files to Snowflake stage
-snowsql -c your_connection -q "CREATE OR REPLACE STAGE billing_dashboard_stage DIRECTORY = (ENABLE = TRUE);"
-snowsql -c your_connection -q "PUT file://streamlit_app.py @billing_dashboard_stage;"
-snowsql -c your_connection -q "PUT file://requirements.txt @billing_dashboard_stage;"
-```
-
-**Option B: Using Snowflake Web UI**
-1. Go to **Data** → **Databases** → Create or select a database/schema
-2. Go to **Stages** → **Create Stage** → Name it `billing_dashboard_stage`
-3. Upload `streamlit_app.py` and `requirements.txt` using the web interface
-
-### **Step 2: Run Deployment Script**
-
-Execute the `deploy.sql` script in Snowflake:
-
+### **Step 3: Grant Access & Launch** 🔓
 ```sql
--- Copy and paste the contents of deploy.sql into Snowflake worksheet
--- Or run via SnowSQL:
--- snowsql -c your_connection -f deploy.sql
+-- Grant access to yourself
+GRANT ROLE BILLING_DASHBOARD_USER TO USER your_username;
+
+-- Access your app at: Projects > Streamlit > billing_dashboard
 ```
 
-### **Step 3: Access Your Dashboard**
+## ✅ **That's It!**
 
-1. Go to **Snowflake Web UI**
-2. Navigate to **Projects** → **Streamlit**
-3. Click on **billing_dashboard**
-4. Start monitoring your reseller billing usage! 🎉
-
-## ✅ **Verification Checklist**
-
-- [ ] BILLING access confirmed: `SELECT COUNT(*) FROM SNOWFLAKE.BILLING.PARTNER_USAGE_IN_CURRENCY_DAILY;`
-- [ ] Files uploaded to stage successfully
-- [ ] Streamlit app created: `SHOW STREAMLIT APPS;`
-- [ ] Dashboard accessible via Snowflake UI
-- [ ] Data loads correctly in the dashboard
-
-## 🔧 **What Gets Created**
-
-- **Stage**: `billing_dashboard_stage` (for app files)
-- **Warehouse**: `BILLING_DASHBOARD_WH` (XSMALL, auto-suspend 60s)
-- **Streamlit App**: `billing_dashboard` (your main application)
-
-## 📊 **Expected Dashboard Features**
-
-Once deployed, your dashboard will provide:
-
-- **Real-time Credit Monitoring** - Track consumption across customers
-- **Interactive Visualizations** - Trends, heatmaps, waterfall charts
-- **Smart Alerts** - High usage warnings and balance notifications
-- **Advanced Filtering** - Date ranges, customers, usage types
-- **Data Export** - Download usage and balance data as CSV
-- **Balance Tracking** - Monitor capacity, free usage, and on-demand charges
-
-## 🆘 **Troubleshooting**
-
-### **Common Issues:**
-
-1. **"Table doesn't exist" error**
-   - Verify BILLING is enabled: Contact Snowflake Support if needed
-
-2. **"Permission denied" error**
-   - Ensure you have ACCOUNTADMIN role or appropriate grants
-
-3. **"Files not found" error**
-   - Check file upload to stage: `LIST @billing_dashboard_stage;`
-
-4. **Dashboard shows "No data"**
-   - Verify date range selection
-   - Check if you have recent billing data
-
-### **Quick Fixes:**
-
-```sql
--- Check stage contents
-LIST @billing_dashboard_stage;
-
--- Verify BILLING access
-SELECT COUNT(*) FROM SNOWFLAKE.BILLING.PARTNER_USAGE_IN_CURRENCY_DAILY;
-
--- Check Streamlit app status
-SHOW STREAMLIT APPS;
-DESC STREAMLIT billing_dashboard;
-```
-
-## 📞 **Support**
-
-- **BILLING Issues**: Contact Snowflake Support
-- **App Issues**: Check error logs in Streamlit interface
-- **Permissions**: Work with your Snowflake ACCOUNTADMIN
+No file uploads, no stages, no complexity - just native Snowflake!
 
 ---
 
-**Total Deployment Time**: ~10-15 minutes ⚡
+## 🔧 **What Gets Created**
 
-**Ready to monitor your reseller billing usage!** 🎯
+- **Warehouse**: `BILLING_DASHBOARD_WH` (XSMALL, auto-suspend 60s)
+- **Role**: `BILLING_DASHBOARD_USER` (with BILLING schema access)
+- **Streamlit App**: `billing_dashboard` (your main application)
+
+## 📊 **Expected Features**
+
+Once deployed, your dashboard provides:
+
+- **Real-time Credit Monitoring** 📈
+- **Interactive Visualizations** 🎨
+- **Smart Alerts & Insights** 🚨
+- **Advanced Filtering** 🔍
+- **Data Export** 📥
+- **Balance Tracking** 💰
+
+## 🆘 **Quick Troubleshooting**
+
+### **"Table doesn't exist" error**
+```sql
+-- Verify BILLING access
+SELECT COUNT(*) FROM SNOWFLAKE.BILLING.PARTNER_USAGE_IN_CURRENCY_DAILY;
+```
+*If this fails: Contact Snowflake Support for BILLING schema access*
+
+### **"Permission denied" error**
+- Ensure you have **ACCOUNTADMIN** role
+- Or ask your admin to run the deployment script
+
+### **Dashboard shows "No data"**
+- Check your date range (try "Last 30 days")
+- Verify you have recent billing data
+
+## 🎉 **Success!**
+
+**Total Deployment Time**: ~3-5 minutes ⚡
+
+**Your billing dashboard is ready!** Access it at:
+**Snowflake UI → Projects → Streamlit → billing_dashboard**
+
+---
+
+*Need detailed instructions? Check out `DEPLOYMENT_GUIDE.md`*

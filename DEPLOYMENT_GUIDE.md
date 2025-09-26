@@ -1,336 +1,242 @@
-# Deployment Guide: Snowflake Credit Usage Dashboard
+# Deployment Guide: Snowflake Reseller Billing Dashboard
 
-This guide provides step-by-step instructions to deploy the **Streamlit in Snowflake** Credit Usage Dashboard for reseller customers.
+Complete deployment instructions for the **Streamlit in Snowflake** Credit Usage Dashboard.
 
 ## 📋 Prerequisites
 
-### 1. Snowflake Account Requirements
-- Snowflake account with **ACCOUNTADMIN** role access
-- **Streamlit in Snowflake** feature enabled
-- Access to **BILLING** schema (available for resellers and distributors)
-- Active warehouse for running queries
+### Required Access
+- **Snowflake Account** with ACCOUNTADMIN role
+- **Streamlit in Snowflake** feature enabled  
+- **BILLING Schema** access (available for resellers/distributors)
+- **Active Warehouse** for running queries
 
-### 2. Feature Access
-- **BILLING** schema access (contact Snowflake support if not available)
-- **Streamlit in Snowflake** feature enabled (uses `st.connection('snowflake')`)
-- Appropriate user permissions
-
-## 🚀 Step-by-Step Deployment
-
-### Step 1: Verify Prerequisites
-
-First, verify you have access to the required features:
-
+### Verify Prerequisites
 ```sql
 -- Test BILLING schema access
 SELECT COUNT(*) FROM SNOWFLAKE.BILLING.PARTNER_USAGE_IN_CURRENCY_DAILY;
 
--- Check Streamlit support
+-- Check Streamlit support  
 SHOW STREAMLIT APPS;
 ```
 
-### Step 2: Create Application Structure
+## 🚀 Deployment Process
 
-1. **Create a local directory** for your application files:
-```bash
-mkdir snowflake-billing-dashboard
-cd snowflake-billing-dashboard
-```
+### Method 1: Quick Deploy (Recommended)
 
-2. **Download all application files** to this directory:
-   - `streamlit_app.py` (main application)
-   - `requirements.txt`
-   - `config/app_config.py`
-   - `config/__init__.py`
-   - `utils/data_utils.py`
-   - `utils/__init__.py`
+**Step 1: Prepare the Code**
+1. Open `streamlit_app.py` in your editor
+2. Select all code (Ctrl+A / Cmd+A)
+3. Copy to clipboard (Ctrl+C / Cmd+C)
 
-### Step 3: Set Up Snowflake Environment
+**Step 2: Deploy in Snowflake**
+1. Open Snowflake Web UI
+2. Create new worksheet
+3. Copy the contents of `deploy.sql`
+4. **IMPORTANT**: Replace the placeholder in the `CREATE STREAMLIT` statement:
+   ```sql
+   CREATE OR REPLACE STREAMLIT billing_dashboard
+       QUERY_WAREHOUSE = 'BILLING_DASHBOARD_WH'
+   AS
+   $$
+   -- PASTE YOUR PYTHON CODE HERE (replace this comment)
+   $$;
+   ```
+5. Paste your Python code between the `$$` markers
+6. Execute the entire script
 
-1. **Connect to Snowflake** using SnowSQL, Snowflake Web UI, or your preferred client.
-
-2. **Run the comprehensive deployment script**:
+**Step 3: Grant Access**
 ```sql
--- Execute the contents of deploy.sql
--- This creates database, schema, warehouse, security roles, helper views, and all necessary permissions
--- The unified script includes everything needed for a complete deployment
+-- Grant to specific users
+GRANT ROLE BILLING_DASHBOARD_USER TO USER username1;
+GRANT ROLE BILLING_DASHBOARD_USER TO USER username2;
+
+-- OR grant to PUBLIC for broad access (development)
+GRANT ROLE BILLING_DASHBOARD_USER TO ROLE PUBLIC;
 ```
 
-3. **Create the stage and upload files**:
+### Method 2: Manual Setup
+
+If you prefer step-by-step manual setup:
+
+**1. Create Infrastructure**
 ```sql
--- Create stage
-CREATE OR REPLACE STAGE billing_dashboard_stage
-    DIRECTORY = ( ENABLE = TRUE )
-    COMMENT = 'Stage for Snowflake Reseller Billing Dashboard files';
-```
+-- Create warehouse
+CREATE WAREHOUSE IF NOT EXISTS BILLING_DASHBOARD_WH
+    WITH WAREHOUSE_SIZE = 'XSMALL'
+    AUTO_SUSPEND = 60
+    AUTO_RESUME = TRUE;
 
-### Step 4: Upload Application Files
-
-**Option A: Using SnowSQL**
-```bash
-# Upload main files
-snowsql -c myconnection -q "PUT file://streamlit_app.py @billing_dashboard_stage"
-snowsql -c myconnection -q "PUT file://requirements.txt @billing_dashboard_stage"
-
-# Upload config files
-snowsql -c myconnection -q "PUT file://config/app_config.py @billing_dashboard_stage/config/"
-snowsql -c myconnection -q "PUT file://config/__init__.py @billing_dashboard_stage/config/"
-
-# Upload utils files
-snowsql -c myconnection -q "PUT file://utils/data_utils.py @billing_dashboard_stage/utils/"
-snowsql -c myconnection -q "PUT file://utils/__init__.py @billing_dashboard_stage/utils/"
-```
-
-**Option B: Using Snowflake Web UI**
-1. Navigate to Databases → BILLING_APPS → STREAMLIT_APPS → Stages
-2. Click on `billing_dashboard_stage`
-3. Upload files using the web interface
-
-### Step 5: Create Streamlit Application
-
-Create the Streamlit application with the following SQL command:
-
-```sql
-CREATE OR REPLACE STREAMLIT billing_dashboard
-    ROOT_LOCATION = '@billing_dashboard_stage'
-    MAIN_FILE = 'streamlit_app.py'
-    QUERY_WAREHOUSE = 'BILLING_DASHBOARD_WH'
-    COMMENT = 'Snowflake Credit Usage Dashboard for Reseller Customers';
-```
-
-### Step 6: Configure Permissions
-
-**Grant basic access:**
-```sql
--- Grant to PUBLIC role (broad access)
-GRANT USAGE ON STREAMLIT billing_dashboard TO ROLE PUBLIC;
-
--- Grant access to BILLING schema
-GRANT USAGE ON DATABASE SNOWFLAKE TO ROLE PUBLIC;
-GRANT USAGE ON SCHEMA SNOWFLAKE.BILLING TO ROLE PUBLIC;
-GRANT SELECT ON ALL VIEWS IN SCHEMA SNOWFLAKE.BILLING TO ROLE PUBLIC;
-```
-
-**Create specific role (recommended):**
-```sql
--- Create role for dashboard users
+-- Create role
 CREATE ROLE IF NOT EXISTS BILLING_DASHBOARD_USER;
 
--- Grant necessary permissions
+-- Grant permissions
 GRANT USAGE ON DATABASE SNOWFLAKE TO ROLE BILLING_DASHBOARD_USER;
 GRANT USAGE ON SCHEMA SNOWFLAKE.BILLING TO ROLE BILLING_DASHBOARD_USER;
 GRANT SELECT ON ALL VIEWS IN SCHEMA SNOWFLAKE.BILLING TO ROLE BILLING_DASHBOARD_USER;
 GRANT USAGE ON WAREHOUSE BILLING_DASHBOARD_WH TO ROLE BILLING_DASHBOARD_USER;
-GRANT USAGE ON STREAMLIT billing_dashboard TO ROLE BILLING_DASHBOARD_USER;
-
--- Grant role to specific users
-GRANT ROLE BILLING_DASHBOARD_USER TO USER your_username;
 ```
 
-### Step 7: Test the Application
+**2. Create Streamlit App**
+```sql
+CREATE OR REPLACE STREAMLIT billing_dashboard
+    QUERY_WAREHOUSE = 'BILLING_DASHBOARD_WH'
+AS
+$$
+-- Paste your entire streamlit_app.py content here
+$$;
 
-1. **Navigate to your Streamlit app**:
-   - Go to Snowflake Web UI
-   - Navigate to Projects → Streamlit
-   - Click on your application
+-- Grant access
+GRANT USAGE ON STREAMLIT billing_dashboard TO ROLE BILLING_DASHBOARD_USER;
+```
 
-2. **Verify functionality**:
-   - Check data loads correctly
-   - Test different date ranges
-   - Verify visualizations appear
-   - Test export functionality
+## ✅ Verification & Testing
+
+### Verify Deployment
+```sql
+-- Check Streamlit app
+SHOW STREAMLIT APPS;
+DESC STREAMLIT billing_dashboard;
+
+-- Test data access
+SELECT 'PARTNER_USAGE_IN_CURRENCY_DAILY' as view_name, COUNT(*) as row_count 
+FROM SNOWFLAKE.BILLING.PARTNER_USAGE_IN_CURRENCY_DAILY
+UNION ALL
+SELECT 'PARTNER_REMAINING_BALANCE_DAILY' as view_name, COUNT(*) as row_count 
+FROM SNOWFLAKE.BILLING.PARTNER_REMAINING_BALANCE_DAILY;
+```
+
+### Access Your Dashboard
+1. Go to **Snowflake Web UI**
+2. Navigate to **Projects** → **Streamlit**  
+3. Click on **billing_dashboard**
+4. Start monitoring! 🎉
 
 ## 🔧 Configuration Options
 
-### Customizing the Application
-
-Edit `config/app_config.py` to customize:
-
-```python
-# Modify default settings
-DEFAULT_DATE_RANGE_DAYS = 30  # Change default date range
-CACHE_TTL_SECONDS = 3600      # Adjust cache duration
-
-# Enable/disable features
-FEATURES = {
-    "export_enabled": True,
-    "advanced_filters": True,
-    "real_time_refresh": False,
-    "email_reports": False
-}
-```
-
 ### Warehouse Sizing
-
-Adjust warehouse size based on usage:
-
 ```sql
--- For light usage (few users, small datasets)
-ALTER WAREHOUSE BILLING_DASHBOARD_WH SET WAREHOUSE_SIZE = 'XSMALL';
-
--- For moderate usage (multiple users, larger datasets)
+-- For heavy usage, consider larger warehouse
 ALTER WAREHOUSE BILLING_DASHBOARD_WH SET WAREHOUSE_SIZE = 'SMALL';
 
--- For heavy usage (many concurrent users)
-ALTER WAREHOUSE BILLING_DASHBOARD_WH SET WAREHOUSE_SIZE = 'MEDIUM';
+-- For cost optimization
+ALTER WAREHOUSE BILLING_DASHBOARD_WH SET AUTO_SUSPEND = 30;
 ```
 
-## 🔍 Troubleshooting
-
-### Common Issues and Solutions
-
-#### 1. "Access Denied" Errors
-**Problem**: Users cannot access BILLING views
-**Solution**:
+### Security Options
 ```sql
--- Verify permissions
-SHOW GRANTS TO ROLE your_role;
-
--- Re-grant if necessary
-GRANT SELECT ON ALL VIEWS IN SCHEMA SNOWFLAKE.BILLING TO ROLE your_role;
+-- Create read-only role
+CREATE ROLE BILLING_DASHBOARD_VIEWER;
+GRANT USAGE ON DATABASE SNOWFLAKE TO ROLE BILLING_DASHBOARD_VIEWER;
+GRANT USAGE ON SCHEMA SNOWFLAKE.BILLING TO ROLE BILLING_DASHBOARD_VIEWER;
+GRANT SELECT ON ALL VIEWS IN SCHEMA SNOWFLAKE.BILLING TO ROLE BILLING_DASHBOARD_VIEWER;
+GRANT USAGE ON STREAMLIT billing_dashboard TO ROLE BILLING_DASHBOARD_VIEWER;
 ```
 
-#### 2. "No Data Found" Messages
-**Problem**: Dashboard shows no usage data
-**Solutions**:
-- Verify you have recent billing data
-- Check date range selection
-- Confirm customer filter settings
-- Ensure data exists in BILLING views
+## 🆘 Troubleshooting
 
-#### 3. Slow Performance
-**Problem**: Dashboard loads slowly
-**Solutions**:
-- Increase warehouse size
-- Adjust cache TTL settings
-- Limit date ranges for large datasets
-- Monitor query performance
+### Common Issues
 
-#### 4. Import Errors
-**Problem**: Python import errors in Streamlit
-**Solutions**:
-- Verify all files uploaded correctly
-- Check file paths in stage
-- Ensure `__init__.py` files exist
-- Validate Python syntax
-
-### Validation Queries
-
+**❌ "Table doesn't exist" Error**
 ```sql
--- Check data availability
-SELECT 
-    MIN(USAGE_DATE) as earliest_date,
-    MAX(USAGE_DATE) as latest_date,
-    COUNT(*) as total_records
-FROM SNOWFLAKE.BILLING.PARTNER_USAGE_IN_CURRENCY_DAILY;
+-- Verify BILLING schema access
+SELECT CURRENT_ROLE();
+SHOW GRANTS TO ROLE CURRENT_ROLE();
+```
+*Solution*: Contact Snowflake Support for BILLING schema access
 
--- Verify customer data
-SELECT DISTINCT SOLD_TO_CUSTOMER_NAME 
-FROM SNOWFLAKE.BILLING.PARTNER_USAGE_IN_CURRENCY_DAILY 
-WHERE USAGE_DATE >= CURRENT_DATE - 30;
+**❌ "Permission denied" Error**  
+*Solution*: Ensure you have ACCOUNTADMIN role or ask admin to run deployment
 
--- Check balance data
-SELECT COUNT(*) 
-FROM SNOWFLAKE.BILLING.PARTNER_REMAINING_BALANCE_DAILY
-WHERE DATE >= CURRENT_DATE - 30;
+**❌ "Streamlit app not found" Error**
+```sql
+-- Check if app exists
+SHOW STREAMLIT APPS;
+-- Recreate if needed
+CREATE OR REPLACE STREAMLIT billing_dashboard...
 ```
 
-## 📊 Usage Guidelines
+**❌ Dashboard Shows "No Data"**
+- Check date range selection (try "Last 30 days")
+- Verify customer filter settings
+- Confirm you have recent billing data:
+  ```sql
+  SELECT MAX(USAGE_DATE) FROM SNOWFLAKE.BILLING.PARTNER_USAGE_IN_CURRENCY_DAILY;
+  ```
 
-### Best Practices
+### Performance Issues
 
-1. **Date Range Selection**:
-   - Start with shorter ranges (7-30 days) for testing
-   - Longer ranges may impact performance
-   - Consider data latency (24-72 hours)
+**Slow Loading**
+- Increase warehouse size temporarily
+- Check data volume for selected date range
+- Consider shorter date ranges for better performance
 
-2. **User Management**:
-   - Create specific roles for different user groups
-   - Grant minimal required permissions
-   - Regular review of user access
+**High Costs**
+- Monitor warehouse usage:
+  ```sql
+  SELECT * FROM SNOWFLAKE.ACCOUNT_USAGE.WAREHOUSE_METERING_HISTORY 
+  WHERE WAREHOUSE_NAME = 'BILLING_DASHBOARD_WH' 
+  ORDER BY START_TIME DESC LIMIT 10;
+  ```
+- Adjust auto-suspend settings
 
-3. **Performance Optimization**:
-   - Monitor warehouse usage
-   - Adjust auto-suspend settings
-   - Use appropriate warehouse sizes
+## 🔄 Updates & Maintenance
 
-4. **Data Refresh**:
-   - Data updates every 24-72 hours
-   - Cache refreshes every hour
-   - Manual refresh by reloading page
-
-## 🛠️ Maintenance
-
-### Regular Maintenance Tasks
-
-1. **Update Application**:
+### Updating the Application
 ```sql
--- Upload new files to stage
--- Then update the app
-ALTER STREAMLIT billing_dashboard SET ROOT_LOCATION = '@billing_dashboard_stage';
+-- Update Streamlit code
+ALTER STREAMLIT billing_dashboard SET MAIN_FILE = 'updated_python_code_here';
 ```
 
-2. **Monitor Usage**:
+### Monitoring Usage
 ```sql
--- Check warehouse usage
+-- Check app usage
+SELECT * FROM SNOWFLAKE.ACCOUNT_USAGE.STREAMLIT_EVENTS 
+WHERE STREAMLIT_NAME = 'BILLING_DASHBOARD';
+
+-- Monitor costs
 SELECT * FROM SNOWFLAKE.ACCOUNT_USAGE.WAREHOUSE_METERING_HISTORY 
-WHERE WAREHOUSE_NAME = 'BILLING_DASHBOARD_WH'
-AND START_TIME >= CURRENT_DATE - 7;
+WHERE WAREHOUSE_NAME = 'BILLING_DASHBOARD_WH';
 ```
 
-3. **Clean Up**:
+### Backup & Recovery
 ```sql
--- Remove old files from stage if needed
-REMOVE @billing_dashboard_stage pattern='old_file.py';
+-- Backup current app definition
+DESC STREAMLIT billing_dashboard;
+
+-- Export role grants
+SHOW GRANTS TO ROLE BILLING_DASHBOARD_USER;
 ```
 
-### Backup and Recovery
+## 📞 Support Resources
 
-1. **Export Configuration**:
-   - Save all SQL scripts
-   - Backup application files
-   - Document custom configurations
+### Snowflake Support
+- **BILLING Schema Issues**: Contact Snowflake Support
+- **Streamlit Issues**: Check Snowflake documentation
+- **Performance**: Snowflake Support or Solutions Architecture
 
-2. **Application Backup**:
-```sql
--- Create backup of Streamlit app
-CREATE OR REPLACE STREAMLIT billing_dashboard_backup
-    CLONE billing_dashboard;
-```
+### Application Support  
+- **Dashboard Errors**: Check Streamlit logs in Snowflake UI
+- **Data Issues**: Verify BILLING schema access and data availability
+- **Permissions**: Work with your Snowflake ACCOUNTADMIN
 
-## 📞 Support
+## 📋 Deployment Checklist
 
-### Getting Help
+- [ ] ✅ Verified BILLING schema access
+- [ ] ✅ Copied Python code from streamlit_app.py
+- [ ] ✅ Executed deploy.sql with embedded Python code
+- [ ] ✅ Granted BILLING_DASHBOARD_USER role to users
+- [ ] ✅ Verified Streamlit app creation
+- [ ] ✅ Tested dashboard access and functionality
+- [ ] ✅ Confirmed data loads correctly
+- [ ] ✅ Set up monitoring (optional)
 
-1. **Snowflake Documentation**:
-   - [BILLING Documentation](https://docs.snowflake.com/en/sql-reference/billing)
-   - [Streamlit in Snowflake Guide](https://docs.snowflake.com/en/developer-guide/streamlit/about-streamlit)
+## 🎉 Success!
 
-2. **Common Resources**:
-   - Snowflake Community
-   - Support tickets for feature access
-   - Internal IT/Admin team
+Your Snowflake Reseller Billing Dashboard is now deployed and ready to use!
 
-3. **Contact Information**:
-   - For BILLING access: Contact Snowflake Support
-   - For application issues: Check error logs in Streamlit
-   - For permissions: Work with Snowflake ACCOUNTADMIN
+**Access URL**: Snowflake UI → Projects → Streamlit → billing_dashboard
 
 ---
 
-## 🎉 Completion Checklist
-
-- [ ] Verified BILLING schema access
-- [ ] Created database and schema structure
-- [ ] Uploaded all application files
-- [ ] Created Streamlit application
-- [ ] Configured user permissions
-- [ ] Tested application functionality
-- [ ] Documented custom configurations
-- [ ] Trained end users
-
-**Congratulations!** Your Snowflake Credit Usage Dashboard is now ready for use by reseller customers to monitor their credit consumption.
-
----
-
-*For questions or issues, refer to the troubleshooting section or contact your Snowflake administrator.* 
+*For quick deployment, see `QUICK_DEPLOY.md`*  
+*For basic information, see `README.md`*

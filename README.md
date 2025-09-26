@@ -13,21 +13,23 @@ A comprehensive **Streamlit in Snowflake** application that enables Snowflake re
 ### 📈 Interactive Visualizations
 - **Usage Trend Chart**: Daily credit usage by usage type (compute, storage, data transfer, etc.)
 - **Usage Breakdown**: Pie chart showing distribution of credits by usage type
-- **Balance Overview**: Stacked bar chart showing current balances by customer
+- **Balance Overview**: Waterfall chart showing current balances by customer
+- **Usage Heatmap**: Weekly usage patterns visualization
 
 ### 🔍 Data Views
 - **Usage Details**: Comprehensive view of daily usage by account and service
 - **Balance Details**: Current balance information including free usage, capacity, and rollover
-- **Contract Information**: Contract terms and amounts for each customer
+- **Smart Alerts**: Automated alerts for high usage, low balances, and growth trends
 
 ### 📥 Export Capabilities
 - Download usage data as CSV
 - Download balance data as CSV  
-- Download contract information as CSV
+- Formatted reports with proper currency and credit formatting
 
-### 🎛️ Filtering Options
-- Date range selection (last 30 days by default)
+### 🎛️ Advanced Filtering
+- Date range selection with quick presets
 - Customer-specific filtering
+- Usage type filtering
 - Real-time data refresh capabilities
 
 ## 🛠️ Technical Implementation
@@ -40,206 +42,136 @@ The application leverages Snowflake's BILLING schema views:
 3. **PARTNER_CONTRACT_ITEMS**: Contract terms and capacity information
 4. **PARTNER_RATE_SHEET_DAILY**: Effective rates for usage calculation
 
-### Key Components
+### Key Features
+- **Native Streamlit in Snowflake**: No external hosting required
+- **Embedded Configuration**: All settings built into the Python code
+- **Smart Caching**: 1-hour data caching for optimal performance
+- **Responsive Design**: Modern UI with enhanced styling
+- **Error Handling**: Comprehensive error handling and user feedback
 
-#### Database Queries
-```sql
--- Example usage query
-SELECT 
-    SOLD_TO_ORGANIZATION_NAME,
-    SOLD_TO_CUSTOMER_NAME,
-    ACCOUNT_NAME,
-    USAGE_DATE,
-    USAGE_TYPE,
-    USAGE as CREDITS_USED,
-    USAGE_IN_CURRENCY,
-    BALANCE_SOURCE
-FROM SNOWFLAKE.BILLING.PARTNER_USAGE_IN_CURRENCY_DAILY
-WHERE USAGE_DATE BETWEEN '2024-01-01' AND '2024-01-31'
-ORDER BY USAGE_DATE DESC;
-```
-
-#### Caching Strategy
-- Data caching for 1 hour using `@st.cache_data(ttl=3600)`
-- Reduces query load on Snowflake
-- Improves app performance
-
-## 🚀 Deployment
+## 🚀 Simple Deployment
 
 ### Prerequisites
 - Snowflake account with **Streamlit in Snowflake** enabled
-- Access to BILLING schema (available for resellers and distributors)
-- ACCOUNTADMIN role or appropriate permissions
+- Access to **BILLING** schema (available for resellers and distributors)
+- **ACCOUNTADMIN** role or appropriate permissions
 
-### Installation Steps
+### Quick Setup (3 Steps!)
 
-1. **Upload to Snowflake**:
-   ```sql
-   -- Create Streamlit app in Snowflake
-   CREATE STREAMLIT APP billing_dashboard
-   ROOT_LOCATION = '@your_stage/billing_app'
-   MAIN_FILE = 'streamlit_app.py'
-   QUERY_WAREHOUSE = 'your_warehouse';
-   ```
+#### 1. **Copy the Python Code**
+- Copy the entire contents of `streamlit_app.py`
 
-2. **Grant Permissions**:
-   ```sql
-   -- Grant access to BILLING schema
-   GRANT USAGE ON DATABASE SNOWFLAKE TO ROLE your_role;
-   GRANT USAGE ON SCHEMA SNOWFLAKE.BILLING TO ROLE your_role;
-   GRANT SELECT ON ALL VIEWS IN SCHEMA SNOWFLAKE.BILLING TO ROLE your_role;
-   ```
+#### 2. **Run the Deployment Script**
+- Open `deploy.sql` in Snowflake
+- Paste the Python code into the `CREATE STREAMLIT` statement
+- Execute the script
 
-3. **Run the Application**:
-   ```sql
-   -- Start the Streamlit app
-   ALTER STREAMLIT billing_dashboard SET ROOT_LOCATION = '@your_stage/billing_app';
-   ```
+#### 3. **Grant Access & Launch**
+```sql
+-- Grant access to users
+GRANT ROLE BILLING_DASHBOARD_USER TO USER your_username;
 
-### File Structure
+-- Access your app at: Projects > Streamlit > billing_dashboard
+```
+
+### Example Deployment
+```sql
+-- Simple deployment - just embed the Python code!
+CREATE OR REPLACE STREAMLIT billing_dashboard
+    QUERY_WAREHOUSE = 'BILLING_DASHBOARD_WH'
+AS
+$$
+# Paste the entire streamlit_app.py content here
+import streamlit as st
+import pandas as pd
+# ... rest of your Python code
+$$;
+```
+
+## 📁 Project Structure
 ```
 reseller-billing/
-├── streamlit_app.py          # Main application file (enhanced version)
-├── requirements.txt          # Python dependencies
-├── README.md                # Documentation
-├── DEPLOYMENT_GUIDE.md      # Step-by-step deployment instructions
-├── deploy.sql               # Comprehensive Snowflake deployment script
-├── config/
-│   ├── __init__.py          # Package initialization
-│   └── app_config.py        # Configuration settings
-└── utils/
-    ├── __init__.py          # Package initialization
-    └── data_utils.py        # Data processing utilities
+├── streamlit_app.py          # Complete application (copy this into Snowflake)
+├── deploy.sql               # Simple deployment script
+├── README.md                # This documentation
+├── DEPLOYMENT_GUIDE.md      # Detailed deployment instructions
+└── QUICK_DEPLOY.md         # Quick start guide
 ```
-
-## 📊 Usage Types Tracked
-
-The application tracks various Snowflake usage types:
-
-- **compute**: Virtual warehouse credit usage
-- **storage**: Data storage costs
-- **data transfer**: Network transfer charges
-- **cloud services**: Cloud services credit usage
-- **materialized views**: Materialized view maintenance
-- **snowpipe**: Snowpipe ingestion costs
-- **serverless tasks**: Task execution costs
-- **automatic clustering**: Table clustering costs
 
 ## 🔐 Security & Permissions
 
-### Required Permissions
-- `USAGE` on SNOWFLAKE database
-- `USAGE` on SNOWFLAKE.BILLING_USAGE schema
-- `SELECT` on all views in BILLING_USAGE schema
+The deployment creates:
+- **BILLING_DASHBOARD_USER** role with appropriate BILLING schema access
+- **Warehouse**: `BILLING_DASHBOARD_WH` (XSMALL, auto-suspend)
+- **Proper grants** for secure access to billing data
 
-### Data Privacy
-- All data queries are scoped to the reseller's organization
-- Customer data is filtered based on contracts
-- No data is stored outside of Snowflake
+## 📊 Dashboard Capabilities
 
-## 🎨 Customization
+### Real-time Monitoring
+- **Credit Consumption**: Track usage across all customer accounts
+- **Cost Analysis**: Monitor spending in contract currencies
+- **Balance Tracking**: View available credits and on-demand usage
+- **Growth Trends**: Automated calculation of usage growth rates
 
-### Adding New Visualizations
-```python
-def create_custom_chart(df):
-    """Create custom visualization"""
-    fig = px.bar(df, x='USAGE_DATE', y='CREDITS_USED')
-    return fig
-```
+### Advanced Analytics
+- **Usage Heatmaps**: Identify usage patterns by day/week
+- **Customer Rankings**: Top customers by credit consumption
+- **Alert System**: Automated warnings for high usage or low balances
+- **Trend Analysis**: Historical usage and cost trends
 
-### Modifying Filters
-```python
-# Add new filter in sidebar
-region_filter = st.sidebar.selectbox(
-    "Select Region",
-    options=usage_df['REGION'].unique()
-)
-```
-
-### Custom Styling
-The app includes custom CSS for improved UI/UX:
-- Professional color scheme
-- Responsive layout
-- Clean typography
-- Interactive elements
-
-## 📱 Mobile Responsiveness
-
-The dashboard is optimized for various screen sizes:
-- Desktop computers
-- Tablets
-- Mobile devices
-- Large displays
-
-## 🔄 Data Refresh
-
-- **Automatic**: Data cached for 1 hour
-- **Manual**: Refresh by reloading the page
-- **Latency**: Up to 24-72 hours from actual usage
+### Export & Reporting
+- **CSV Downloads**: Export filtered data for external analysis
+- **Formatted Reports**: Properly formatted currency and credit values
+- **Date Range Flexibility**: Custom date ranges up to 1 year
 
 ## 🆘 Troubleshooting
 
 ### Common Issues
 
-1. **Caching Errors**:
-   - **UnserializableReturnValueError**: If you see `Cannot serialize the return value (of type snowflake.snowpark.session.Session)`, ensure you're using `@st.cache_resource` for database connections, not `@st.cache_data`
-   - **UnhashableParamError**: If you see `Cannot hash argument 'session'`, add a leading underscore to the session parameter: `def function(_session):`
-   - **Solution**: Use `@st.cache_resource` for Snowflake sessions and `@st.cache_data` for serializable data like pandas DataFrames
+**"Table doesn't exist" error**
+- Verify BILLING schema access: Contact Snowflake Support if needed
 
-2. **Connection Errors**:
-   - Ensure you're running in **Streamlit in Snowflake** environment
-   - Verify warehouse is running and accessible
-   - Check that `st.connection('snowflake')` is available (Streamlit in Snowflake feature)
+**"Permission denied" error**  
+- Ensure you have ACCOUNTADMIN role or appropriate grants
 
-3. **Permission Denied**:
-   - Ensure ACCOUNTADMIN role or proper grants
-   - Verify access to BILLING_USAGE schema
+**Dashboard shows "No data"**
+- Verify date range selection
+- Check if you have recent billing data
+- Confirm customer filter settings
 
-4. **No Data Available**:
-   - Check date range selection
-   - Verify customer has usage in period
-   - Confirm contract is active
+### Quick Verification
+```sql
+-- Test BILLING schema access
+SELECT COUNT(*) FROM SNOWFLAKE.BILLING.PARTNER_USAGE_IN_CURRENCY_DAILY;
 
-### Streamlit Caching Guidelines
-
-```python
-# ✅ Correct: Use st.cache_resource for Streamlit in Snowflake connections
-@st.cache_resource
-def get_snowflake_session():
-    return st.connection('snowflake').session()
-
-# ✅ Correct: Use st.cache_data for serializable data
-@st.cache_data
-def load_data():
-    return pd.DataFrame(data)
-
-# ✅ Correct: Add underscore to unhashable parameters
-@st.cache_data
-def load_from_db(_session, query_params):
-    return _session.sql(query).to_pandas()
+-- Check Streamlit app status
+SHOW STREAMLIT APPS;
+DESC STREAMLIT billing_dashboard;
 ```
-
-### Error Handling
-The application includes comprehensive error handling:
-- Database connection failures
-- Query execution errors
-- Data processing issues
-- UI/UX error messages
 
 ## 📞 Support
 
-For support with this application:
-1. Check Snowflake documentation for BILLING_USAGE schema
-2. Verify permissions and access rights
-3. Review application logs for errors
-4. Contact your Snowflake administrator
+- **BILLING Schema Issues**: Contact Snowflake Support
+- **App Issues**: Check error logs in Streamlit interface  
+- **Permissions**: Work with your Snowflake ACCOUNTADMIN
 
-## 🔗 References
+## 🔄 Updates & Maintenance
 
-- [Snowflake BILLING_USAGE Documentation](https://docs.snowflake.com/en/LIMITEDACCESS/billing-usage-resellers)
-- [Streamlit Documentation](https://docs.streamlit.io/)
-- [Plotly Documentation](https://plotly.com/python/)
+### Updating the Application
+```sql
+-- Simply update the Streamlit code
+ALTER STREAMLIT billing_dashboard SET MAIN_FILE = 'new_python_code_here';
+```
+
+### Monitoring Usage
+```sql
+-- Monitor warehouse costs
+SELECT * FROM SNOWFLAKE.ACCOUNT_USAGE.WAREHOUSE_METERING_HISTORY 
+WHERE WAREHOUSE_NAME = 'BILLING_DASHBOARD_WH';
+```
 
 ---
 
-*Built with ❄️ for Snowflake reseller partners* 
+**🎯 Ready to monitor your reseller billing usage with a native Snowflake solution!**
+
+*Compatible with Snowflake reseller/distributor accounts with BILLING schema access*

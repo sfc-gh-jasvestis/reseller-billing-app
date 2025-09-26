@@ -1,1 +1,0 @@
-# Utility functions package for Snowflake Credit Usage Dashboard 
