@@ -56,19 +56,34 @@ The application leverages Snowflake's BILLING schema views:
 - Access to **BILLING** schema (available for resellers and distributors)
 - **ACCOUNTADMIN** role or appropriate permissions
 
+### Choose Your Deployment Method
+
+**Option A: Minimal Setup** (`MINIMAL_DEPLOY.sql`)
+- ✅ Use if your users **already have** BILLING schema access
+- Only creates: warehouse + Streamlit app
+- Fastest deployment
+
+**Option B: Complete Setup** (`deploy.sql`)
+- ✅ Use if you need to **create permissions** for users
+- Creates: warehouse + role + permissions + Streamlit app
+- Recommended for new setups
+
 ### Quick Setup (3 Steps!)
 
 #### 1. **Copy the Python Code**
 - Copy the entire contents of `streamlit_app.py`
 
 #### 2. **Run the Deployment Script**
-- Open `deploy.sql` in Snowflake
+- Open `MINIMAL_DEPLOY.sql` OR `deploy.sql` in Snowflake
 - Paste the Python code into the `CREATE STREAMLIT` statement
 - Execute the script
 
 #### 3. **Grant Access & Launch**
 ```sql
--- Grant access to users
+-- For MINIMAL setup: Grant to existing role
+GRANT USAGE ON STREAMLIT billing_dashboard TO ROLE YOUR_EXISTING_ROLE;
+
+-- For COMPLETE setup: Grant new role to users
 GRANT ROLE BILLING_DASHBOARD_USER TO USER your_username;
 
 -- Access your app at: Projects > Streamlit > billing_dashboard
@@ -92,7 +107,8 @@ $$;
 ```
 reseller-billing/
 ├── streamlit_app.py          # Complete application (copy this into Snowflake)
-├── deploy.sql               # Simple deployment script
+├── MINIMAL_DEPLOY.sql       # Minimal deployment (users already have BILLING access)
+├── deploy.sql               # Complete deployment (creates role + permissions)
 ├── README.md                # This documentation
 ├── DEPLOYMENT_GUIDE.md      # Detailed deployment instructions
 └── QUICK_DEPLOY.md         # Quick start guide
@@ -100,10 +116,19 @@ reseller-billing/
 
 ## 🔐 Security & Permissions
 
-The deployment creates:
+**Important:** The Streamlit app runs **as the viewing user**, not as a service account.
+
+Users need:
+- ✅ SELECT access to `SNOWFLAKE.BILLING` views
+- ✅ USAGE on the warehouse
+- ✅ USAGE on the Streamlit app
+
+The **complete deployment** (`deploy.sql`) creates:
 - **BILLING_DASHBOARD_USER** role with appropriate BILLING schema access
 - **Warehouse**: `BILLING_DASHBOARD_WH` (XSMALL, auto-suspend)
 - **Proper grants** for secure access to billing data
+
+The **minimal deployment** (`MINIMAL_DEPLOY.sql`) assumes users already have BILLING access.
 
 ## 📊 Dashboard Capabilities
 

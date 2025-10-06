@@ -5,7 +5,7 @@ Complete deployment instructions for the **Streamlit in Snowflake** Credit Usage
 ## 📋 Prerequisites
 
 ### Required Access
-- **Snowflake Account** with ACCOUNTADMIN role
+- **Snowflake Account** with ACCOUNTADMIN role (or CREATE STREAMLIT privilege)
 - **Streamlit in Snowflake** feature enabled  
 - **BILLING Schema** access (available for resellers/distributors)
 - **Active Warehouse** for running queries
@@ -21,44 +21,29 @@ SHOW STREAMLIT APPS;
 
 ## 🚀 Deployment Process
 
-### Method 1: Quick Deploy (Recommended)
+### Choose Your Deployment Method
+
+**Option A: Minimal Setup** - Use if your users already have BILLING schema access  
+**Option B: Complete Setup** - Creates dedicated role and grants all permissions
+
+---
+
+### Option A: Minimal Setup (Users Already Have Permissions)
+
+**What This Does:**
+- ✅ Creates warehouse for the app
+- ✅ Creates the Streamlit app
+- ✅ Grants Streamlit access to existing role
+- ❌ Does NOT create new role or BILLING permissions
+
+**When to Use:** Your users already have access to `SNOWFLAKE.BILLING` views through an existing role.
 
 **Step 1: Prepare the Code**
 1. Open `streamlit_app.py` in your editor
 2. Select all code (Ctrl+A / Cmd+A)
 3. Copy to clipboard (Ctrl+C / Cmd+C)
 
-**Step 2: Deploy in Snowflake**
-1. Open Snowflake Web UI
-2. Create new worksheet
-3. Copy the contents of `deploy.sql`
-4. **IMPORTANT**: Replace the placeholder in the `CREATE STREAMLIT` statement:
-   ```sql
-   CREATE OR REPLACE STREAMLIT billing_dashboard
-       QUERY_WAREHOUSE = 'BILLING_DASHBOARD_WH'
-   AS
-   $$
-   -- PASTE YOUR PYTHON CODE HERE (replace this comment)
-   $$;
-   ```
-5. Paste your Python code between the `$$` markers
-6. Execute the entire script
-
-**Step 3: Grant Access**
-```sql
--- Grant to specific users
-GRANT ROLE BILLING_DASHBOARD_USER TO USER username1;
-GRANT ROLE BILLING_DASHBOARD_USER TO USER username2;
-
--- OR grant to PUBLIC for broad access (development)
-GRANT ROLE BILLING_DASHBOARD_USER TO ROLE PUBLIC;
-```
-
-### Method 2: Manual Setup
-
-If you prefer step-by-step manual setup:
-
-**1. Create Infrastructure**
+**Step 2: Deploy**
 ```sql
 -- Create warehouse
 CREATE WAREHOUSE IF NOT EXISTS BILLING_DASHBOARD_WH
@@ -66,28 +51,95 @@ CREATE WAREHOUSE IF NOT EXISTS BILLING_DASHBOARD_WH
     AUTO_SUSPEND = 60
     AUTO_RESUME = TRUE;
 
--- Create role
-CREATE ROLE IF NOT EXISTS BILLING_DASHBOARD_USER;
-
--- Grant permissions
-GRANT USAGE ON DATABASE SNOWFLAKE TO ROLE BILLING_DASHBOARD_USER;
-GRANT USAGE ON SCHEMA SNOWFLAKE.BILLING TO ROLE BILLING_DASHBOARD_USER;
-GRANT SELECT ON ALL VIEWS IN SCHEMA SNOWFLAKE.BILLING TO ROLE BILLING_DASHBOARD_USER;
-GRANT USAGE ON WAREHOUSE BILLING_DASHBOARD_WH TO ROLE BILLING_DASHBOARD_USER;
-```
-
-**2. Create Streamlit App**
-```sql
+-- Create Streamlit app (paste Python code between $$)
 CREATE OR REPLACE STREAMLIT billing_dashboard
     QUERY_WAREHOUSE = 'BILLING_DASHBOARD_WH'
 AS
 $$
--- Paste your entire streamlit_app.py content here
+-- PASTE streamlit_app.py CONTENTS HERE (replace this comment)
 $$;
 
--- Grant access
+-- Grant access to your existing role
+GRANT USAGE ON STREAMLIT billing_dashboard TO ROLE YOUR_EXISTING_ROLE;
+GRANT USAGE ON WAREHOUSE BILLING_DASHBOARD_WH TO ROLE YOUR_EXISTING_ROLE;
+```
+
+**Step 3: Done!**
+Navigate to **Projects** → **Streamlit** → **billing_dashboard** 🎉
+
+---
+
+### Option B: Complete Setup (Create Role & Permissions)
+
+**What This Does:**
+- ✅ Creates warehouse for the app
+- ✅ Creates dedicated `BILLING_DASHBOARD_USER` role
+- ✅ Grants all BILLING schema permissions to the role
+- ✅ Creates the Streamlit app
+- ✅ Grants Streamlit access to the role
+
+**When to Use:** You want a clean, dedicated role specifically for this dashboard.
+
+**Step 1: Prepare the Code**
+1. Open `streamlit_app.py` in your editor
+2. Select all code (Ctrl+A / Cmd+A)
+3. Copy to clipboard (Ctrl+C / Cmd+C)
+
+**Step 2: Deploy with Full Setup**
+```sql
+-- Create warehouse
+CREATE WAREHOUSE IF NOT EXISTS BILLING_DASHBOARD_WH
+    WITH WAREHOUSE_SIZE = 'XSMALL'
+    AUTO_SUSPEND = 60
+    AUTO_RESUME = TRUE;
+
+-- Create dedicated role
+CREATE ROLE IF NOT EXISTS BILLING_DASHBOARD_USER;
+
+-- Grant BILLING schema permissions to the role
+GRANT USAGE ON DATABASE SNOWFLAKE TO ROLE BILLING_DASHBOARD_USER;
+GRANT USAGE ON SCHEMA SNOWFLAKE.BILLING TO ROLE BILLING_DASHBOARD_USER;
+GRANT SELECT ON ALL VIEWS IN SCHEMA SNOWFLAKE.BILLING TO ROLE BILLING_DASHBOARD_USER;
+GRANT USAGE ON WAREHOUSE BILLING_DASHBOARD_WH TO ROLE BILLING_DASHBOARD_USER;
+
+-- Create Streamlit app (paste Python code between $$)
+CREATE OR REPLACE STREAMLIT billing_dashboard
+    QUERY_WAREHOUSE = 'BILLING_DASHBOARD_WH'
+AS
+$$
+-- PASTE streamlit_app.py CONTENTS HERE (replace this comment)
+$$;
+
+-- Grant Streamlit access to the role
 GRANT USAGE ON STREAMLIT billing_dashboard TO ROLE BILLING_DASHBOARD_USER;
 ```
+
+**Step 3: Assign Role to Users**
+```sql
+-- Grant to specific users
+GRANT ROLE BILLING_DASHBOARD_USER TO USER username1;
+GRANT ROLE BILLING_DASHBOARD_USER TO USER username2;
+
+-- OR grant to PUBLIC for broad access (development only)
+GRANT ROLE BILLING_DASHBOARD_USER TO ROLE PUBLIC;
+```
+
+**Step 4: Done!**
+Navigate to **Projects** → **Streamlit** → **billing_dashboard** 🎉
+
+---
+
+## 🔑 Understanding Permissions
+
+**Important:** The Streamlit app runs **as the viewing user**, not as a service account. This means:
+
+- ✅ Each user needs access to `SNOWFLAKE.BILLING` views
+- ✅ Each user needs access to the warehouse
+- ✅ Each user needs USAGE permission on the Streamlit app itself
+
+**What each option does:**
+- **Option A**: Assumes users already have BILLING access via existing role
+- **Option B**: Creates new role and grants everything needed
 
 ## ✅ Verification & Testing
 

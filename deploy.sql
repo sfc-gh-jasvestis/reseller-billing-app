@@ -1,8 +1,10 @@
 -- =============================================================================
--- SNOWFLAKE RESELLER BILLING DASHBOARD - SIMPLE DEPLOYMENT
+-- COMPLETE DEPLOYMENT - Snowflake Reseller Billing Dashboard
 -- =============================================================================
--- This script creates the Streamlit billing dashboard directly in Snowflake
--- No file uploads or stages required - just copy/paste the Python code!
+-- This script creates EVERYTHING: warehouse, role, permissions, and Streamlit app
+-- Use this if you need to set up a dedicated role with BILLING schema access
+--
+-- For minimal deployment (if users already have BILLING access), see MINIMAL_DEPLOY.sql
 --
 -- PREREQUISITES:
 -- 1. ACCOUNTADMIN role or equivalent permissions
@@ -36,17 +38,22 @@ CREATE WAREHOUSE IF NOT EXISTS BILLING_DASHBOARD_WH
 -- =============================================================================
 -- STEP 3: SECURITY SETUP
 -- =============================================================================
+-- NOTE: The Streamlit app runs AS the viewing user (not as a service account)
+-- These permissions are granted to the BILLING_DASHBOARD_USER role so that
+-- users with this role can query the BILLING schema when viewing the dashboard
 
 -- Create dedicated role for billing dashboard users
 CREATE ROLE IF NOT EXISTS BILLING_DASHBOARD_USER
     COMMENT = 'Role for users accessing the billing dashboard';
 
 -- Grant necessary permissions for BILLING schema access
+-- (Required because the app queries BILLING views as the logged-in user)
 GRANT USAGE ON DATABASE SNOWFLAKE TO ROLE BILLING_DASHBOARD_USER;
 GRANT USAGE ON SCHEMA SNOWFLAKE.BILLING TO ROLE BILLING_DASHBOARD_USER;
 GRANT SELECT ON ALL VIEWS IN SCHEMA SNOWFLAKE.BILLING TO ROLE BILLING_DASHBOARD_USER;
 
 -- Grant warehouse access
+-- (Required for the app to execute queries)
 GRANT USAGE ON WAREHOUSE BILLING_DASHBOARD_WH TO ROLE BILLING_DASHBOARD_USER;
 
 -- =============================================================================
