@@ -304,6 +304,127 @@ def get_top_customers_by_usage(df, top_n=5):
     
     return top_customers
 
+def calculate_run_rate_by_customer(usage_df, balance_df=None, run_rate_days=7):
+    """
+    Calculate consumption run rate per customer based on recent usage
+    
+    Args:
+        usage_df: DataFrame with usage data
+        balance_df: DataFrame with balance data (optional)
+        run_rate_days: Number of recent days to use for run rate calculation (default 7)
+    
+    Returns:
+        DataFrame with run rate metrics per customer
+    """
+    if usage_df.empty:
+        return pd.DataFrame()
+    
+    # Get the most recent N days of data
+    max_date = usage_df['USAGE_DATE'].max()
+    cutoff_date = max_date - timedelta(days=run_rate_days)
+    recent_usage = usage_df[usage_df['USAGE_DATE'] > cutoff_date]
+    
+    if recent_usage.empty:
+        return pd.DataFrame()
+    
+    # Calculate actual days in the period
+    actual_days = (max_date - recent_usage['USAGE_DATE'].min()).days + 1
+    
+    # Aggregate by customer
+    run_rate_data = recent_usage.groupby('SOLD_TO_CUSTOMER_NAME').agg({
+        'CREDITS_USED': 'sum',
+        'USAGE_IN_CURRENCY': ['sum', lambda x: x.iloc[0] if len(x) > 0 else 'USD'],
+        'USAGE_DATE': ['min', 'max']
+    }).reset_index()
+    
+    # Flatten column names
+    run_rate_data.columns = ['CUSTOMER', 'TOTAL_CREDITS', 'TOTAL_COST', 'CURRENCY', 'START_DATE', 'END_DATE']
+    
+    # Calculate daily run rate
+    run_rate_data['DAILY_RUN_RATE_CREDITS'] = run_rate_data['TOTAL_CREDITS'] / actual_days
+    run_rate_data['DAILY_RUN_RATE_COST'] = run_rate_data['TOTAL_COST'] / actual_days
+    
+    # Calculate projected monthly consumption (30 days)
+    run_rate_data['PROJECTED_MONTHLY_CREDITS'] = run_rate_data['DAILY_RUN_RATE_CREDITS'] * 30
+    run_rate_data['PROJECTED_MONTHLY_COST'] = run_rate_data['DAILY_RUN_RATE_COST'] * 30
+    
+    # Add balance information if available
+    if balance_df is not None and not balance_df.empty:
+        # Get latest balance for each customer
+        latest_balances = balance_df.loc[balance_df.groupby('SOLD_TO_CUSTOMER_NAME')['BALANCE_DATE'].idxmax()]
+        balance_lookup = latest_balances.set_index('SOLD_TO_CUSTOMER_NAME')[
+            ['FREE_USAGE_BALANCE', 'CAPACITY_BALANCE', 'ROLLOVER_BALANCE', 'TOTAL_BALANCE']
+        ].to_dict('index')
+        
+        run_rate_data['CURRENT_BALANCE'] = run_rate_data['CUSTOMER'].map(
+            lambda x: balance_lookup.get(x, {}).get('TOTAL_BALANCE', 0)
+        )
+        
+        # Calculate days until balance depletion
+        run_rate_data['DAYS_UNTIL_DEPLETION'] = run_rate_data.apply(
+            lambda row: (row['CURRENT_BALANCE'] / row['DAILY_RUN_RATE_COST']) 
+            if row['DAILY_RUN_RATE_COST'] > 0 and row['CURRENT_BALANCE'] > 0 
+            else None, 
+            axis=1
+        )
+    else:
+        run_rate_data['CURRENT_BALANCE'] = 0
+        run_rate_data['DAYS_UNTIL_DEPLETION'] = None
+    
+    # Add metadata
+    run_rate_data['RUN_RATE_PERIOD_DAYS'] = actual_days
+    
+    # Sort by daily run rate descending
+    run_rate_data = run_rate_data.sort_values('DAILY_RUN_RATE_CREDITS', ascending=False)
+    
+    return run_rate_data
+
+def calculate_overall_run_rate(usage_df, balance_df=None, run_rate_days=7):
+    """Calculate overall run rate across all customers"""
+    if usage_df.empty:
+        return {}
+    
+    # Get the most recent N days of data
+    max_date = usage_df['USAGE_DATE'].max()
+    cutoff_date = max_date - timedelta(days=run_rate_days)
+    recent_usage = usage_df[usage_df['USAGE_DATE'] > cutoff_date]
+    
+    if recent_usage.empty:
+        return {}
+    
+    actual_days = (max_date - recent_usage['USAGE_DATE'].min()).days + 1
+    
+    total_credits = recent_usage['CREDITS_USED'].sum()
+    total_cost = recent_usage['USAGE_IN_CURRENCY'].sum()
+    
+    daily_rate_credits = total_credits / actual_days
+    daily_rate_cost = total_cost / actual_days
+    
+    run_rate = {
+        'daily_rate_credits': daily_rate_credits,
+        'daily_rate_cost': daily_rate_cost,
+        'weekly_rate_credits': daily_rate_credits * 7,
+        'weekly_rate_cost': daily_rate_cost * 7,
+        'monthly_rate_credits': daily_rate_credits * 30,
+        'monthly_rate_cost': daily_rate_cost * 30,
+        'period_days': actual_days,
+        'period_start': recent_usage['USAGE_DATE'].min(),
+        'period_end': recent_usage['USAGE_DATE'].max()
+    }
+    
+    # Add balance information if available
+    if balance_df is not None and not balance_df.empty:
+        latest_balances = balance_df.loc[balance_df.groupby('SOLD_TO_CUSTOMER_NAME')['BALANCE_DATE'].idxmax()]
+        total_balance = latest_balances['TOTAL_BALANCE'].sum()
+        run_rate['total_balance'] = total_balance
+        
+        if daily_rate_cost > 0:
+            run_rate['days_until_depletion'] = total_balance / daily_rate_cost
+        else:
+            run_rate['days_until_depletion'] = None
+    
+    return run_rate
+
 # Page configuration
 st.set_page_config(
     page_title=APP_TITLE,
@@ -810,7 +931,7 @@ def main():
     # Enhanced visualizations
     st.subheader("📈 Advanced Analytics")
     
-    tab1, tab2, tab3 = st.tabs(["📊 Trends", "🎯 Usage Patterns", "💰 Balance Analysis"])
+    tab1, tab2, tab3, tab4 = st.tabs(["📊 Trends", "🎯 Usage Patterns", "💰 Balance Analysis", "⚡ Run Rate Analysis"])
     
     with tab1:
         trend_chart = create_enhanced_trend_chart(usage_df)
@@ -875,6 +996,173 @@ def main():
             st.plotly_chart(fig_balance_trend, use_container_width=True)
         else:
             st.info("No balance data available for the selected period.")
+    
+    with tab4:
+        st.markdown("### ⚡ Consumption Run Rate Analysis")
+        st.markdown("*Based on the most recent 7 days of usage data*")
+        
+        # Run rate period selector
+        col1, col2 = st.columns([1, 3])
+        with col1:
+            run_rate_days = st.selectbox(
+                "Run Rate Period",
+                options=[3, 7, 14, 30],
+                index=1,
+                help="Number of recent days to calculate run rate"
+            )
+        
+        # Calculate run rates
+        overall_run_rate = calculate_overall_run_rate(usage_df, balance_df, run_rate_days)
+        customer_run_rates = calculate_run_rate_by_customer(usage_df, balance_df, run_rate_days)
+        
+        if overall_run_rate:
+            # Overall run rate metrics
+            st.markdown("#### 📊 Overall Run Rate Metrics")
+            
+            currency = usage_df['CURRENCY'].iloc[0] if not usage_df.empty else "USD"
+            
+            col1, col2, col3, col4 = st.columns(4)
+            
+            with col1:
+                st.metric(
+                    "Daily Run Rate",
+                    format_credits(overall_run_rate['daily_rate_credits']),
+                    delta=f"{format_currency(overall_run_rate['daily_rate_cost'], currency)}/day"
+                )
+            
+            with col2:
+                st.metric(
+                    "Weekly Projection",
+                    format_credits(overall_run_rate['weekly_rate_credits']),
+                    delta=f"{format_currency(overall_run_rate['weekly_rate_cost'], currency)}/week"
+                )
+            
+            with col3:
+                st.metric(
+                    "Monthly Projection",
+                    format_credits(overall_run_rate['monthly_rate_credits']),
+                    delta=f"{format_currency(overall_run_rate['monthly_rate_cost'], currency)}/month"
+                )
+            
+            with col4:
+                if overall_run_rate.get('days_until_depletion'):
+                    days_remaining = overall_run_rate['days_until_depletion']
+                    depletion_color = "🔴" if days_remaining < 30 else "🟡" if days_remaining < 60 else "🟢"
+                    st.metric(
+                        "Days Until Depletion",
+                        f"{depletion_color} {days_remaining:.0f}",
+                        delta=f"Balance: {format_currency(overall_run_rate['total_balance'], currency)}"
+                    )
+                else:
+                    st.metric("Days Until Depletion", "N/A", delta="No balance data")
+            
+            st.markdown("---")
+        
+        # Customer run rate table
+        if not customer_run_rates.empty:
+            st.markdown("#### 📋 Customer Run Rate Comparison")
+            
+            # Create formatted display dataframe
+            display_run_rate = customer_run_rates.copy()
+            
+            # Format numeric columns
+            display_run_rate['Daily Rate (Credits)'] = display_run_rate['DAILY_RUN_RATE_CREDITS'].apply(format_credits)
+            display_run_rate['Daily Rate (Cost)'] = display_run_rate.apply(
+                lambda row: format_currency(row['DAILY_RUN_RATE_COST'], row['CURRENCY']), axis=1
+            )
+            display_run_rate['Monthly Projection'] = display_run_rate.apply(
+                lambda row: format_currency(row['PROJECTED_MONTHLY_COST'], row['CURRENCY']), axis=1
+            )
+            display_run_rate['Current Balance'] = display_run_rate.apply(
+                lambda row: format_currency(row['CURRENT_BALANCE'], row['CURRENCY']), axis=1
+            )
+            
+            # Format days until depletion with color coding
+            def format_depletion(days):
+                if pd.isna(days) or days is None:
+                    return "N/A"
+                if days < 30:
+                    return f"🔴 {days:.0f} days"
+                elif days < 60:
+                    return f"🟡 {days:.0f} days"
+                else:
+                    return f"🟢 {days:.0f} days"
+            
+            display_run_rate['Days to Depletion'] = display_run_rate['DAYS_UNTIL_DEPLETION'].apply(format_depletion)
+            
+            # Select columns for display
+            display_columns = [
+                'CUSTOMER',
+                'Daily Rate (Credits)',
+                'Daily Rate (Cost)',
+                'Monthly Projection',
+                'Current Balance',
+                'Days to Depletion'
+            ]
+            
+            st.dataframe(
+                display_run_rate[display_columns],
+                use_container_width=True,
+                height=400
+            )
+            
+            # Run rate visualization
+            st.markdown("#### 📊 Visual Comparison")
+            
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                # Daily run rate bar chart
+                fig_run_rate = px.bar(
+                    customer_run_rates.head(10),
+                    x='DAILY_RUN_RATE_COST',
+                    y='CUSTOMER',
+                    orientation='h',
+                    title='Top 10 Customers by Daily Run Rate (Cost)',
+                    labels={'DAILY_RUN_RATE_COST': 'Daily Cost', 'CUSTOMER': 'Customer'}
+                )
+                fig_run_rate.update_traces(marker_color='lightblue')
+                st.plotly_chart(fig_run_rate, use_container_width=True)
+            
+            with col2:
+                # Days until depletion chart (only customers with balance data)
+                depletion_data = customer_run_rates[customer_run_rates['DAYS_UNTIL_DEPLETION'].notna()].copy()
+                if not depletion_data.empty:
+                    # Color code by urgency
+                    depletion_data['Urgency'] = depletion_data['DAYS_UNTIL_DEPLETION'].apply(
+                        lambda x: 'Critical (<30 days)' if x < 30 else 'Warning (30-60 days)' if x < 60 else 'Healthy (>60 days)'
+                    )
+                    
+                    fig_depletion = px.bar(
+                        depletion_data.sort_values('DAYS_UNTIL_DEPLETION').head(10),
+                        x='DAYS_UNTIL_DEPLETION',
+                        y='CUSTOMER',
+                        orientation='h',
+                        title='Days Until Balance Depletion',
+                        labels={'DAYS_UNTIL_DEPLETION': 'Days', 'CUSTOMER': 'Customer'},
+                        color='Urgency',
+                        color_discrete_map={
+                            'Critical (<30 days)': '#d62728',
+                            'Warning (30-60 days)': '#ff7f0e',
+                            'Healthy (>60 days)': '#2ca02c'
+                        }
+                    )
+                    st.plotly_chart(fig_depletion, use_container_width=True)
+                else:
+                    st.info("No balance data available to calculate depletion timeline.")
+            
+            # Export run rate data
+            st.markdown("#### 📥 Export Run Rate Data")
+            csv_run_rate = export_to_csv(customer_run_rates, "run_rate_data")
+            if csv_run_rate:
+                st.download_button(
+                    label="⚡ Download Run Rate Analysis",
+                    data=csv_run_rate,
+                    file_name=f"run_rate_analysis_{start_date}_{end_date}.csv",
+                    mime="text/csv"
+                )
+        else:
+            st.info("Not enough data to calculate run rates. Try extending your date range.")
     
     # Data tables with enhanced features
     st.subheader("📋 Detailed Data")

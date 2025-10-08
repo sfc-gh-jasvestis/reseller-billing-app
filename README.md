@@ -15,6 +15,7 @@ A comprehensive **Streamlit in Snowflake** application that enables Snowflake re
 - **Usage Breakdown**: Pie chart showing distribution of credits by usage type
 - **Balance Overview**: Waterfall chart showing current balances by customer
 - **Usage Heatmap**: Weekly usage patterns visualization
+- **Run Rate Analysis**: Consumption projections and balance depletion forecasting
 
 ### 🔍 Data Views
 - **Usage Details**: Comprehensive view of daily usage by account and service
@@ -143,6 +144,11 @@ The **minimal deployment** (`MINIMAL_DEPLOY.sql`) assumes users already have BIL
 - **Customer Rankings**: Top customers by credit consumption
 - **Alert System**: Automated warnings for high usage or low balances
 - **Trend Analysis**: Historical usage and cost trends
+- **Run Rate Analysis**: 
+  - Daily/weekly/monthly consumption projections
+  - Days until balance depletion calculations
+  - Customer run rate comparison with color-coded urgency
+  - Configurable analysis periods (3, 7, 14, or 30 days)
 
 ### Export & Reporting
 - **CSV Downloads**: Export filtered data for external analysis
