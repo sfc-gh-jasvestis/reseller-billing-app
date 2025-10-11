@@ -780,7 +780,6 @@ def load_contract_data(_session, customer_filter=None):
         SELECT 
             SOLD_TO_CUSTOMER_NAME,
             SOLD_TO_CONTRACT_NUMBER,
-            CAPACITY_TYPE_NAME,
             CONTRACT_ITEM_START_DATE,
             CONTRACT_ITEM_END_DATE,
             CONTRACTED_AMOUNT,
