@@ -16,6 +16,9 @@ A comprehensive **Streamlit in Snowflake** application for monitoring credit con
 - **Smart Alerts**: Automated warnings for high usage, low balances, and growth anomalies
 - **Contract Monitoring**: Track capacity usage, overage projections, and renewal recommendations
 
+<img width="2043" height="1025" alt="Screenshot 2025-09-11 at 3 36 46 PM (1)" src="https://github.com/user-attachments/assets/915656c6-96bd-467a-864b-8a49eecdda6d" />
+
+
 ### 📈 Five Analytics Tabs
 
 1. **📊 Trends**: Daily usage and cost trends with multi-line charts
