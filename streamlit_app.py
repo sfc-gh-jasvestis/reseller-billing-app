@@ -444,9 +444,9 @@ def calculate_contract_usage_metrics(usage_df, contract_df, run_rate_days=30):
     
     for _, contract in contract_df.iterrows():
         customer_name = contract['SOLD_TO_CUSTOMER_NAME']
-        contract_start = contract['CONTRACT_ITEM_START_DATE']
-        contract_end = contract['CONTRACT_ITEM_END_DATE']
-        capacity_purchased = contract['CONTRACTED_AMOUNT'] + contract.get('ROLLOVER_AMOUNT', 0) + contract.get('FREE_USAGE_AMOUNT', 0)
+        contract_start = contract['START_DATE']
+        contract_end = contract['END_DATE']
+        capacity_purchased = contract['AMOUNT']
         
         # Filter usage for this customer and contract period
         customer_usage = usage_df[
@@ -501,7 +501,7 @@ def calculate_contract_usage_metrics(usage_df, contract_df, run_rate_days=30):
             overage_date = None
         
         metrics[customer_name] = {
-            'contract_id': contract['CONTRACT_ITEM_ID'],
+            'contract_id': contract['CONTRACT_ITEM'],
             'contract_start': contract_start,
             'contract_end': contract_end,
             'capacity_purchased': capacity_purchased,
@@ -780,31 +780,27 @@ def load_contract_data(_session, customer_filter=None):
         SELECT 
             SOLD_TO_CUSTOMER_NAME,
             SOLD_TO_CONTRACT_NUMBER,
-            CONTRACT_ITEM_START_DATE,
-            CONTRACT_ITEM_END_DATE,
-            CONTRACTED_AMOUNT,
+            START_DATE,
+            END_DATE,
+            AMOUNT,
             CURRENCY,
-            ROLLOVER_AMOUNT,
-            FREE_USAGE_AMOUNT,
-            CONTRACT_ITEM_ID
+            CONTRACT_ITEM
         FROM {BILLING_SCHEMA}.{VIEWS['CONTRACT']}
-        WHERE CONTRACT_ITEM_END_DATE >= CURRENT_DATE
+        WHERE END_DATE >= CURRENT_DATE
         """
         
         if customer_filter and customer_filter != "All Customers":
             query += f" AND SOLD_TO_CUSTOMER_NAME = '{customer_filter}'"
             
-        query += " ORDER BY SOLD_TO_CUSTOMER_NAME, CONTRACT_ITEM_START_DATE DESC"
+        query += " ORDER BY SOLD_TO_CUSTOMER_NAME, START_DATE DESC"
         
         df = _session.sql(query).to_pandas()
         
         # Convert date columns
         if not df.empty:
-            df['CONTRACT_ITEM_START_DATE'] = pd.to_datetime(df['CONTRACT_ITEM_START_DATE']).dt.date
-            df['CONTRACT_ITEM_END_DATE'] = pd.to_datetime(df['CONTRACT_ITEM_END_DATE']).dt.date
-            df['CONTRACTED_AMOUNT'] = df['CONTRACTED_AMOUNT'].fillna(0)
-            df['ROLLOVER_AMOUNT'] = df['ROLLOVER_AMOUNT'].fillna(0)
-            df['FREE_USAGE_AMOUNT'] = df['FREE_USAGE_AMOUNT'].fillna(0)
+            df['START_DATE'] = pd.to_datetime(df['START_DATE']).dt.date
+            df['END_DATE'] = pd.to_datetime(df['END_DATE']).dt.date
+            df['AMOUNT'] = df['AMOUNT'].fillna(0)
         
         return df
         

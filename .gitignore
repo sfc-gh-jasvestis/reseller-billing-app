@@ -20,7 +20,7 @@ wheels/
 .installed.cfg
 *.egg
 
-# Virtual Environment
+# Virtual Environments
 venv/
 ENV/
 env/
@@ -34,25 +34,26 @@ env/
 *~
 .DS_Store
 
-# Streamlit
-.streamlit/secrets.toml
-.streamlit/config.toml
-
-# Logs
-*.log
+# Jupyter Notebooks
+.ipynb_checkpoints
+*.ipynb
 
 # Environment variables
 .env
 .env.local
 
-# Jupyter Notebook
-.ipynb_checkpoints
-
-# Test coverage
+# Testing
+.pytest_cache/
 .coverage
 htmlcov/
 
-# Backup files
-*.bak
-*.backup
+# Logs
+*.log
 
+# Temporary files
+*.tmp
+*.bak
+*.cache
+
+# Archive folder (optional - uncomment if you don't want to track archived files)
+# archive/

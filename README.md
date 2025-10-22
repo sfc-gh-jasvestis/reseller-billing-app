@@ -1,208 +1,282 @@
-# Snowflake Credit Usage Dashboard for Resellers
+# ❄️ Snowflake Credit Usage Dashboard for Resellers
 
-A comprehensive **Streamlit in Snowflake** application that enables Snowflake reseller customers to view their credit consumption, billing usage, and account balances using Snowflake's BILLING schema.
+A comprehensive **Streamlit in Snowflake** application for monitoring credit consumption, billing usage, and account balances using Snowflake's BILLING schema.
 
-## 🌟 Features
+[![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=Streamlit&logoColor=white)](https://streamlit.io/)
+[![Snowflake](https://img.shields.io/badge/Snowflake-29B5E8?style=for-the-badge&logo=snowflake&logoColor=white)](https://www.snowflake.com/)
+[![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 
-### 📊 Key Metrics Dashboard
-- **Total Credits Used**: Aggregate credit consumption across all accounts
-- **Total Cost**: Monetary value of usage in contract currency
-- **Active Customers**: Number of customers with usage in the selected period
-- **Average Daily Credits**: Daily credit consumption trends
+---
 
-### 📈 Interactive Visualizations
-- **Usage Trend Chart**: Daily credit usage by usage type (compute, storage, data transfer, etc.)
-- **Usage Breakdown**: Pie chart showing distribution of credits by usage type
-- **Balance Overview**: Waterfall chart showing current balances by customer
-- **Usage Heatmap**: Weekly usage patterns visualization
-- **Run Rate Analysis**: Consumption projections and balance depletion forecasting
+## 🌟 Key Features
 
-### 🔍 Data Views
-- **Usage Details**: Comprehensive view of daily usage by account and service
-- **Balance Details**: Current balance information including free usage, capacity, and rollover
-- **Smart Alerts**: Automated alerts for high usage, low balances, and growth trends
+### 📊 Interactive Dashboard
+- **Real-time Metrics**: Total credits, costs, active customers, and daily averages
+- **Advanced Analytics**: Usage trends, patterns, and forecasting
+- **Smart Alerts**: Automated warnings for high usage, low balances, and growth anomalies
+- **Contract Monitoring**: Track capacity usage, overage projections, and renewal recommendations
 
-### 📥 Export Capabilities
-- Download usage data as CSV
-- Download balance data as CSV  
-- Formatted reports with proper currency and credit formatting
+### 📈 Five Analytics Tabs
 
-### 🎛️ Advanced Filtering
-- Date range selection with quick presets
-- Customer-specific filtering
-- Usage type filtering
-- Real-time data refresh capabilities
+1. **📊 Trends**: Daily usage and cost trends with multi-line charts
+2. **🎯 Usage Patterns**: Pie charts, heatmaps, and top customer rankings
+3. **💰 Balance Analysis**: Waterfall charts and balance trends over time
+4. **⚡ Run Rate Analysis**: Consumption projections and balance depletion forecasting
+5. **📋 Contract Usage Report**: Active contract monitoring with overage predictions
 
-## 🛠️ Technical Implementation
+### 🎯 Run Rate Analysis
+- Configurable analysis periods (3, 7, 14, or 30 days)
+- Daily/weekly/monthly consumption projections
+- Balance depletion timeline with color-coded urgency
+- Customer-by-customer run rate comparison
+- Export capabilities for further analysis
 
-### Data Sources
-The application leverages Snowflake's BILLING schema views:
+### 📋 Contract Usage Monitoring
+- **Capacity Tracking**: Monitor contract capacity vs. actual usage
+- **Overage Predictions**: Calculate days until capacity overage
+- **Visual Projections**: Interactive charts showing actual vs. predicted consumption
+- **Renewal Intelligence**: Automatic recommendations for contract renewals
+- **12-Month Run Rate**: Projected annual consumption for upsell opportunities
 
-1. **PARTNER_USAGE_IN_CURRENCY_DAILY**: Daily credit and currency usage
-2. **PARTNER_REMAINING_BALANCE_DAILY**: Daily balance information
-3. **PARTNER_CONTRACT_ITEMS**: Contract terms and capacity information
-4. **PARTNER_RATE_SHEET_DAILY**: Effective rates for usage calculation
+### 📥 Export & Data Access
+- Download usage and balance data as CSV
+- Properly formatted reports with currency symbols
+- Detailed data tables with sorting and filtering
+- Run rate analysis exports
 
-### Key Features
-- **Native Streamlit in Snowflake**: No external hosting required
-- **Embedded Configuration**: All settings built into the Python code
-- **Smart Caching**: 1-hour data caching for optimal performance
-- **Responsive Design**: Modern UI with enhanced styling
-- **Error Handling**: Comprehensive error handling and user feedback
+---
 
-## 🚀 Simple Deployment
+## 🚀 Quick Start
 
 ### Prerequisites
 - Snowflake account with **Streamlit in Snowflake** enabled
 - Access to **BILLING** schema (available for resellers and distributors)
 - **ACCOUNTADMIN** role or appropriate permissions
 
-### Choose Your Deployment Method
+### Installation (3 Simple Steps)
 
-**Option A: Minimal Setup** (`MINIMAL_DEPLOY.sql`)
-- ✅ Use if your users **already have** BILLING schema access
-- Only creates: warehouse + Streamlit app
-- Fastest deployment
-
-**Option B: Complete Setup** (`deploy.sql`)
-- ✅ Use if you need to **create permissions** for users
-- Creates: warehouse + role + permissions + Streamlit app
-- Recommended for new setups
-
-### Quick Setup (3 Steps!)
-
-#### 1. **Copy the Python Code**
-- Copy the entire contents of `streamlit_app.py`
-
-#### 2. **Run the Deployment Script**
-- Open `MINIMAL_DEPLOY.sql` OR `deploy.sql` in Snowflake
-- Paste the Python code into the `CREATE STREAMLIT` statement
-- Execute the script
-
-#### 3. **Grant Access & Launch**
-```sql
--- For MINIMAL setup: Grant to existing role
-GRANT USAGE ON STREAMLIT billing_dashboard TO ROLE YOUR_EXISTING_ROLE;
-
--- For COMPLETE setup: Grant new role to users
-GRANT ROLE BILLING_DASHBOARD_USER TO USER your_username;
-
--- Access your app at: Projects > Streamlit > billing_dashboard
+#### 1. Copy the Application Code
+```bash
+# Copy streamlit_app.py contents
 ```
 
-### Example Deployment
+#### 2. Run Deployment Script
 ```sql
--- Simple deployment - just embed the Python code!
+-- Execute deploy.sql in Snowflake
+-- This creates: warehouse + role + permissions + app
+```
+
+#### 3. Grant Access & Launch
+```sql
+-- Grant the role to users
+GRANT ROLE BILLING_DASHBOARD_USER TO USER your_username;
+
+-- Access at: Projects > Streamlit > billing_dashboard
+```
+
+### Quick Deploy Example
+```sql
 CREATE OR REPLACE STREAMLIT billing_dashboard
     QUERY_WAREHOUSE = 'BILLING_DASHBOARD_WH'
 AS
 $$
-# Paste the entire streamlit_app.py content here
+# Paste entire streamlit_app.py content here
 import streamlit as st
 import pandas as pd
-# ... rest of your Python code
+# ... rest of code
 $$;
 ```
 
+---
+
 ## 📁 Project Structure
+
 ```
 reseller-billing/
-├── streamlit_app.py          # Complete application (copy this into Snowflake)
-├── MINIMAL_DEPLOY.sql       # Minimal deployment (users already have BILLING access)
-├── deploy.sql               # Complete deployment (creates role + permissions)
-├── README.md                # This documentation
-├── DEPLOYMENT_GUIDE.md      # Detailed deployment instructions
-└── QUICK_DEPLOY.md         # Quick start guide
+├── streamlit_app.py          # Main application (deploy this to Snowflake)
+├── deploy.sql                # Complete deployment script
+├── README.md                 # This file
+│
+├── docs/                     # 📚 Documentation
+│   ├── DEPLOYMENT_GUIDE.md   # Detailed deployment instructions
+│   ├── QUICK_DEPLOY.md       # Quick start guide
+│   ├── PARTNER_SETUP.md      # Partner configuration guide
+│   ├── TESTING_GUIDE.md      # Testing procedures
+│   └── RUN_RATE_FEATURES.md  # Run rate analysis documentation
+│
+└── archive/                  # 🗄️ Archived files
+    ├── MINIMAL_DEPLOY.sql    # Minimal deployment option
+    ├── verify_schema.sql     # Schema verification script
+    └── ...
 ```
+
+---
+
+## 📊 Data Sources
+
+The application uses Snowflake's BILLING schema views:
+
+| View | Purpose |
+|------|---------|
+| **PARTNER_USAGE_IN_CURRENCY_DAILY** | Daily credit and currency usage by account |
+| **PARTNER_REMAINING_BALANCE_DAILY** | Daily balance snapshots (capacity, rollover, free usage) |
+| **PARTNER_CONTRACT_ITEMS** | Contract terms, capacity, and dates |
+| **PARTNER_RATE_SHEET_DAILY** | Effective rates for usage calculation |
+
+---
 
 ## 🔐 Security & Permissions
 
-**Important:** The Streamlit app runs **as the viewing user**, not as a service account.
+**Important:** The Streamlit app runs as the viewing user, not as a service account.
 
+### Required Permissions
 Users need:
-- ✅ SELECT access to `SNOWFLAKE.BILLING` views
-- ✅ USAGE on the warehouse
-- ✅ USAGE on the Streamlit app
+- ✅ `SELECT` access to `SNOWFLAKE.BILLING.*` views
+- ✅ `USAGE` on the warehouse
+- ✅ `USAGE` on the Streamlit app
 
-The **complete deployment** (`deploy.sql`) creates:
-- **BILLING_DASHBOARD_USER** role with appropriate BILLING schema access
-- **Warehouse**: `BILLING_DASHBOARD_WH` (XSMALL, auto-suspend)
-- **Proper grants** for secure access to billing data
+### What Gets Created
+The deployment script (`deploy.sql`) creates:
+- **Role**: `BILLING_DASHBOARD_USER` with BILLING schema access
+- **Warehouse**: `BILLING_DASHBOARD_WH` (XSMALL, auto-suspend 60s)
+- **Streamlit App**: `billing_dashboard` with embedded code
+- **Proper Grants**: Secure access to billing data
 
-The **minimal deployment** (`MINIMAL_DEPLOY.sql`) assumes users already have BILLING access.
+---
 
-## 📊 Dashboard Capabilities
+## 🛠️ Technical Details
 
-### Real-time Monitoring
-- **Credit Consumption**: Track usage across all customer accounts
-- **Cost Analysis**: Monitor spending in contract currencies
-- **Balance Tracking**: View available credits and on-demand usage
-- **Growth Trends**: Automated calculation of usage growth rates
+### Built With
+- **Python 3.9+**
+- **Streamlit** (native Snowflake integration)
+- **Pandas** for data manipulation
+- **Plotly** for interactive visualizations
 
-### Advanced Analytics
-- **Usage Heatmaps**: Identify usage patterns by day/week
-- **Customer Rankings**: Top customers by credit consumption
-- **Alert System**: Automated warnings for high usage or low balances
-- **Trend Analysis**: Historical usage and cost trends
-- **Run Rate Analysis**: 
-  - Daily/weekly/monthly consumption projections
-  - Days until balance depletion calculations
-  - Customer run rate comparison with color-coded urgency
-  - Configurable analysis periods (3, 7, 14, or 30 days)
+### Performance Features
+- **Smart Caching**: 1-hour TTL for query results
+- **Query Limits**: 100K rows max, 5-minute timeout
+- **Efficient Queries**: Optimized SQL for fast data retrieval
+- **Auto-suspend Warehouse**: Minimizes compute costs
 
-### Export & Reporting
-- **CSV Downloads**: Export filtered data for external analysis
-- **Formatted Reports**: Properly formatted currency and credit values
-- **Date Range Flexibility**: Custom date ranges up to 1 year
+### UI/UX Features
+- Responsive design with modern styling
+- Color-coded alerts (🔴 Critical, 🟡 Warning, 🟢 Healthy)
+- Enhanced metric cards with gradients
+- Interactive charts with drill-down capabilities
+- Date range presets (Last 7/30/90 days, Current/Last Month)
+
+---
+
+## 📖 Documentation
+
+- **[Deployment Guide](docs/DEPLOYMENT_GUIDE.md)**: Step-by-step deployment instructions
+- **[Quick Deploy](docs/QUICK_DEPLOY.md)**: Fast setup for experienced users
+- **[Partner Setup](docs/PARTNER_SETUP.md)**: Multi-partner configuration
+- **[Testing Guide](docs/TESTING_GUIDE.md)**: Verification and testing procedures
+- **[Run Rate Features](docs/RUN_RATE_FEATURES.md)**: Run rate analysis deep dive
+
+---
 
 ## 🆘 Troubleshooting
 
 ### Common Issues
 
-**"Table doesn't exist" error**
-- Verify BILLING schema access: Contact Snowflake Support if needed
-
-**"Permission denied" error**  
-- Ensure you have ACCOUNTADMIN role or appropriate grants
-
-**Dashboard shows "No data"**
-- Verify date range selection
-- Check if you have recent billing data
-- Confirm customer filter settings
+| Issue | Solution |
+|-------|----------|
+| **"Table doesn't exist"** | Verify BILLING schema access with Snowflake Support |
+| **"Permission denied"** | Ensure ACCOUNTADMIN role or proper grants |
+| **"No data" in dashboard** | Check date range, billing data availability, and filters |
+| **Cache issues** | Press `C` in app to clear cache, then rerun |
+| **Column name errors** | Ensure you're using the latest version of `streamlit_app.py` |
 
 ### Quick Verification
 ```sql
 -- Test BILLING schema access
 SELECT COUNT(*) FROM SNOWFLAKE.BILLING.PARTNER_USAGE_IN_CURRENCY_DAILY;
 
--- Check Streamlit app status
+-- Verify app status
 SHOW STREAMLIT APPS;
 DESC STREAMLIT billing_dashboard;
-```
 
-## 📞 Support
-
-- **BILLING Schema Issues**: Contact Snowflake Support
-- **App Issues**: Check error logs in Streamlit interface  
-- **Permissions**: Work with your Snowflake ACCOUNTADMIN
-
-## 🔄 Updates & Maintenance
-
-### Updating the Application
-```sql
--- Simply update the Streamlit code
-ALTER STREAMLIT billing_dashboard SET MAIN_FILE = 'new_python_code_here';
-```
-
-### Monitoring Usage
-```sql
--- Monitor warehouse costs
-SELECT * FROM SNOWFLAKE.ACCOUNT_USAGE.WAREHOUSE_METERING_HISTORY 
-WHERE WAREHOUSE_NAME = 'BILLING_DASHBOARD_WH';
+-- Check warehouse
+SHOW WAREHOUSES LIKE 'BILLING_DASHBOARD_WH';
 ```
 
 ---
 
-**🎯 Ready to monitor your reseller billing usage with a native Snowflake solution!**
+## 🔄 Maintenance
 
-*Compatible with Snowflake reseller/distributor accounts with BILLING schema access*
+### Updating the Application
+```sql
+-- Replace the Streamlit code
+CREATE OR REPLACE STREAMLIT billing_dashboard
+    QUERY_WAREHOUSE = 'BILLING_DASHBOARD_WH'
+AS
+$$ 
+-- Paste new streamlit_app.py code here
+$$;
+```
+
+### Monitoring Costs
+```sql
+-- Monitor warehouse usage
+SELECT * 
+FROM SNOWFLAKE.ACCOUNT_USAGE.WAREHOUSE_METERING_HISTORY 
+WHERE WAREHOUSE_NAME = 'BILLING_DASHBOARD_WH'
+ORDER BY START_TIME DESC
+LIMIT 100;
+
+-- Check app query history
+SELECT * 
+FROM SNOWFLAKE.ACCOUNT_USAGE.QUERY_HISTORY
+WHERE WAREHOUSE_NAME = 'BILLING_DASHBOARD_WH'
+ORDER BY START_TIME DESC
+LIMIT 100;
+```
+
+---
+
+## 🎯 Use Cases
+
+- **Reseller Account Managers**: Monitor customer consumption and proactively manage capacity
+- **Finance Teams**: Track costs and create budget forecasts
+- **Sales Teams**: Identify upsell opportunities based on usage trends
+- **Operations**: Ensure customers stay within contracted capacity
+- **Executive Dashboards**: High-level consumption and revenue tracking
+
+---
+
+## 📞 Support & Contributing
+
+### Getting Help
+- **BILLING Schema Access**: Contact Snowflake Support
+- **Application Issues**: Check Streamlit logs and error messages
+- **Permissions**: Work with your Snowflake ACCOUNTADMIN
+
+### Contributing
+Contributions are welcome! Please ensure:
+- Code follows existing style and patterns
+- All features are documented
+- SQL queries are optimized
+- Security best practices are maintained
+
+---
+
+## 📝 License
+
+This project is provided as-is for Snowflake reseller and distributor customers with access to the BILLING schema.
+
+---
+
+## 🎉 Ready to Get Started?
+
+1. **Review the [Deployment Guide](docs/DEPLOYMENT_GUIDE.md)**
+2. **Run `deploy.sql` in your Snowflake account**
+3. **Grant access to your users**
+4. **Start monitoring your reseller billing!**
+
+---
+
+*Built with ❤️ for Snowflake reseller partners*
+
+*Compatible with Snowflake accounts that have BILLING schema access enabled*
