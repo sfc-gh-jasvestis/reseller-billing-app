@@ -49,45 +49,46 @@ A comprehensive **Streamlit in Snowflake** application for monitoring credit con
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Quick Start (3 Steps)
 
 ### Prerequisites
 - Snowflake account with **Streamlit in Snowflake** enabled
-- Access to **BILLING** schema (available for resellers and distributors)
-- **ACCOUNTADMIN** role or appropriate permissions
+- Access to **BILLING** schema (contact Snowflake Support if needed)
+- **ACCOUNTADMIN** role
 
-### Installation (3 Simple Steps)
+### Step 1: Open `deploy.sql` in a Snowflake Worksheet
 
-#### 1. Copy the Application Code
-```bash
-# Copy streamlit_app.py contents
-```
-
-#### 2. Run Deployment Script
-```sql
--- Execute deploy.sql in Snowflake
--- This creates: warehouse + role + permissions + app
-```
-
-#### 3. Grant Access & Launch
-```sql
--- Grant the role to users
-GRANT ROLE BILLING_DASHBOARD_USER TO USER your_username;
-
--- Access at: Projects > Streamlit > billing_dashboard
-```
-
-### Quick Deploy Example
+### Step 2: Paste `streamlit_app.py` code between the `$` markers
 ```sql
 CREATE OR REPLACE STREAMLIT billing_dashboard
     QUERY_WAREHOUSE = 'BILLING_DASHBOARD_WH'
 AS
-$$
-# Paste entire streamlit_app.py content here
-import streamlit as st
-import pandas as pd
-# ... rest of code
-$$;
+$
+-- PASTE streamlit_app.py CONTENTS HERE --
+$;
+```
+
+### Step 3: Run the script & grant access
+```sql
+GRANT ROLE BILLING_DASHBOARD_USER TO USER your_username;
+```
+
+**Done! Access at:** Projects → Streamlit → `billing_dashboard`
+
+---
+
+### Minimal Deploy (If you already have BILLING access)
+```sql
+-- Create warehouse
+CREATE WAREHOUSE IF NOT EXISTS BILLING_DASHBOARD_WH
+    WAREHOUSE_SIZE = 'XSMALL' AUTO_SUSPEND = 60 AUTO_RESUME = TRUE;
+
+-- Create app (paste streamlit_app.py between $)
+CREATE OR REPLACE STREAMLIT billing_dashboard
+    QUERY_WAREHOUSE = 'BILLING_DASHBOARD_WH'
+AS $ 
+-- paste streamlit_app.py here
+$;
 ```
 
 ---
