@@ -896,6 +896,18 @@ st.markdown("""
         background-color: #ffffff;
         border-radius: 5px;
     }
+    /* Fix sidebar text visibility in dark mode */
+    [data-testid="stSidebar"] .stSelectbox label,
+    [data-testid="stSidebar"] .stMultiSelect label,
+    [data-testid="stSidebar"] h2,
+    [data-testid="stSidebar"] p,
+    [data-testid="stSidebar"] span {
+        color: #ffffff !important;
+    }
+    [data-testid="stSidebar"] .stSelectbox [data-baseweb="select"] > div,
+    [data-testid="stSidebar"] .stMultiSelect [data-baseweb="select"] > div {
+        color: #333333 !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
