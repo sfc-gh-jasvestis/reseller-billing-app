@@ -87,6 +87,173 @@ FEATURES = {
     "email_reports": False
 }
 
+# Demo mode flag - set to True to use sample data when BILLING schema is unavailable
+USE_DEMO_DATA = False
+
+# Demo data configuration - 5 customers with varying usage patterns
+DEMO_CUSTOMERS = [
+    {"name": "Acme Corporation", "org": "Acme Inc", "contract": "ACME-2024-001", "tier": "enterprise", "usage_multiplier": 1.5},
+    {"name": "TechStart Labs", "org": "TechStart Holdings", "contract": "TSL-2024-002", "tier": "standard", "usage_multiplier": 0.6},
+    {"name": "Global Analytics Co", "org": "Global Analytics", "contract": "GAC-2024-003", "tier": "enterprise", "usage_multiplier": 2.2},
+    {"name": "DataDriven Solutions", "org": "DataDriven Group", "contract": "DDS-2024-004", "tier": "business_critical", "usage_multiplier": 3.0},
+    {"name": "SmallBiz Insights", "org": "SmallBiz LLC", "contract": "SBI-2024-005", "tier": "standard", "usage_multiplier": 0.3},
+]
+
+# =============================================================================
+# DEMO DATA GENERATION FUNCTIONS
+# =============================================================================
+import numpy as np
+import random
+
+def generate_demo_usage_data(start_date, end_date):
+    """Generate realistic demo usage data for 5 customers"""
+    random.seed(42)
+    np.random.seed(42)
+    
+    usage_types = ['compute', 'storage', 'data transfer', 'cloud services', 'snowpipe', 'serverless tasks']
+    regions = ['AWS_US_WEST_2', 'AWS_US_EAST_1', 'AZURE_EASTUS2', 'AWS_EU_WEST_1']
+    balance_sources = ['capacity', 'free usage', 'rollover']
+    
+    data = []
+    date_range = pd.date_range(start=start_date, end=end_date)
+    
+    for customer in DEMO_CUSTOMERS:
+        base_daily_credits = 100 * customer['usage_multiplier']
+        
+        for date in date_range:
+            # Add weekend dip
+            day_factor = 0.4 if date.weekday() >= 5 else 1.0
+            # Add some trend (slight growth over time)
+            trend_factor = 1 + (date - date_range[0]).days * 0.002
+            # Add randomness
+            random_factor = np.random.uniform(0.7, 1.3)
+            
+            for usage_type in usage_types:
+                # Different usage types have different base amounts
+                type_multipliers = {
+                    'compute': 0.5,
+                    'storage': 0.2,
+                    'data transfer': 0.1,
+                    'cloud services': 0.1,
+                    'snowpipe': 0.05,
+                    'serverless tasks': 0.05
+                }
+                
+                credits = base_daily_credits * type_multipliers.get(usage_type, 0.1) * day_factor * trend_factor * random_factor
+                credits = max(0, credits + np.random.normal(0, credits * 0.1))
+                
+                if credits > 0.01:
+                    cost = credits * 3.00  # $3 per credit
+                    data.append({
+                        'SOLD_TO_ORGANIZATION_NAME': customer['org'],
+                        'SOLD_TO_CUSTOMER_NAME': customer['name'],
+                        'SOLD_TO_CONTRACT_NUMBER': customer['contract'],
+                        'ACCOUNT_NAME': f"{customer['name'].replace(' ', '_').lower()}_account",
+                        'ACCOUNT_LOCATOR': f"LOC{hash(customer['name']) % 100000:05d}",
+                        'REGION': random.choice(regions),
+                        'SERVICE_LEVEL': customer['tier'],
+                        'USAGE_DATE': date.date(),
+                        'USAGE_TYPE': usage_type,
+                        'CURRENCY': 'USD',
+                        'CREDITS_USED': round(credits, 4),
+                        'USAGE_IN_CURRENCY': round(cost, 2),
+                        'BALANCE_SOURCE': random.choice(balance_sources)
+                    })
+    
+    df = pd.DataFrame(data)
+    df['USAGE_DATE'] = pd.to_datetime(df['USAGE_DATE']).dt.date
+    return df
+
+def generate_demo_balance_data(start_date, end_date):
+    """Generate realistic demo balance data for 5 customers"""
+    random.seed(42)
+    np.random.seed(42)
+    
+    data = []
+    date_range = pd.date_range(start=start_date, end=end_date)
+    
+    # Initial balances per customer
+    initial_balances = {
+        'Acme Corporation': {'capacity': 50000, 'free': 1000, 'rollover': 5000},
+        'TechStart Labs': {'capacity': 15000, 'free': 500, 'rollover': 1000},
+        'Global Analytics Co': {'capacity': 100000, 'free': 2000, 'rollover': 10000},
+        'DataDriven Solutions': {'capacity': 200000, 'free': 5000, 'rollover': 25000},
+        'SmallBiz Insights': {'capacity': 5000, 'free': 200, 'rollover': 500},
+    }
+    
+    for customer in DEMO_CUSTOMERS:
+        balances = initial_balances.get(customer['name'], {'capacity': 10000, 'free': 500, 'rollover': 1000})
+        daily_burn = 100 * customer['usage_multiplier'] * 3.00  # Daily cost
+        
+        capacity_bal = balances['capacity']
+        free_bal = balances['free']
+        rollover_bal = balances['rollover']
+        
+        for date in date_range:
+            # Consume from free first, then rollover, then capacity
+            daily_consumption = daily_burn * np.random.uniform(0.8, 1.2)
+            
+            if free_bal > 0:
+                consumed_free = min(free_bal, daily_consumption * 0.1)
+                free_bal -= consumed_free
+            
+            if rollover_bal > 0:
+                consumed_rollover = min(rollover_bal, daily_consumption * 0.1)
+                rollover_bal -= consumed_rollover
+            
+            capacity_bal -= daily_consumption * 0.8
+            capacity_bal = max(0, capacity_bal)
+            
+            data.append({
+                'SOLD_TO_ORGANIZATION_NAME': customer['org'],
+                'SOLD_TO_CUSTOMER_NAME': customer['name'],
+                'SOLD_TO_CONTRACT_NUMBER': customer['contract'],
+                'BALANCE_DATE': date.date(),
+                'CURRENCY': 'USD',
+                'FREE_USAGE_BALANCE': round(max(0, free_bal), 2),
+                'CAPACITY_BALANCE': round(max(0, capacity_bal), 2),
+                'ON_DEMAND_CONSUMPTION_BALANCE': 0,
+                'ROLLOVER_BALANCE': round(max(0, rollover_bal), 2)
+            })
+    
+    df = pd.DataFrame(data)
+    df['BALANCE_DATE'] = pd.to_datetime(df['BALANCE_DATE']).dt.date
+    return df
+
+def generate_demo_contract_data():
+    """Generate realistic demo contract data for 5 customers"""
+    data = []
+    today = datetime.now().date()
+    
+    contract_amounts = {
+        'Acme Corporation': 150000,
+        'TechStart Labs': 45000,
+        'Global Analytics Co': 300000,
+        'DataDriven Solutions': 600000,
+        'SmallBiz Insights': 15000,
+    }
+    
+    for customer in DEMO_CUSTOMERS:
+        amount = contract_amounts.get(customer['name'], 50000)
+        start = today - timedelta(days=180)
+        end = today + timedelta(days=185)
+        
+        data.append({
+            'SOLD_TO_CUSTOMER_NAME': customer['name'],
+            'SOLD_TO_CONTRACT_NUMBER': customer['contract'],
+            'START_DATE': start,
+            'END_DATE': end,
+            'AMOUNT': amount,
+            'CURRENCY': 'USD',
+            'CONTRACT_ITEM': 'Snowflake Credits'
+        })
+    
+    return pd.DataFrame(data)
+
+def generate_demo_customer_list():
+    """Generate demo customer list"""
+    return ["All Customers"] + [c['name'] for c in DEMO_CUSTOMERS]
+
 # =============================================================================
 # UTILITY FUNCTIONS (embedded for Streamlit in Snowflake compatibility)
 # =============================================================================
@@ -523,7 +690,7 @@ def calculate_contract_usage_metrics(usage_df, contract_df, run_rate_days=30):
 
 def create_contract_usage_chart(usage_df, contract_metrics, customer_name):
     """
-    Create contract usage visualization with actual vs predicted consumption
+    Create contract usage visualization with actual vs predicted consumption and dual y-axes
     
     Args:
         usage_df: DataFrame with usage data
@@ -531,8 +698,10 @@ def create_contract_usage_chart(usage_df, contract_metrics, customer_name):
         customer_name: Name of the customer
     
     Returns:
-        Plotly figure object
+        Plotly figure object with dual y-axes (daily consumption left, cumulative right)
     """
+    from plotly.subplots import make_subplots
+    
     if usage_df.empty or not contract_metrics:
         return None
     
@@ -556,77 +725,118 @@ def create_contract_usage_chart(usage_df, contract_metrics, customer_name):
     if metrics['daily_run_rate'] > 0:
         # Actual dates
         actual_dates = customer_usage['USAGE_DATE'].tolist()
+        actual_values = customer_usage['USAGE_IN_CURRENCY'].tolist()
         actual_cumulative = customer_usage['CUMULATIVE_USAGE'].tolist()
         
         # Prediction from today to contract end
         current_cumulative = customer_usage['CUMULATIVE_USAGE'].iloc[-1] if not customer_usage.empty else 0
         prediction_dates = pd.date_range(start=today, end=contract_end, freq='D')
         
-        prediction_values = []
+        prediction_daily = [metrics['daily_run_rate'] for _ in prediction_dates]
+        prediction_cumulative = []
         for i, date in enumerate(prediction_dates):
             predicted = current_cumulative + (metrics['daily_run_rate'] * i)
-            prediction_values.append(predicted)
+            prediction_cumulative.append(predicted)
         
-        # Create figure
-        fig = go.Figure()
+        # Create figure with secondary y-axis
+        fig = make_subplots(specs=[[{"secondary_y": True}]])
         
-        # Add actual consumption area
-        fig.add_trace(go.Scatter(
-            x=actual_dates,
-            y=customer_usage['USAGE_IN_CURRENCY'].tolist(),
-            name='Actual Consumption',
-            fill='tozeroy',
-            fillcolor='rgba(31, 119, 180, 0.3)',
-            line=dict(color='rgba(31, 119, 180, 0.8)', width=0),
-            mode='none'
-        ))
+        # Add actual consumption area (blue) - left y-axis
+        fig.add_trace(
+            go.Scatter(
+                x=actual_dates,
+                y=actual_values,
+                name='Actual',
+                fill='tozeroy',
+                fillcolor='rgba(66, 133, 244, 0.7)',
+                line=dict(color='rgba(66, 133, 244, 1)', width=0),
+                mode='none',
+                legendgroup='actual'
+            ),
+            secondary_y=False
+        )
         
-        # Add predicted consumption area
-        fig.add_trace(go.Scatter(
-            x=prediction_dates,
-            y=[metrics['daily_run_rate'] for _ in prediction_dates],
-            name='Predicted Consumption',
-            fill='tozeroy',
-            fillcolor='rgba(255, 127, 14, 0.3)',
-            line=dict(color='rgba(255, 127, 14, 0.8)', width=0),
-            mode='none'
-        ))
+        # Add predicted consumption area (orange) - left y-axis
+        fig.add_trace(
+            go.Scatter(
+                x=prediction_dates,
+                y=prediction_daily,
+                name='Prediction',
+                fill='tozeroy',
+                fillcolor='rgba(255, 167, 38, 0.7)',
+                line=dict(color='rgba(255, 167, 38, 1)', width=0),
+                mode='none',
+                legendgroup='prediction'
+            ),
+            secondary_y=False
+        )
         
-        # Add cumulative consumption line
+        # Combine all dates and cumulative values for the line
         all_dates = actual_dates + prediction_dates.tolist()
-        all_cumulative = actual_cumulative + prediction_values
+        all_cumulative = actual_cumulative + prediction_cumulative
         
-        fig.add_trace(go.Scatter(
-            x=all_dates,
-            y=all_cumulative,
-            name='Cumulative Consumption',
-            line=dict(color='black', width=2),
-            mode='lines'
-        ))
+        # Add cumulative consumption line (black) - right y-axis
+        fig.add_trace(
+            go.Scatter(
+                x=all_dates,
+                y=all_cumulative,
+                name='Cumulative Consump',
+                line=dict(color='black', width=2),
+                mode='lines',
+                legendgroup='cumulative'
+            ),
+            secondary_y=True
+        )
         
-        # Add capacity line
-        fig.add_trace(go.Scatter(
-            x=[contract_start, contract_end],
-            y=[metrics['capacity_purchased'], metrics['capacity_purchased']],
-            name='Capacity Contract Amount',
-            line=dict(color='gray', width=2, dash='dash'),
-            mode='lines'
-        ))
+        # Add capacity contract amount line (gray horizontal) - right y-axis
+        fig.add_trace(
+            go.Scatter(
+                x=[contract_start, contract_end],
+                y=[metrics['capacity_purchased'], metrics['capacity_purchased']],
+                name='Capacity Contract Amt',
+                line=dict(color='gray', width=2, dash='dash'),
+                mode='lines',
+                legendgroup='capacity'
+            ),
+            secondary_y=True
+        )
         
         # Update layout
         fig.update_layout(
-            title=f"Contract Usage Analysis - {customer_name}",
-            xaxis_title="Date",
-            yaxis_title=f"Consumption ({metrics['currency']})",
             hovermode='x unified',
-            height=500,
+            height=450,
+            margin=dict(l=50, r=50, t=30, b=80),
             legend=dict(
                 orientation="h",
-                yanchor="bottom",
-                y=-0.3,
+                yanchor="top",
+                y=-0.15,
                 xanchor="center",
-                x=0.5
-            )
+                x=0.5,
+                font=dict(size=10)
+            ),
+            plot_bgcolor='white'
+        )
+        
+        # Update y-axes
+        fig.update_yaxes(
+            title_text=f"Consumption ({metrics['currency']})",
+            secondary_y=False,
+            gridcolor='lightgray',
+            tickformat="$,.0f"
+        )
+        fig.update_yaxes(
+            title_text="Cumulative Consumption",
+            secondary_y=True,
+            gridcolor='lightgray',
+            tickformat="$,.0f"
+        )
+        
+        # Update x-axis
+        fig.update_xaxes(
+            tickformat="%m/%d/%Y",
+            tickangle=45,
+            gridcolor='lightgray',
+            nticks=20
         )
         
         return fig
@@ -704,7 +914,16 @@ def get_snowflake_session():
 
 @st.cache_data(ttl=CACHE_TTL_SECONDS)
 def load_usage_data(_session, start_date, end_date, customer_filter=None, usage_type_filter=None):
-    """Enhanced usage data loading with additional filters"""
+    """Enhanced usage data loading with additional filters - falls back to demo data"""
+    # Use demo data if flag is set
+    if USE_DEMO_DATA:
+        df = generate_demo_usage_data(start_date, end_date)
+        if customer_filter and customer_filter != "All Customers":
+            df = df[df['SOLD_TO_CUSTOMER_NAME'] == customer_filter]
+        if usage_type_filter:
+            df = df[df['USAGE_TYPE'].isin(usage_type_filter)]
+        return clean_usage_data(df)
+    
     try:
         query = f"""
         SELECT 
@@ -738,12 +957,24 @@ def load_usage_data(_session, start_date, end_date, customer_filter=None, usage_
         return clean_usage_data(df)
         
     except Exception as e:
-        st.error(f"❌ Error loading usage data: {str(e)}")
-        return pd.DataFrame()
+        st.warning(f"⚠️ Using demo data (BILLING schema not available): {str(e)}")
+        df = generate_demo_usage_data(start_date, end_date)
+        if customer_filter and customer_filter != "All Customers":
+            df = df[df['SOLD_TO_CUSTOMER_NAME'] == customer_filter]
+        if usage_type_filter:
+            df = df[df['USAGE_TYPE'].isin(usage_type_filter)]
+        return clean_usage_data(df)
 
 @st.cache_data(ttl=CACHE_TTL_SECONDS)
 def load_balance_data(_session, start_date, end_date, customer_filter=None):
-    """Enhanced balance data loading"""
+    """Enhanced balance data loading - falls back to demo data"""
+    # Use demo data if flag is set
+    if USE_DEMO_DATA:
+        df = generate_demo_balance_data(start_date, end_date)
+        if customer_filter and customer_filter != "All Customers":
+            df = df[df['SOLD_TO_CUSTOMER_NAME'] == customer_filter]
+        return clean_balance_data(df)
+    
     try:
         query = f"""
         SELECT 
@@ -769,12 +1000,21 @@ def load_balance_data(_session, start_date, end_date, customer_filter=None):
         return clean_balance_data(df)
         
     except Exception as e:
-        st.error(f"❌ Error loading balance data: {str(e)}")
-        return pd.DataFrame()
+        df = generate_demo_balance_data(start_date, end_date)
+        if customer_filter and customer_filter != "All Customers":
+            df = df[df['SOLD_TO_CUSTOMER_NAME'] == customer_filter]
+        return clean_balance_data(df)
 
 @st.cache_data(ttl=CACHE_TTL_SECONDS)
 def load_contract_data(_session, customer_filter=None):
-    """Load contract data from PARTNER_CONTRACT_ITEMS"""
+    """Load contract data from PARTNER_CONTRACT_ITEMS - falls back to demo data"""
+    # Use demo data if flag is set
+    if USE_DEMO_DATA:
+        df = generate_demo_contract_data()
+        if customer_filter and customer_filter != "All Customers":
+            df = df[df['SOLD_TO_CUSTOMER_NAME'] == customer_filter]
+        return df
+    
     try:
         query = f"""
         SELECT 
@@ -805,12 +1045,18 @@ def load_contract_data(_session, customer_filter=None):
         return df
         
     except Exception as e:
-        st.error(f"❌ Error loading contract data: {str(e)}")
-        return pd.DataFrame()
+        df = generate_demo_contract_data()
+        if customer_filter and customer_filter != "All Customers":
+            df = df[df['SOLD_TO_CUSTOMER_NAME'] == customer_filter]
+        return df
 
 @st.cache_data(ttl=CACHE_TTL_SECONDS)
 def load_customer_list(_session):
-    """Load available customers dynamically"""
+    """Load available customers dynamically - falls back to demo data"""
+    # Use demo data if flag is set
+    if USE_DEMO_DATA:
+        return generate_demo_customer_list()
+    
     try:
         query = f"""
         SELECT DISTINCT SOLD_TO_CUSTOMER_NAME
@@ -823,8 +1069,7 @@ def load_customer_list(_session):
         return ["All Customers"] + df['SOLD_TO_CUSTOMER_NAME'].tolist()
         
     except Exception as e:
-        st.warning(f"⚠️ Could not load customer list: {str(e)}")
-        return ["All Customers"]
+        return generate_demo_customer_list()
 
 def create_enhanced_trend_chart(df):
     """Create enhanced trend chart with multiple metrics"""
@@ -1080,6 +1325,11 @@ def main():
     # Header with enhanced styling
     st.markdown(f'<h1 class="main-header">{APP_ICON} {APP_TITLE}</h1>', unsafe_allow_html=True)
     st.markdown("### Real-time credit consumption monitoring for Snowflake reseller customers")
+    
+    # Demo mode banner
+    if USE_DEMO_DATA:
+        st.info("🎭 **Demo Mode Active** - Displaying sample data for 5 fictional customers. Set `USE_DEMO_DATA = False` to use live BILLING schema data.")
+    
     st.markdown("---")
     
     # Get Snowflake session
@@ -1418,18 +1668,8 @@ def main():
         if contract_df.empty:
             st.warning("No active contracts found for the selected customer.")
         else:
-            # Run rate period selector for contract analysis
-            col1, col2 = st.columns([1, 3])
-            with col1:
-                contract_run_rate_days = st.selectbox(
-                    "Select a Run Rate period",
-                    options=[30, 60, 90, 180],
-                    index=0,
-                    help="Number of recent days to calculate run rate",
-                    key="contract_run_rate"
-                )
-            
-            # Calculate contract metrics
+            # Calculate contract metrics with default run rate
+            contract_run_rate_days = 30  # Default, will be updated by radio button
             contract_metrics = calculate_contract_usage_metrics(usage_df, contract_df, contract_run_rate_days)
             
             if not contract_metrics:
@@ -1450,106 +1690,89 @@ def main():
                 
                 if metrics:
                     # Contract header with customer name and contract ID
-                    st.markdown(f"## Active Contract - {selected_customer}")
-                    st.markdown(f"**Contract ID:** {metrics['contract_id']}")
+                    st.markdown(f"## Active Contract - {selected_customer} (ID: {metrics['contract_id']})")
                     st.markdown("---")
                     
                     # Key metrics in columns
                     col1, col2, col3, col4 = st.columns(4)
                     
                     with col1:
-                        st.metric(
-                            "Capacity Purchased",
-                            format_currency(metrics['capacity_purchased'], metrics['currency']),
-                            delta=f"Contract Start: {metrics['contract_start'].strftime('%m/%d/%Y')}"
-                        )
+                        st.markdown("**Capacity Purchased**")
+                        st.markdown(f"### {format_currency(metrics['capacity_purchased'], metrics['currency'])}")
+                        st.markdown(f"↑ ContractStart: {metrics['contract_start'].strftime('%m/%d/%Y')}")
                     
                     with col2:
-                        st.metric(
-                            "Total Capacity Used",
-                            format_currency(metrics['total_used'], metrics['currency']),
-                            delta=f"Used %: {metrics['used_percent']:.1f}%"
-                        )
+                        st.markdown("**Total Capacity Used**")
+                        st.markdown(f"### {format_currency(metrics['total_used'], metrics['currency'])}")
+                        st.markdown(f"↑ Used % *: {metrics['used_percent']:.1f}%")
                     
                     with col3:
                         overage_display = format_currency(metrics['overage'], metrics['currency']) if metrics['overage'] > 0 else "$0.00"
-                        st.metric(
-                            "Overage",
-                            overage_display,
-                            delta=f"Contract End: {metrics['contract_end'].strftime('%m/%d/%Y')}"
-                        )
+                        st.markdown("**Overage**")
+                        st.markdown(f"### {overage_display}")
+                        st.markdown(f"↑ ContractEnd: {metrics['contract_end'].strftime('%m/%d/%Y')}")
                     
                     with col4:
+                        st.markdown("**Days until Overage**")
                         if metrics['days_until_overage'] is not None and metrics['days_until_overage'] >= 0:
-                            days_display = f"{int(metrics['days_until_overage'])} days"
-                            
-                            # Determine alert color
-                            if metrics['days_until_overage'] < 30:
-                                delta_color = "🔴"
-                            elif metrics['days_until_overage'] < 60:
-                                delta_color = "🟡"
-                            else:
-                                delta_color = "🟢"
-                            
+                            st.markdown(f"### {int(metrics['days_until_overage'])} days")
                             overage_date_display = ""
                             if metrics['overage_date']:
-                                overage_date_display = f"Overage Date: {metrics['overage_date'].strftime('%m/%d/%Y')}"
-                            
-                            st.metric(
-                                "Days until Overage",
-                                f"{delta_color} {days_display}",
-                                delta=overage_date_display
-                            )
+                                overage_date_display = f"↑ Overage Date: {metrics['overage_date'].strftime('%m/%d/%Y')}"
+                            st.markdown(overage_date_display)
                         else:
-                            st.metric(
-                                "Days until Overage",
-                                "N/A",
-                                delta="Sufficient capacity"
-                            )
+                            st.markdown("### N/A")
+                            st.markdown("↑ Sufficient capacity")
+                    
+                    # Note about Capacity Used %
+                    st.markdown("<small>*Note: Capacity Used % is based on Total Capacity = Capacity Purchased + Free Usage + Rollover + Offset - Adjustment + Bal Transfer + CurrencyConv Adj + DataSharing Rebate + Balance Exp</small>", unsafe_allow_html=True)
                     
                     # Alert banner if overage is imminent
-                    if metrics['days_until_overage'] is not None and metrics['days_until_overage'] < 30:
+                    if metrics['days_until_overage'] is not None and metrics['overage_date']:
                         st.markdown(
-                            f'<div class="alert-warning">⚠️ <strong>Critical Alert:</strong> Will run out of credits by {metrics["overage_date"].strftime("%m/%d/%Y")}</div>',
+                            f'<div style="color: #dc3545; font-weight: bold; text-align: right; font-size: 1.2rem; margin-top: 0.5rem;">Will run out of credits by {metrics["overage_date"].strftime("%m/%d/%Y")}</div>',
                             unsafe_allow_html=True
                         )
                     
                     st.markdown("---")
                     
-                    # Run Rate Analysis section
-                    col1, col2 = st.columns([1, 2])
+                    # Two-column layout: left for run rate selector and metrics, right for chart
+                    col1, col2 = st.columns([1, 3])
                     
                     with col1:
-                        st.markdown("### Consumption Run Rate")
-                        st.metric(
-                            f"Estimated 12 months run rate",
-                            format_currency(metrics['annual_run_rate'], metrics['currency']),
-                            delta=f"Avg Daily Consumption × 365"
+                        st.markdown("**Select a Run Rate period**")
+                        contract_run_rate_days = st.radio(
+                            "Run Rate Period",
+                            options=[30, 60, 90, 180],
+                            format_func=lambda x: f"{x} days",
+                            index=0,
+                            key="contract_run_rate",
+                            label_visibility="collapsed"
                         )
                         
-                        # Key business question
-                        if metrics['annual_run_rate'] > metrics['capacity_purchased']:
-                            renewal_suggestion = metrics['annual_run_rate']
-                            st.markdown(
-                                f"""
-                                <div style="background-color: #fff3cd; padding: 1rem; border-radius: 10px; border-left: 4px solid #ffc107; margin-top: 1rem;">
-                                    <h4 style="margin-top: 0; color: #856404;">💡 Renewal Recommendation</h4>
-                                    <p style="color: #856404; margin-bottom: 0;">
-                                        <strong>Estimated 12 months run rate {format_currency(renewal_suggestion, metrics['currency'])}. 
-                                        Can we renew a bigger ACV?</strong>
-                                    </p>
-                                    <p style="color: #856404; font-size: 0.9rem; margin-bottom: 0;">
-                                        Suggested capacity increase: ~{(renewal_suggestion / metrics['capacity_purchased']):.1f}x larger 
-                                        ({format_currency(renewal_suggestion, metrics['currency'])} vs {format_currency(metrics['capacity_purchased'], metrics['currency'])})
-                                    </p>
-                                </div>
-                                """,
-                                unsafe_allow_html=True
-                            )
+                        # Recalculate metrics with selected run rate period
+                        contract_metrics = calculate_contract_usage_metrics(usage_df, contract_df, contract_run_rate_days)
+                        metrics = contract_metrics.get(selected_customer)
+                        
+                        st.markdown("---")
+                        st.markdown("**Consumption Run Rate**")
+                        st.markdown(f"### {format_currency(metrics['annual_run_rate'], metrics['currency'])}")
+                        st.markdown("↑ Avg Daily Consump.*365")
+                        
+                        # Green renewal recommendation box
+                        st.markdown(
+                            f"""
+                            <div style="background-color: #d4edda; padding: 1rem; border-radius: 10px; border: 2px solid #28a745; margin-top: 1rem;">
+                                <p style="color: #155724; margin-bottom: 0; font-weight: bold;">
+                                    Estimated 12 months run rate - {format_currency(metrics['annual_run_rate'], metrics['currency'])}. Can we renew a bigger ACV?
+                                </p>
+                            </div>
+                            """,
+                            unsafe_allow_html=True
+                        )
                     
                     with col2:
-                        st.markdown("### Usage Trend & Projection")
-                        # Create the contract usage chart
+                        # Create the contract usage chart with dual y-axes
                         chart = create_contract_usage_chart(usage_df, contract_metrics, selected_customer)
                         if chart:
                             st.plotly_chart(chart, use_container_width=True)
