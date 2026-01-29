@@ -1680,8 +1680,10 @@ def main():
         if contract_df.empty:
             st.warning("No active contracts found for the selected customer.")
         else:
-            # Calculate contract metrics with default run rate
-            contract_run_rate_days = 30  # Default, will be updated by radio button
+            # Get run rate from session state (set by radio button below)
+            if 'contract_run_rate' not in st.session_state:
+                st.session_state.contract_run_rate = 30
+            contract_run_rate_days = st.session_state.contract_run_rate
             contract_metrics = calculate_contract_usage_metrics(usage_df, contract_df, contract_run_rate_days)
             
             if not contract_metrics:
@@ -1753,18 +1755,19 @@ def main():
                     
                     with col1:
                         st.markdown("**Select a Run Rate period**")
+                        run_rate_options = [30, 60, 90, 180]
+                        current_value = st.session_state.get('contract_run_rate', 30)
+                        default_index = run_rate_options.index(current_value) if current_value in run_rate_options else 0
                         contract_run_rate_days = st.radio(
                             "Run Rate Period",
-                            options=[30, 60, 90, 180],
+                            options=run_rate_options,
                             format_func=lambda x: f"{x} days",
-                            index=0,
+                            index=default_index,
                             key="contract_run_rate",
                             label_visibility="collapsed"
                         )
                         
-                        # Recalculate metrics with selected run rate period
-                        contract_metrics = calculate_contract_usage_metrics(usage_df, contract_df, contract_run_rate_days)
-                        metrics = contract_metrics.get(selected_customer)
+                        # Metrics already calculated at tab5 start with current run rate
                         
                         st.markdown("---")
                         st.markdown("**Consumption Run Rate**")
