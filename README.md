@@ -5,7 +5,7 @@ A **Streamlit in Snowflake** app for monitoring customer credit consumption, con
 [![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=Streamlit&logoColor=white)](https://streamlit.io/)
 [![Snowflake](https://img.shields.io/badge/Snowflake-29B5E8?style=for-the-badge&logo=snowflake&logoColor=white)](https://www.snowflake.com/)
 
-![Dashboard Screenshot](screenshots/dashboard.png)
+<img width="1902" height="815" alt="image" src="https://github.com/user-attachments/assets/c71c7e11-9861-40f0-bfb4-3f17876f03cf" />
 
 ---
 
