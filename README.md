@@ -27,8 +27,6 @@ GRANT ROLE BILLING_DASHBOARD_USER TO USER <username>;
 
 That's it. The app is now available under **Projects → Streamlit → `billing_dashboard`**.
 
-> **No BILLING schema yet?** The app runs in demo mode automatically — no setup needed to explore the interface.
-
 ---
 
 ## Live Data vs. Demo Mode
