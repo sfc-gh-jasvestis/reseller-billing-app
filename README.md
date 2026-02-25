@@ -67,4 +67,4 @@ SELECT COUNT(*) FROM SNOWFLAKE.BILLING.PARTNER_USAGE_IN_CURRENCY_DAILY;
 
 ---
 
-*Built for Snowflake reseller and distributor partners.*
+*Built for Snowflake reseller partners.*
