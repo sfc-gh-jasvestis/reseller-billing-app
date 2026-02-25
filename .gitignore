@@ -55,5 +55,12 @@ htmlcov/
 *.bak
 *.cache
 
-# Archive folder (optional - uncomment if you don't want to track archived files)
-# archive/
+# Archive and local docs (tracked externally)
+archive/
+docs/
+
+# Streamlit secrets
+.streamlit/
+
+# Stray directories from malformed paths
+file:/
