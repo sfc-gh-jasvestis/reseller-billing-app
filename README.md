@@ -38,7 +38,7 @@ The app detects which mode to use **automatically** — no configuration require
 | BILLING schema is accessible | Live customer data loads; no banner shown |
 | BILLING schema is inaccessible | App falls back to demo data and shows an info banner |
 
-When you (or your customer) connect via their SPN account and the `BILLING_DASHBOARD_USER` role has been granted, live data loads seamlessly on first open.
+Once deployed in your SPN account and the `BILLING_DASHBOARD_USER` role has been granted, live data loads seamlessly on first open.
 
 To force demo mode at any time (e.g. for a sales demo), set this flag near the top of `streamlit_app.py`:
 
