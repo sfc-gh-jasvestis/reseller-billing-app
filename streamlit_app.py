@@ -103,8 +103,9 @@ FEATURES = {
     "email_reports": False
 }
 
-# Demo mode flag - set to True to use sample data when BILLING schema is unavailable
-USE_DEMO_DATA = False
+# Demo mode flag - auto-detects via env var, defaults to True outside Snowflake
+import os
+USE_DEMO_DATA = os.environ.get("USE_DEMO_DATA", "true").lower() != "false"
 
 # Demo data configuration - 5 customers with varying usage patterns
 DEMO_CUSTOMERS = [
@@ -1487,22 +1488,25 @@ def main():
     
     st.markdown("---")
     
-    # Get Snowflake session
-    session = get_snowflake_session()
-    if not session:
-        if st.session_state.get('auth_expired', False):
-            st.error("🔐 **Authentication token has expired**")
-            st.info("""
+    # Get Snowflake session (skip when demo mode)
+    if USE_DEMO_DATA:
+        session = None
+    else:
+        session = get_snowflake_session()
+        if not session:
+            if st.session_state.get('auth_expired', False):
+                st.error("🔐 **Authentication token has expired**")
+                st.info("""
 To reconnect, please try one of the following:
 1. **Refresh the browser page** - this will prompt for re-authentication
 2. **Run in terminal**: `snow connection test` to refresh your connection
 3. **Re-authenticate via SSO** if using federated authentication
-            """)
-            if st.button("🔄 Retry Connection", type="primary"):
-                st.session_state['auth_expired'] = False
-                st.cache_data.clear()
-                st.rerun()
-        st.stop()
+                """)
+                if st.button("🔄 Retry Connection", type="primary"):
+                    st.session_state['auth_expired'] = False
+                    st.cache_data.clear()
+                    st.rerun()
+            st.stop()
     
     # Sidebar with enhanced filters
     st.sidebar.header("🎛️ Dashboard Controls")
@@ -1596,7 +1600,53 @@ To reconnect, please try one of the following:
             heatmap_chart = create_usage_heatmap(usage_df)
             if heatmap_chart:
                 st.plotly_chart(heatmap_chart, use_container_width=True)
-    
+
+        # Detailed data table
+        st.subheader("📋 Detailed Data")
+        with st.expander("💻 Usage Details", expanded=False):
+            if not usage_df.empty:
+                display_df = usage_df.copy()
+                display_df['CREDITS_FORMATTED'] = display_df['CREDITS_USED'].apply(format_credits)
+                display_df['COST_FORMATTED'] = display_df.apply(
+                    lambda row: format_currency(row['USAGE_IN_CURRENCY'], row['CURRENCY']), axis=1
+                )
+                st.dataframe(
+                    display_df.sort_values('USAGE_DATE', ascending=False),
+                    use_container_width=True,
+                    height=400
+                )
+            else:
+                st.info("No usage data available.")
+
+        # Export functionality
+        if FEATURES['export_enabled']:
+            st.subheader("📥 Export Data")
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                if not usage_df.empty:
+                    csv_data = export_to_csv(usage_df, "usage_data")
+                    if csv_data:
+                        st.download_button(
+                            label="📊 Download Usage Data",
+                            data=csv_data,
+                            file_name=EXPORT_TEMPLATES['usage'].format(
+                                start_date=start_date, end_date=end_date
+                            ),
+                            mime="text/csv"
+                        )
+            with col2:
+                if not balance_df.empty:
+                    csv_data = export_to_csv(balance_df, "balance_data")
+                    if csv_data:
+                        st.download_button(
+                            label="💰 Download Balance Data",
+                            data=csv_data,
+                            file_name=EXPORT_TEMPLATES['balance'].format(
+                                start_date=start_date, end_date=end_date
+                            ),
+                            mime="text/csv"
+                        )
+
     with tab2:
         usage_by_type = usage_df.groupby('USAGE_TYPE').agg(
             CREDITS_USED=('CREDITS_USED', 'sum'),
@@ -1984,63 +2034,9 @@ This is the authoritative reseller view — it shows daily credit consumption pe
 | `snowflake intelligence` | ✨ Snowflake Intelligence | Usage credits |
 | `ml functions` | 🧠 ML Functions | Compute credits |
 
-> **Demo mode:** synthetic data matches this schema exactly. Connect to your SPN account to see your customer consumption.
+> **Demo mode:** synthetic data matches this schema exactly. Connect to your SPN account to see your customer(s) consumption.
                 """)
 
-
-    # Data tables with enhanced features
-    st.subheader("📋 Detailed Data")
-    
-    # Usage details with better formatting
-    with st.expander("💻 Usage Details", expanded=False):
-        if not usage_df.empty:
-            # Add formatted columns for display
-            display_df = usage_df.copy()
-            display_df['CREDITS_FORMATTED'] = display_df['CREDITS_USED'].apply(format_credits)
-            display_df['COST_FORMATTED'] = display_df.apply(
-                lambda row: format_currency(row['USAGE_IN_CURRENCY'], row['CURRENCY']), axis=1
-            )
-            
-            st.dataframe(
-                display_df.sort_values('USAGE_DATE', ascending=False),
-                use_container_width=True,
-                height=400
-            )
-        else:
-            st.info("No usage data available.")
-    
-    # Export functionality
-    if FEATURES['export_enabled']:
-        st.subheader("📥 Export Data")
-        
-        col1, col2, col3 = st.columns(3)
-        
-        with col1:
-            if not usage_df.empty:
-                csv_data = export_to_csv(usage_df, "usage_data")
-                if csv_data:
-                    st.download_button(
-                        label="📊 Download Usage Data",
-                        data=csv_data,
-                        file_name=EXPORT_TEMPLATES['usage'].format(
-                            start_date=start_date, end_date=end_date
-                        ),
-                        mime="text/csv"
-                    )
-        
-        with col2:
-            if not balance_df.empty:
-                csv_data = export_to_csv(balance_df, "balance_data")
-                if csv_data:
-                    st.download_button(
-                        label="💰 Download Balance Data",
-                        data=csv_data,
-                        file_name=EXPORT_TEMPLATES['balance'].format(
-                            start_date=start_date, end_date=end_date
-                        ),
-                        mime="text/csv"
-                    )
-    
     # Footer
     st.markdown("---")
     col1, col2, col3 = st.columns(3)
