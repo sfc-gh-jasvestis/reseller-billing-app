@@ -1726,9 +1726,6 @@ To reconnect, please try one of the following:
         st.info("💡 Try adjusting your filters or date range to find available data.")
         return
     
-    # Show alerts and insights (now contract-aware)
-    show_alerts_and_insights(usage_df, balance_df, contract_df)
-    
     # Enhanced metrics display
     st.subheader("📊 Key Performance Indicators")
     display_enhanced_metrics(usage_df, balance_df)
@@ -1756,6 +1753,8 @@ To reconnect, please try one of the following:
     st.markdown("---")
 
     if active_tab == "📊 Trends":
+        show_alerts_and_insights(usage_df, balance_df, contract_df)
+
         trend_chart = create_enhanced_trend_chart(usage_df)
         if trend_chart:
             st.plotly_chart(trend_chart, use_container_width=True)
