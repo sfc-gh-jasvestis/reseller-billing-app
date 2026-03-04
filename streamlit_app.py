@@ -602,9 +602,6 @@ def calculate_run_rate_by_customer(usage_df, balance_df=None, run_rate_days=7):
     if recent_usage.empty:
         return pd.DataFrame()
     
-    # Calculate actual days in the period
-    actual_days = (max_date - recent_usage['USAGE_DATE'].min()).days + 1
-    
     # Aggregate by customer
     run_rate_data = recent_usage.groupby('SOLD_TO_CUSTOMER_NAME').agg({
         'CREDITS_USED': 'sum',
@@ -615,9 +612,16 @@ def calculate_run_rate_by_customer(usage_df, balance_df=None, run_rate_days=7):
     # Flatten column names
     run_rate_data.columns = ['CUSTOMER', 'TOTAL_CREDITS', 'TOTAL_COST', 'CURRENCY', 'START_DATE', 'END_DATE']
     
+    # Calculate actual days per customer (not a shared global value)
+    # Using each customer's own date range avoids underestimating customers
+    # that joined mid-window or have sparse data
+    run_rate_data['ACTUAL_DAYS'] = run_rate_data.apply(
+        lambda row: max((row['END_DATE'] - row['START_DATE']).days + 1, 1), axis=1
+    )
+    
     # Calculate daily run rate
-    run_rate_data['DAILY_RUN_RATE_CREDITS'] = run_rate_data['TOTAL_CREDITS'] / actual_days
-    run_rate_data['DAILY_RUN_RATE_COST'] = run_rate_data['TOTAL_COST'] / actual_days
+    run_rate_data['DAILY_RUN_RATE_CREDITS'] = run_rate_data['TOTAL_CREDITS'] / run_rate_data['ACTUAL_DAYS']
+    run_rate_data['DAILY_RUN_RATE_COST'] = run_rate_data['TOTAL_COST'] / run_rate_data['ACTUAL_DAYS']
     
     # Calculate projected monthly consumption (30 days)
     run_rate_data['PROJECTED_MONTHLY_CREDITS'] = run_rate_data['DAILY_RUN_RATE_CREDITS'] * 30
@@ -647,7 +651,7 @@ def calculate_run_rate_by_customer(usage_df, balance_df=None, run_rate_days=7):
         run_rate_data['DAYS_UNTIL_DEPLETION'] = None
     
     # Add metadata
-    run_rate_data['RUN_RATE_PERIOD_DAYS'] = actual_days
+    run_rate_data['RUN_RATE_PERIOD_DAYS'] = run_rate_days
     
     # Sort by daily run rate descending
     run_rate_data = run_rate_data.sort_values('DAILY_RUN_RATE_CREDITS', ascending=False)
@@ -667,7 +671,7 @@ def calculate_overall_run_rate(usage_df, balance_df=None, run_rate_days=7):
     if recent_usage.empty:
         return {}
     
-    actual_days = (max_date - recent_usage['USAGE_DATE'].min()).days + 1
+    actual_days = max((max_date - recent_usage['USAGE_DATE'].min()).days + 1, 1)
     
     total_credits = recent_usage['CREDITS_USED'].sum()
     total_cost = recent_usage['USAGE_IN_CURRENCY'].sum()
@@ -751,7 +755,7 @@ def calculate_contract_usage_metrics(usage_df, contract_df, run_rate_days=30):
         recent_usage = customer_usage[customer_usage['USAGE_DATE'] > cutoff_date]
         
         if not recent_usage.empty and len(recent_usage) > 0:
-            actual_days = (max_date - recent_usage['USAGE_DATE'].min()).days + 1
+            actual_days = max((max_date - recent_usage['USAGE_DATE'].min()).days + 1, 1)
             daily_rate = recent_usage['USAGE_IN_CURRENCY'].sum() / actual_days
             
             # Calculate days until overage
