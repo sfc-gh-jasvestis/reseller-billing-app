@@ -1834,7 +1834,7 @@ To reconnect, please try one of the following:
                         st.metric(
                             "Capacity Purchased",
                             format_currency(metrics['capacity_purchased'], metrics['currency']),
-                            delta=f"Start: {metrics['contract_start'].strftime('%m/%d/%Y')}"
+                            delta=f"Start: {metrics['contract_start'].strftime('%d/%m/%Y')}"
                         )
                     with col2:
                         st.metric(
@@ -1847,7 +1847,7 @@ To reconnect, please try one of the following:
                         st.metric(
                             "Overage",
                             format_currency(overage_val, metrics['currency']) if overage_val > 0 else "$0.00",
-                            delta=f"End: {metrics['contract_end'].strftime('%m/%d/%Y')}"
+                            delta=f"End: {metrics['contract_end'].strftime('%d/%m/%Y')}"
                         )
                     with col4:
                         if metrics['days_until_overage'] is not None and metrics['days_until_overage'] >= 0:
@@ -1855,7 +1855,7 @@ To reconnect, please try one of the following:
                             if metrics['days_until_overage'] == 0 and metrics['overage'] > 0:
                                 ov_delta = "Already in overage"
                             elif metrics['overage_date']:
-                                ov_delta = f"Est. overage: {metrics['overage_date'].strftime('%m/%d/%Y')}"
+                                ov_delta = f"Est. overage: {metrics['overage_date'].strftime('%d/%m/%Y')}"
                             else:
                                 ov_delta = "Within contract"
                             st.metric("Days Until Overage", f"{ov_icon} {int(metrics['days_until_overage'])}", delta=ov_delta)
@@ -1872,7 +1872,7 @@ To reconnect, please try one of the following:
                             )
                         elif metrics['overage_date']:
                             st.markdown(
-                                f'<div style="color: #dc3545; font-weight: bold; text-align: right; font-size: 1.1rem; margin-top: 0.25rem;">⚠️ Projected to exhaust capacity by {metrics["overage_date"].strftime("%m/%d/%Y")}</div>',
+                                f'<div style="color: #dc3545; font-weight: bold; text-align: right; font-size: 1.1rem; margin-top: 0.25rem;">⚠️ Projected to exhaust capacity by {metrics["overage_date"].strftime("%d/%m/%Y")}</div>',
                                 unsafe_allow_html=True
                             )
 
@@ -1892,8 +1892,8 @@ To reconnect, please try one of the following:
                         col1, col2 = st.columns(2)
                         with col1:
                             st.markdown("**Timeline**")
-                            st.write(f"- Start: {metrics['contract_start'].strftime('%B %d, %Y')}")
-                            st.write(f"- End: {metrics['contract_end'].strftime('%B %d, %Y')}")
+                            st.write(f"- Start: {metrics['contract_start'].strftime('%d %B %Y')}")
+                            st.write(f"- End: {metrics['contract_end'].strftime('%d %B %Y')}")
                             st.write(f"- Duration: {metrics['days_in_contract']} days")
                             st.write(f"- Elapsed: {metrics['days_elapsed']} days")
                             st.write(f"- Remaining: {(metrics['contract_end'] - datetime.now().date()).days} days")
