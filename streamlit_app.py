@@ -1773,8 +1773,8 @@ To reconnect, please try one of the following:
                     delta=f"{format_currency(overall_run_rate['monthly_rate_cost'], currency)}/month"
                 )
             with col4:
-                if overall_run_rate.get('days_until_depletion'):
-                    days_remaining = overall_run_rate['days_until_depletion']
+                days_remaining = overall_run_rate.get('days_until_depletion')
+                if days_remaining is not None and days_remaining > 0:
                     dep_icon = "🔴" if days_remaining < 30 else "🟡" if days_remaining < 60 else "🟢"
                     depletion_date = (datetime.now().date() + timedelta(days=int(days_remaining))).strftime('%-d %b %Y')
                     st.metric(
@@ -1782,6 +1782,8 @@ To reconnect, please try one of the following:
                         f"{dep_icon} {days_remaining:.0f}",
                         delta=f"~{depletion_date} · Balance: {format_currency(overall_run_rate['total_balance'], currency)}"
                     )
+                elif days_remaining == 0:
+                    st.metric("Days Until Depletion", "🔴 0", delta="Balance already depleted")
                 else:
                     st.metric("Days Until Depletion", "N/A", delta="No balance data")
 
@@ -1850,18 +1852,29 @@ To reconnect, please try one of the following:
                     with col4:
                         if metrics['days_until_overage'] is not None and metrics['days_until_overage'] >= 0:
                             ov_icon = "🔴" if metrics['days_until_overage'] < 30 else "🟡" if metrics['days_until_overage'] < 60 else "🟢"
-                            ov_delta = f"Overage: {metrics['overage_date'].strftime('%m/%d/%Y')}" if metrics['overage_date'] else "Within contract"
+                            if metrics['days_until_overage'] == 0 and metrics['overage'] > 0:
+                                ov_delta = "Already in overage"
+                            elif metrics['overage_date']:
+                                ov_delta = f"Est. overage: {metrics['overage_date'].strftime('%m/%d/%Y')}"
+                            else:
+                                ov_delta = "Within contract"
                             st.metric("Days Until Overage", f"{ov_icon} {int(metrics['days_until_overage'])}", delta=ov_delta)
                         else:
                             st.metric("Days Until Overage", "N/A", delta="Sufficient capacity")
 
                     st.caption("Used % and Days Until Overage are calculated against Capacity Purchased. Rollover and other adjustments may differ slightly from Snowflake's billing portal.")
 
-                    if metrics['days_until_overage'] is not None and metrics['overage_date']:
-                        st.markdown(
-                            f'<div style="color: #dc3545; font-weight: bold; text-align: right; font-size: 1.1rem; margin-top: 0.25rem;">⚠️ Projected to exhaust capacity by {metrics["overage_date"].strftime("%m/%d/%Y")}</div>',
-                            unsafe_allow_html=True
-                        )
+                    if metrics['days_until_overage'] is not None:
+                        if metrics['days_until_overage'] == 0 and metrics['overage'] > 0:
+                            st.markdown(
+                                f'<div style="color: #dc3545; font-weight: bold; text-align: right; font-size: 1.1rem; margin-top: 0.25rem;">🔴 Capacity already exhausted — customer is in overage</div>',
+                                unsafe_allow_html=True
+                            )
+                        elif metrics['overage_date']:
+                            st.markdown(
+                                f'<div style="color: #dc3545; font-weight: bold; text-align: right; font-size: 1.1rem; margin-top: 0.25rem;">⚠️ Projected to exhaust capacity by {metrics["overage_date"].strftime("%m/%d/%Y")}</div>',
+                                unsafe_allow_html=True
+                            )
 
                     col_chart, col_aside = st.columns([3, 1])
                     with col_chart:
