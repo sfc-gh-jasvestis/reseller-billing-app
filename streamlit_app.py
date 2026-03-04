@@ -1627,14 +1627,22 @@ To reconnect, please try one of the following:
         with st.expander("💻 Usage Details", expanded=False):
             if not usage_df.empty:
                 display_df = usage_df.copy()
-                display_df['CREDITS_FORMATTED'] = display_df['CREDITS_USED'].apply(format_credits)
-                display_df['COST_FORMATTED'] = display_df.apply(
+                display_df['Credits'] = display_df['CREDITS_USED'].apply(format_credits)
+                display_df['Cost'] = display_df.apply(
                     lambda row: format_currency(row['USAGE_IN_CURRENCY'], row['CURRENCY']), axis=1
                 )
+                display_df['Feature'] = display_df['USAGE_TYPE'].apply(
+                    lambda x: USAGE_TYPE_DISPLAY.get(x, x.title())
+                )
+                cols = [c for c in [
+                    'USAGE_DATE', 'SOLD_TO_CUSTOMER_NAME', 'ACCOUNT_NAME',
+                    'ACCOUNT_LOCATOR', 'REGION', 'Feature', 'Credits', 'Cost'
+                ] if c in display_df.columns]
                 st.dataframe(
-                    display_df.sort_values('USAGE_DATE', ascending=False),
+                    display_df[cols].sort_values('USAGE_DATE', ascending=False),
                     use_container_width=True,
-                    height=400
+                    height=400,
+                    hide_index=True
                 )
             else:
                 st.info("No usage data available.")
