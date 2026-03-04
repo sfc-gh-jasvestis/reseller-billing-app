@@ -840,9 +840,12 @@ def create_contract_usage_chart(usage_df, contract_metrics, customer_name):
         actual_values = customer_usage['USAGE_IN_CURRENCY'].tolist()
         actual_cumulative = customer_usage['CUMULATIVE_USAGE'].tolist()
         
-        # Prediction from today to contract end
+        # Prediction from today — extend at least 90 days forward so the
+        # slope change is always visible, even when the contract end is near
+        # or already past (customer is in overage)
         current_cumulative = customer_usage['CUMULATIVE_USAGE'].iloc[-1] if not customer_usage.empty else 0
-        prediction_dates = pd.date_range(start=today, end=contract_end, freq='D')
+        prediction_end = max(contract_end, today + timedelta(days=90))
+        prediction_dates = pd.date_range(start=today, end=prediction_end, freq='D')
         
         prediction_daily = [metrics['daily_run_rate'] for _ in prediction_dates]
         prediction_cumulative = []
@@ -901,9 +904,10 @@ def create_contract_usage_chart(usage_df, contract_metrics, customer_name):
         )
         
         # Add capacity contract amount line (gray horizontal) - right y-axis
+        # Extend to prediction_end so it stays visible across the full chart window
         fig.add_trace(
             go.Scatter(
-                x=[contract_start, contract_end],
+                x=[contract_start, prediction_end],
                 y=[metrics['capacity_purchased'], metrics['capacity_purchased']],
                 name='Capacity Contract Amt',
                 line=dict(color='gray', width=2, dash='dash'),
@@ -1880,7 +1884,11 @@ To reconnect, please try one of the following:
                     with col_chart:
                         chart = create_contract_usage_chart(contract_usage_df, contract_metrics, selected_customer)
                         if chart:
-                            st.plotly_chart(chart, use_container_width=True)
+                            st.plotly_chart(
+                                chart,
+                                use_container_width=True,
+                                key=f"contract_chart_{selected_customer}_{financial_run_rate_days}"
+                            )
                         else:
                             st.info("Not enough data to generate the projection chart.")
                     with col_aside:
