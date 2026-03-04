@@ -1698,8 +1698,10 @@ To reconnect, please try one of the following:
     )
 
     st.sidebar.markdown("---")
-    if st.sidebar.button("🔄 Refresh Data", help="Clear cached data and reload from source", use_container_width=True):
+    if st.sidebar.button("🔄 Refresh Data", help="Clear cached data and session state, then reload", use_container_width=True):
         st.cache_data.clear()
+        for key in list(st.session_state.keys()):
+            del st.session_state[key]
         st.rerun()
     st.sidebar.caption("🕐 Data refreshed every hour. For the most current information, refresh the page.")
 
