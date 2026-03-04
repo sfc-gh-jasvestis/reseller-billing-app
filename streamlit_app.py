@@ -1596,9 +1596,22 @@ To reconnect, please try one of the following:
     # Enhanced visualizations
     st.subheader("📈 Advanced Analytics")
     
-    tab1, tab2, tab3, tab4 = st.tabs(["📊 Trends", "🎯 Usage Patterns", "💰 Financial Health", "🔬 Feature Adoption"])
-    
-    with tab1:
+    # Tab navigation — st.radio persists across reruns via session_state,
+    # unlike st.tabs which resets to the first tab on any widget-triggered rerun
+    TAB_OPTIONS = ["📊 Trends", "🎯 Usage Patterns", "💰 Financial Health", "🔬 Feature Adoption"]
+    if 'active_tab' not in st.session_state:
+        st.session_state['active_tab'] = TAB_OPTIONS[0]
+
+    active_tab = st.radio(
+        "Navigation",
+        options=TAB_OPTIONS,
+        horizontal=True,
+        label_visibility="collapsed",
+        key="active_tab"
+    )
+    st.markdown("---")
+
+    if active_tab == "📊 Trends":
         trend_chart = create_enhanced_trend_chart(usage_df)
         if trend_chart:
             st.plotly_chart(trend_chart, use_container_width=True)
@@ -1655,7 +1668,7 @@ To reconnect, please try one of the following:
                             mime="text/csv"
                         )
 
-    with tab2:
+    elif active_tab == "🎯 Usage Patterns":
         usage_by_type = usage_df.groupby('USAGE_TYPE').agg(
             CREDITS_USED=('CREDITS_USED', 'sum'),
             COST=('USAGE_IN_CURRENCY', 'sum')
@@ -1713,7 +1726,7 @@ To reconnect, please try one of the following:
             use_container_width=True, hide_index=True
         )
     
-    with tab3:  # Financial Health (Contract Status + Balance & Run Rate)
+    elif active_tab == "💰 Financial Health":
         currency = usage_df['CURRENCY'].iloc[0] if not usage_df.empty else "USD"
 
         # ── Shared projection window selector ─────────────────────────────────
@@ -1913,7 +1926,7 @@ To reconnect, please try one of the following:
                             st.write(f"- Annual: {format_currency(metrics['annual_run_rate'], metrics['currency'])}/year")
                             st.write(f"- Window: last {metrics['run_rate_period']} days")
     
-    with tab4:
+    elif active_tab == "🔬 Feature Adoption":
         st.markdown("### 🔬 Feature Adoption")
         st.markdown("*Which Snowflake features are your customers using — and where are the upsell opportunities?*")
 
