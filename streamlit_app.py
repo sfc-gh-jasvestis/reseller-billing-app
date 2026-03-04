@@ -1377,62 +1377,109 @@ def create_usage_heatmap(df):
     fig.update_xaxes(side="top")
     return fig
 
-def show_alerts_and_insights(usage_df, balance_df):
+def show_alerts_and_insights(usage_df, balance_df, contract_df=None):
     """Display intelligent alerts and insights"""
     st.subheader("🚨 Alerts & Insights")
-    
+
     alerts = []
-    
+    today = datetime.now().date()
+    ai_features = {'cortex', 'cortex analyst', 'cortex search', 'cortex code',
+                   'ml functions', 'snowflake intelligence'}
+
     if not usage_df.empty:
+        all_customers = set(usage_df['SOLD_TO_CUSTOMER_NAME'].unique())
+
         # High usage alert
-        total_credits = usage_df['CREDITS_USED'].sum()
         avg_daily = usage_df.groupby('USAGE_DATE')['CREDITS_USED'].sum().mean()
-        
-        if avg_daily > 1000:  # Configurable threshold
-            alerts.append({
-                'type': 'warning',
-                'message': f"High daily credit usage detected: {avg_daily:,.0f} credits/day average"
-            })
-        
+        if avg_daily > 1000:
+            alerts.append({'type': 'warning',
+                'message': f"⚡ High daily credit usage: {avg_daily:,.0f} credits/day average"})
+
         # Usage growth alert
         growth_rate = calculate_growth_rate(usage_df, 'CREDITS_USED', 'USAGE_DATE')
         if growth_rate > 50:
-            alerts.append({
-                'type': 'warning',
-                'message': f"Usage growth rate is high: {growth_rate}% over last week"
-            })
-        elif growth_rate < -20:
-            alerts.append({
-                'type': 'success',
-                'message': f"Usage has decreased: {abs(growth_rate)}% reduction over last week"
-            })
-    
+            alerts.append({'type': 'warning',
+                'message': f"📈 Usage growth is high: +{growth_rate}% over the last week"})
+
+        # Zero usage in last 7 days — potential churn risk
+        cutoff_7 = usage_df['USAGE_DATE'].max() - timedelta(days=7)
+        active_7d = set(usage_df[usage_df['USAGE_DATE'] > cutoff_7]['SOLD_TO_CUSTOMER_NAME'].unique())
+        inactive = sorted(all_customers - active_7d)
+        if inactive:
+            names = ", ".join(inactive)
+            alerts.append({'type': 'warning',
+                'message': f"😶 No usage in the last 7 days: {names}"})
+
+        # No AI / Cortex usage — upsell signal
+        ai_users = set(
+            usage_df[usage_df['USAGE_TYPE'].str.lower().isin(ai_features)]['SOLD_TO_CUSTOMER_NAME'].unique()
+        )
+        non_ai = sorted(all_customers - ai_users)
+        if non_ai:
+            names = ", ".join(non_ai)
+            alerts.append({'type': 'info',
+                'message': f"🤖 Not using AI/Cortex features (upsell opportunity): {names}"})
+
     if not balance_df.empty:
-        # Low balance alert
-        latest_balances = balance_df.loc[balance_df.groupby('SOLD_TO_CUSTOMER_NAME')['BALANCE_DATE'].idxmax()]
-        low_balance_customers = latest_balances[latest_balances['TOTAL_BALANCE'] < 1000]
-        
-        if not low_balance_customers.empty:
-            alerts.append({
-                'type': 'warning',
-                'message': f"{len(low_balance_customers)} customer(s) have low balance (<$1,000)"
-            })
-        
-        # On-demand usage alert
-        on_demand_customers = latest_balances[latest_balances['ON_DEMAND_CONSUMPTION_BALANCE'] < -500]
-        if not on_demand_customers.empty:
-            alerts.append({
-                'type': 'warning',
-                'message': f"{len(on_demand_customers)} customer(s) have significant on-demand charges"
-            })
-    
-    # Display alerts
+        latest_balances = balance_df.loc[
+            balance_df.groupby('SOLD_TO_CUSTOMER_NAME')['BALANCE_DATE'].idxmax()
+        ]
+        # Depleted balance
+        depleted = latest_balances[latest_balances['TOTAL_BALANCE'] <= 0]
+        if not depleted.empty:
+            names = ", ".join(depleted['SOLD_TO_CUSTOMER_NAME'].tolist())
+            alerts.append({'type': 'error',
+                'message': f"🔴 Balance fully depleted — customer(s) in overage: {names}"})
+        # Low balance
+        low_bal = latest_balances[
+            (latest_balances['TOTAL_BALANCE'] > 0) & (latest_balances['TOTAL_BALANCE'] < 1000)
+        ]
+        if not low_bal.empty:
+            alerts.append({'type': 'warning',
+                'message': f"⚠️ {len(low_bal)} customer(s) have very low balance (<$1,000)"})
+
+    if contract_df is not None and not contract_df.empty:
+        for _, row in contract_df.iterrows():
+            days_left = (row['END_DATE'] - today).days
+            cname = row['SOLD_TO_CUSTOMER_NAME']
+            # Contract ending soon
+            if 0 < days_left <= 30:
+                alerts.append({'type': 'error',
+                    'message': f"🔔 Contract for **{cname}** expires in {days_left} days — renewal conversation needed now"})
+            elif 0 < days_left <= 60:
+                alerts.append({'type': 'warning',
+                    'message': f"🔔 Contract for **{cname}** expires in {days_left} days — start renewal discussion"})
+            # Already past contract end
+            elif days_left <= 0:
+                alerts.append({'type': 'error',
+                    'message': f"🚨 Contract for **{cname}** has expired ({abs(days_left)} days ago)"})
+
+        # Check for overage (usage > capacity)
+        if not usage_df.empty:
+            for _, row in contract_df.iterrows():
+                cname = row['SOLD_TO_CUSTOMER_NAME']
+                cust_used = usage_df[
+                    (usage_df['SOLD_TO_CUSTOMER_NAME'] == cname) &
+                    (usage_df['USAGE_DATE'] >= row['START_DATE']) &
+                    (usage_df['USAGE_DATE'] <= row['END_DATE'])
+                ]['USAGE_IN_CURRENCY'].sum()
+                if cust_used > row['AMOUNT'] and row['AMOUNT'] > 0:
+                    pct = cust_used / row['AMOUNT'] * 100
+                    alerts.append({'type': 'error',
+                        'message': f"🔴 **{cname}** is in overage — used {pct:.0f}% of contracted capacity"})
+
+    # Display
     if alerts:
+        # Sort: errors first, then warnings, then info
+        order = {'error': 0, 'warning': 1, 'info': 2, 'success': 3}
+        alerts.sort(key=lambda a: order.get(a['type'], 9))
         for alert in alerts:
-            alert_class = f"alert-{alert['type']}"
-            st.markdown(f'<div class="{alert_class}">{alert["message"]}</div>', unsafe_allow_html=True)
+            css = {'error': 'alert-warning', 'warning': 'alert-warning',
+                   'info': 'alert-info', 'success': 'alert-success'}.get(alert['type'], 'alert-info')
+            st.markdown(f'<div class="{css}">{alert["message"]}</div>', unsafe_allow_html=True)
     else:
-        st.markdown('<div class="alert-success">✅ No alerts detected. All metrics are within normal ranges.</div>', unsafe_allow_html=True)
+        st.markdown('<div class="alert-success">✅ No alerts detected. All metrics are within normal ranges.</div>',
+                    unsafe_allow_html=True)
 
 def display_enhanced_metrics(usage_df, balance_df):
     """Display enhanced metrics with better formatting"""
@@ -1484,6 +1531,97 @@ def display_enhanced_metrics(usage_df, balance_df):
                 format_currency(total_balance, currency),
                 help="Capacity + Rollover — total credits available before on-demand charges apply"
             )
+
+def show_portfolio_summary(usage_df, balance_df, contract_df):
+    """One-row-per-customer portfolio health table for the All Customers view."""
+    st.subheader("📋 Portfolio Overview")
+    today = datetime.now().date()
+    ai_features = {'cortex', 'cortex analyst', 'cortex search', 'cortex code',
+                   'ml functions', 'snowflake intelligence'}
+
+    customers = sorted(usage_df['SOLD_TO_CUSTOMER_NAME'].unique())
+    currency = usage_df['CURRENCY'].iloc[0] if not usage_df.empty else "USD"
+
+    # Latest balances lookup
+    bal_lookup = {}
+    if not balance_df.empty:
+        latest = balance_df.loc[balance_df.groupby('SOLD_TO_CUSTOMER_NAME')['BALANCE_DATE'].idxmax()]
+        bal_lookup = latest.set_index('SOLD_TO_CUSTOMER_NAME')['TOTAL_BALANCE'].to_dict()
+
+    # Contract lookup: capacity and end date per customer
+    contract_lookup = {}
+    if contract_df is not None and not contract_df.empty:
+        for _, row in contract_df.iterrows():
+            contract_lookup[row['SOLD_TO_CUSTOMER_NAME']] = {
+                'capacity': row['AMOUNT'], 'end': row['END_DATE'], 'start': row['START_DATE']
+            }
+
+    rows = []
+    for cust in customers:
+        cdf = usage_df[usage_df['SOLD_TO_CUSTOMER_NAME'] == cust]
+        credits = cdf['CREDITS_USED'].sum()
+        cost = cdf['USAGE_IN_CURRENCY'].sum()
+
+        # Daily rate from last 30 days
+        max_date = cdf['USAGE_DATE'].max()
+        cutoff = max_date - timedelta(days=30)
+        recent = cdf[cdf['USAGE_DATE'] > cutoff]
+        actual_days = max((max_date - recent['USAGE_DATE'].min()).days + 1, 1) if not recent.empty else 1
+        daily_cost = recent['USAGE_IN_CURRENCY'].sum() / actual_days if not recent.empty else 0
+
+        # Balance and days to depletion
+        balance = bal_lookup.get(cust, 0)
+        days_depletion = int(balance / daily_cost) if daily_cost > 0 and balance > 0 else None
+
+        # Contract metrics
+        ci = contract_lookup.get(cust)
+        used_pct = None
+        days_overage = None
+        if ci:
+            contract_used = usage_df[
+                (usage_df['SOLD_TO_CUSTOMER_NAME'] == cust) &
+                (usage_df['USAGE_DATE'] >= ci['start']) &
+                (usage_df['USAGE_DATE'] <= ci['end'])
+            ]['USAGE_IN_CURRENCY'].sum()
+            used_pct = contract_used / ci['capacity'] * 100 if ci['capacity'] > 0 else 0
+            remaining_cap = ci['capacity'] - contract_used
+            if remaining_cap <= 0:
+                days_overage = 0
+            elif daily_cost > 0:
+                days_overage = int(remaining_cap / daily_cost)
+            else:
+                days_overage = (ci['end'] - today).days
+
+        # AI usage flag
+        uses_ai = cdf['USAGE_TYPE'].str.lower().isin(ai_features).any()
+
+        # Risk score
+        risk_factors = 0
+        if days_depletion is not None and days_depletion < 30: risk_factors += 2
+        elif days_depletion is not None and days_depletion < 90: risk_factors += 1
+        if days_overage is not None and days_overage < 30: risk_factors += 2
+        elif days_overage is not None and days_overage < 60: risk_factors += 1
+        if ci and (ci['end'] - today).days < 60: risk_factors += 1
+        risk = "🔴 Critical" if risk_factors >= 3 else "🟡 Watch" if risk_factors >= 1 else "🟢 Healthy"
+
+        rows.append({
+            'Customer': cust,
+            'Credits Used': format_credits(credits),
+            'Cost': format_currency(cost, currency),
+            'Balance': format_currency(balance, currency) if balance else '—',
+            'Days to Depletion': str(days_depletion) if days_depletion is not None else ('🔴 Depleted' if balance == 0 else '—'),
+            'Contract Used': f"{used_pct:.1f}%" if used_pct is not None else '—',
+            'Days to Overage': str(days_overage) if days_overage is not None else '—',
+            'AI/ML': '✅' if uses_ai else '❌',
+            'Risk': risk,
+        })
+
+    if rows:
+        portfolio_df = pd.DataFrame(rows)
+        st.dataframe(portfolio_df, use_container_width=True, hide_index=True)
+        st.caption("Risk: 🔴 Critical = near depletion/overage/expiry · 🟡 Watch = approaching a limit · 🟢 Healthy · AI/ML = any Cortex/ML feature active")
+    st.markdown("---")
+
 
 def main():
     # Header with enhanced styling
@@ -1572,11 +1710,13 @@ To reconnect, please try one of the following:
         progress_bar = st.progress(0)
         
         usage_df = load_usage_data(session, start_date, end_date, customer_filter, usage_type_filter)
-        progress_bar.progress(33)
+        progress_bar.progress(25)
         
         balance_df = load_balance_data(session, start_date, end_date, customer_filter)
-        progress_bar.progress(66)
-        
+        progress_bar.progress(55)
+
+        # Load contract data at top level — needed for smart alerts + portfolio table
+        contract_df = load_contract_data(session, customer_filter)
         progress_bar.progress(100)
         progress_bar.empty()
     
@@ -1586,13 +1726,17 @@ To reconnect, please try one of the following:
         st.info("💡 Try adjusting your filters or date range to find available data.")
         return
     
-    # Show alerts and insights
-    show_alerts_and_insights(usage_df, balance_df)
+    # Show alerts and insights (now contract-aware)
+    show_alerts_and_insights(usage_df, balance_df, contract_df)
     
     # Enhanced metrics display
     st.subheader("📊 Key Performance Indicators")
     display_enhanced_metrics(usage_df, balance_df)
-    
+
+    # ── Portfolio summary (All Customers view only) ───────────────────────────
+    if customer_filter == "All Customers":
+        show_portfolio_summary(usage_df, balance_df, contract_df)
+
     # Enhanced visualizations
     st.subheader("📈 Advanced Analytics")
     
@@ -1617,10 +1761,55 @@ To reconnect, please try one of the following:
             st.plotly_chart(trend_chart, use_container_width=True)
         
         # Usage heatmap
-        if len(usage_df) > 7:  # Only show if we have enough data
+        if len(usage_df) > 7:
             heatmap_chart = create_usage_heatmap(usage_df)
             if heatmap_chart:
                 st.plotly_chart(heatmap_chart, use_container_width=True)
+
+        # Month-over-month comparison chart
+        mom_df = usage_df.copy()
+        mom_df['Month'] = pd.to_datetime(mom_df['USAGE_DATE']).dt.to_period('M').dt.to_timestamp()
+        if customer_filter == "All Customers":
+            mom_agg = mom_df.groupby(['Month', 'SOLD_TO_CUSTOMER_NAME'])['USAGE_IN_CURRENCY'].sum().reset_index()
+            mom_agg.columns = ['Month', 'Customer', 'Cost']
+            if mom_agg['Month'].nunique() >= 2:
+                fig_mom = px.bar(
+                    mom_agg, x='Month', y='Cost', color='Customer',
+                    title='Monthly spend by customer',
+                    labels={'Cost': 'Cost (USD)', 'Month': ''},
+                    barmode='stack'
+                )
+                fig_mom.update_layout(height=360, legend=dict(orientation='h', y=-0.25),
+                                      margin=dict(t=40, b=80))
+                st.plotly_chart(fig_mom, use_container_width=True)
+        else:
+            mom_agg = mom_df.groupby('Month')['USAGE_IN_CURRENCY'].sum().reset_index()
+            mom_agg.columns = ['Month', 'Cost']
+            mom_agg['MoM %'] = mom_agg['Cost'].pct_change() * 100
+            if mom_agg['Month'].nunique() >= 2:
+                fig_mom = go.Figure()
+                fig_mom.add_trace(go.Bar(
+                    x=mom_agg['Month'], y=mom_agg['Cost'],
+                    name='Monthly Cost', marker_color='#1f77b4',
+                    text=mom_agg['Cost'].apply(lambda v: f"${v:,.0f}"),
+                    textposition='outside'
+                ))
+                # MoM % change annotations
+                for _, row in mom_agg.dropna(subset=['MoM %']).iterrows():
+                    color = '#2ca02c' if row['MoM %'] >= 0 else '#d62728'
+                    sign = '+' if row['MoM %'] >= 0 else ''
+                    fig_mom.add_annotation(
+                        x=row['Month'], y=row['Cost'],
+                        text=f"{sign}{row['MoM %']:.1f}%",
+                        showarrow=False, yshift=30,
+                        font=dict(color=color, size=11)
+                    )
+                fig_mom.update_layout(
+                    title='Monthly spend with MoM % change',
+                    height=360, xaxis_title='', yaxis_title='Cost (USD)',
+                    margin=dict(t=40, b=40)
+                )
+                st.plotly_chart(fig_mom, use_container_width=True)
 
         # Detailed data table
         st.subheader("📋 Detailed Data")
@@ -1733,7 +1922,47 @@ To reconnect, please try one of the following:
             display_type[['Feature', 'Credits', 'Cost', 'Share']],
             use_container_width=True, hide_index=True
         )
-    
+
+        # ── Per-account breakdown ─────────────────────────────────────────────
+        st.markdown("---")
+        st.markdown("#### Account-Level Breakdown")
+
+        account_usage = (
+            usage_df.groupby(['SOLD_TO_CUSTOMER_NAME', 'ACCOUNT_NAME', 'ACCOUNT_LOCATOR', 'REGION'])
+            .agg(Credits=('CREDITS_USED', 'sum'), Cost=('USAGE_IN_CURRENCY', 'sum'))
+            .reset_index()
+            .sort_values('Credits', ascending=False)
+        )
+        # Only show this section when there are multiple accounts
+        n_accounts = account_usage['ACCOUNT_NAME'].nunique()
+        if n_accounts > 1:
+            fig_acct = px.bar(
+                account_usage,
+                x='ACCOUNT_NAME',
+                y='Credits',
+                color='SOLD_TO_CUSTOMER_NAME' if customer_filter == "All Customers" else 'REGION',
+                title='Credits consumed by account',
+                labels={'ACCOUNT_NAME': 'Account', 'Credits': 'Credits',
+                        'SOLD_TO_CUSTOMER_NAME': 'Customer', 'REGION': 'Region'},
+                text='Credits'
+            )
+            fig_acct.update_traces(texttemplate='%{text:,.0f}', textposition='outside')
+            fig_acct.update_layout(
+                height=380, xaxis_tickangle=-25,
+                margin=dict(t=40, b=80),
+                legend=dict(orientation='h', y=-0.3)
+            )
+            st.plotly_chart(fig_acct, use_container_width=True)
+
+            # Account table
+            display_acct = account_usage.copy()
+            display_acct['Credits'] = display_acct['Credits'].apply(format_credits)
+            display_acct['Cost'] = display_acct['Cost'].apply(lambda v: format_currency(v, currency))
+            display_acct.columns = ['Customer', 'Account', 'Locator', 'Region', 'Credits', 'Cost']
+            st.dataframe(display_acct, use_container_width=True, hide_index=True)
+        else:
+            st.caption("Only one account detected — account-level breakdown not applicable.")
+
     elif active_tab == "💰 Financial Health":
         currency = usage_df['CURRENCY'].iloc[0] if not usage_df.empty else "USD"
 
@@ -1751,11 +1980,8 @@ To reconnect, please try one of the following:
                 key="financial_run_rate_days"
             )
 
-        # Load contracts and full-period usage up front so both sections share
-        # the same dataset — keeps the run rate KPIs consistent with the chart.
-        with st.spinner("Loading contract data..."):
-            contract_df = load_contract_data(session, customer_filter)
-
+        # contract_df already loaded at top level — extend to full contract period
+        # for consistent run rate vs chart comparisons
         if not contract_df.empty:
             contract_data_start = contract_df['START_DATE'].min()
             if contract_data_start < start_date:
@@ -1959,6 +2185,39 @@ To reconnect, please try one of the following:
             currency = usage_df['CURRENCY'].iloc[0] if not usage_df.empty else "USD"
             all_known_features = set(USAGE_TYPE_DISPLAY.keys())
             used_globally = set(usage_df['USAGE_TYPE'].str.lower().unique())
+
+            # ── Adoption matrix (all-customers view) ─────────────────────────
+            if customer_filter == "All Customers":
+                st.markdown("#### Adoption Matrix")
+                st.caption("Credits consumed per feature per customer — blank = not used in this period")
+
+                pivot = (
+                    usage_df.groupby(['SOLD_TO_CUSTOMER_NAME', 'USAGE_TYPE'])['CREDITS_USED']
+                    .sum().reset_index()
+                )
+                pivot['Feature'] = pivot['USAGE_TYPE'].apply(
+                    lambda x: USAGE_TYPE_DISPLAY.get(x, x.title())
+                )
+                matrix = pivot.pivot(
+                    index='SOLD_TO_CUSTOMER_NAME', columns='Feature', values='CREDITS_USED'
+                ).fillna(0)
+
+                fig_matrix = px.imshow(
+                    matrix,
+                    labels=dict(x='Feature', y='Customer', color='Credits'),
+                    color_continuous_scale='Blues',
+                    aspect='auto',
+                    text_auto='.0f'
+                )
+                fig_matrix.update_layout(
+                    height=max(280, len(matrix) * 60),
+                    margin=dict(t=20, b=60, l=160, r=20),
+                    coloraxis_showscale=False,
+                    xaxis=dict(tickangle=-35, side='bottom')
+                )
+                fig_matrix.update_traces(textfont_size=10)
+                st.plotly_chart(fig_matrix, use_container_width=True)
+                st.markdown("---")
 
             # ── Customer deep dive ────────────────────────────────────────────
             st.markdown("#### Customer Feature Breakdown")
