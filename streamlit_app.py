@@ -1728,17 +1728,6 @@ To reconnect, please try one of the following:
         st.info("💡 Try adjusting your filters or date range to find available data.")
         return
     
-    # Enhanced metrics display
-    st.subheader("📊 Key Performance Indicators")
-    display_enhanced_metrics(usage_df, balance_df)
-
-    # ── Portfolio summary (All Customers view only) ───────────────────────────
-    if customer_filter == "All Customers":
-        show_portfolio_summary(usage_df, balance_df, contract_df)
-
-    # Enhanced visualizations
-    st.subheader("📈 Advanced Analytics")
-    
     # Tab navigation — st.radio persists across reruns via session_state,
     # unlike st.tabs which resets to the first tab on any widget-triggered rerun
     TAB_OPTIONS = ["📊 Trends", "🎯 Usage Patterns", "💰 Financial Health", "🔬 Feature Adoption"]
@@ -1755,6 +1744,13 @@ To reconnect, please try one of the following:
     st.markdown("---")
 
     if active_tab == "📊 Trends":
+        # KPIs, portfolio summary, and alerts all live here
+        st.subheader("📊 Key Performance Indicators")
+        display_enhanced_metrics(usage_df, balance_df)
+
+        if customer_filter == "All Customers":
+            show_portfolio_summary(usage_df, balance_df, contract_df)
+
         show_alerts_and_insights(usage_df, balance_df, contract_df)
 
         trend_chart = create_enhanced_trend_chart(usage_df)
