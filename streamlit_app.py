@@ -1772,10 +1772,21 @@ To reconnect, please try one of the following:
         # SECTION 1 — BALANCE & RUN RATE (summary, shown first)
         # ══════════════════════════════════════════════════════════════════════
         st.markdown("#### 💰 Balance & Run Rate")
-        st.caption(f"Based on the last {financial_run_rate_days} days of consumption across the full contract period")
 
         overall_run_rate = calculate_overall_run_rate(contract_usage_df, balance_df, financial_run_rate_days)
         customer_run_rates = calculate_run_rate_by_customer(contract_usage_df, balance_df, financial_run_rate_days)
+
+        # Show effective window — if available history is shorter than the
+        # requested window, make it explicit so users understand why changing
+        # from e.g. 60 → 90 days produces identical numbers
+        effective_days = overall_run_rate.get('period_days', financial_run_rate_days) if overall_run_rate else financial_run_rate_days
+        if effective_days < financial_run_rate_days:
+            st.caption(
+                f"Using last **{effective_days} days** of data "
+                f"(only {effective_days} days available — {financial_run_rate_days}d window requested)"
+            )
+        else:
+            st.caption(f"Based on the last {financial_run_rate_days} days of consumption across the full contract period")
 
         if overall_run_rate:
             col1, col2, col3, col4 = st.columns(4)
@@ -1915,7 +1926,11 @@ To reconnect, please try one of the following:
                     with col_aside:
                         st.markdown("**Consumption Run Rate**")
                         st.markdown(f"### {format_currency(metrics['annual_run_rate'], metrics['currency'])}")
-                        st.caption("Avg daily × 365")
+                        actual_period = metrics.get('run_rate_period', financial_run_rate_days)
+                        if actual_period < financial_run_rate_days:
+                            st.caption(f"Avg daily × 365\n\n⚠️ Only {actual_period}d of data available ({financial_run_rate_days}d requested)")
+                        else:
+                            st.caption(f"Avg daily × 365 · based on last {actual_period}d")
 
                     with st.expander("📄 Contract Details", expanded=False):
                         col1, col2 = st.columns(2)
