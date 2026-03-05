@@ -1930,8 +1930,9 @@ To reconnect, please try one of the following:
             .reset_index()
             .sort_values('Credits', ascending=False)
         )
-        # Only show this section when there are multiple accounts
         n_accounts = account_usage['ACCOUNT_NAME'].nunique()
+
+        # Only show the bar chart when there are multiple accounts to compare
         if n_accounts > 1:
             fig_acct = px.bar(
                 account_usage,
@@ -1951,14 +1952,12 @@ To reconnect, please try one of the following:
             )
             st.plotly_chart(fig_acct, use_container_width=True)
 
-            # Account table
-            display_acct = account_usage.copy()
-            display_acct['Credits'] = display_acct['Credits'].apply(format_credits)
-            display_acct['Cost'] = display_acct['Cost'].apply(lambda v: format_currency(v, currency))
-            display_acct.columns = ['Customer', 'Account', 'Locator', 'Region', 'Credits', 'Cost']
-            st.dataframe(display_acct, use_container_width=True, hide_index=True)
-        else:
-            st.caption("Only one account detected — account-level breakdown not applicable.")
+        # Always show the account table
+        display_acct = account_usage.copy()
+        display_acct['Credits'] = display_acct['Credits'].apply(format_credits)
+        display_acct['Cost'] = display_acct['Cost'].apply(lambda v: format_currency(v, currency))
+        display_acct.columns = ['Customer', 'Account', 'Locator', 'Region', 'Credits', 'Cost']
+        st.dataframe(display_acct, use_container_width=True, hide_index=True)
 
     elif active_tab == "💰 Financial Health":
         currency = usage_df['CURRENCY'].iloc[0] if not usage_df.empty else "USD"
