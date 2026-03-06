@@ -80,14 +80,8 @@ EXPORT_TEMPLATES = {
     "contract": "contract_data.csv"
 }
 
-# UI Messages
-MESSAGES = {
-    "no_data": "No data found for the selected criteria.",
-    "loading": "Loading data...",
-    "connection_error": "Unable to connect to Snowflake. Please check your connection.",
-    "permission_error": "Access denied. Please check your permissions for the BILLING schema.",
-    "data_refresh": "Data refreshed every hour. For the most current information, please refresh the page."
-}
+# UI Messages — now served via TRANSLATIONS; kept as fallback reference
+# Access via t('msg_no_data'), t('msg_loading'), etc.
 
 # Query configurations
 QUERY_LIMITS = {
@@ -102,6 +96,450 @@ FEATURES = {
     "real_time_refresh": False,
     "email_reports": False
 }
+
+# =============================================================================
+# INTERNATIONALIZATION (i18n)
+# =============================================================================
+
+SUPPORTED_LANGUAGES = {"en": "English", "ja": "日本語"}
+DEFAULT_LANGUAGE = "en"
+
+TRANSLATIONS = {
+    "en": {
+        # App-level
+        "app_title": "Snowflake Credit Usage Dashboard",
+        "app_subtitle": "Real-time credit consumption monitoring for Snowflake reseller customers",
+        "app_demo_banner": "🎭 **Demo Mode Active** - Displaying sample data for 5 fictional customers. Set `USE_DEMO_DATA = False` to use live BILLING schema data.",
+
+        # Sidebar
+        "sidebar_controls": "🎛️ Dashboard Controls",
+        "sidebar_date_range": "📅 Quick Date Range",
+        "sidebar_customer": "👥 Select Customer",
+        "sidebar_refresh": "🔄 Refresh Data",
+        "sidebar_refresh_note": "🕐 Data refreshed every hour. For the most current information, refresh the page.",
+        "sidebar_loading_customers": "Loading customers...",
+
+        # Date range labels
+        "date_last_7": "Last 7 days",
+        "date_last_30": "Last 30 days",
+        "date_last_90": "Last 90 days",
+        "date_current_month": "Current Month",
+        "date_last_month": "Last Month",
+        "date_custom": "Custom",
+        "date_start": "Start Date",
+        "date_end": "End Date",
+
+        # All Customers label
+        "all_customers": "All Customers",
+
+        # Tab names
+        "tab_trends": "📊 Trends",
+        "tab_usage": "🎯 Usage Patterns",
+        "tab_financial": "💰 Financial Health",
+        "tab_feature": "🔬 Feature Adoption",
+
+        # KPI metrics
+        "kpi_header": "📊 Key Performance Indicators",
+        "kpi_total_credits": "Total Credits Used",
+        "kpi_total_cost": "Total Cost",
+        "kpi_avg_daily": "Avg Daily Credits",
+        "kpi_vs_last_week": "{value:+.1f}% vs last week",
+        "kpi_balance_header": "### 💰 Balance Metrics",
+        "kpi_total_balance": "Total Available Balance",
+        "kpi_balance_help": "Capacity + Rollover — total credits available before on-demand charges apply",
+
+        # Portfolio overview
+        "portfolio_header": "📋 Portfolio Overview",
+        "portfolio_customer": "Customer",
+        "portfolio_credits": "Credits Used",
+        "portfolio_cost": "Cost",
+        "portfolio_balance": "Balance",
+        "portfolio_depletion": "Days to Depletion",
+        "portfolio_contract_used": "Contract Used",
+        "portfolio_overage_days": "Days to Overage",
+        "portfolio_ai": "AI/ML",
+        "portfolio_risk": "Risk",
+        "portfolio_depleted": "🔴 Depleted",
+        "portfolio_critical": "🔴 Critical",
+        "portfolio_watch": "🟡 Watch",
+        "portfolio_healthy": "🟢 Healthy",
+        "portfolio_risk_caption": "Risk: 🔴 Critical = near depletion/overage/expiry · 🟡 Watch = approaching a limit · 🟢 Healthy · AI/ML = any Cortex/ML feature active",
+
+        # Alerts
+        "alert_header": "🚨 Alerts & Insights",
+        "alert_high_usage": "⚡ High daily credit usage: {avg_daily} credits/day average",
+        "alert_usage_growth": "📈 Usage growth is high: +{rate}% over the last week",
+        "alert_inactive": "😶 No usage in the last 7 days: {names}",
+        "alert_no_ai": "🤖 Not using AI/Cortex features (upsell opportunity): {names}",
+        "alert_depleted": "🔴 Balance fully depleted — customer(s) in overage: {names}",
+        "alert_low_balance": "⚠️ {count} customer(s) have very low balance (<$1,000)",
+        "alert_contract_expire_30": "🔔 Contract for **{name}** expires in {days} days — renewal conversation needed now",
+        "alert_contract_expire_60": "🔔 Contract for **{name}** expires in {days} days — start renewal discussion",
+        "alert_contract_expired": "🚨 Contract for **{name}** has expired ({days} days ago)",
+        "alert_overage": "🔴 **{name}** is in overage — used {pct}% of contracted capacity",
+        "alert_none": "✅ No alerts detected. All metrics are within normal ranges.",
+
+        # Trends tab
+        "trend_monthly_spend_customer": "Monthly spend by customer",
+        "trend_monthly_spend_mom": "Monthly spend with MoM % change",
+        "trend_detailed_data": "📋 Detailed Data",
+        "trend_usage_details": "💻 Usage Details",
+        "trend_no_usage": "No usage data available.",
+        "trend_export_header": "📥 Export Data",
+        "trend_export_usage": "📊 Download Usage Data",
+        "trend_export_balance": "💰 Download Balance Data",
+
+        # Usage Patterns tab
+        "usage_credit_share": "Credit share by feature",
+        "usage_credits_per_feature": "Credits consumed per feature",
+        "usage_account_breakdown": "#### Account-Level Breakdown",
+        "usage_credits_by_account": "Credits consumed by account",
+        "usage_single_account": "Only one account detected — account-level breakdown not applicable.",
+
+        # Financial Health tab
+        "financial_projection_window": "Projection window",
+        "financial_last_n_days": "Last {n} days",
+        "financial_balance_header": "#### 💰 Balance & Run Rate",
+        "financial_using_days": "Using last **{effective}** days of data (only {effective} days available — {requested}d window requested)",
+        "financial_based_on": "Based on the last {days} days of consumption across the full contract period",
+        "financial_daily_rate": "Daily Run Rate",
+        "financial_weekly": "Weekly Projection",
+        "financial_monthly": "Monthly Projection",
+        "financial_depletion": "Days Until Depletion",
+        "financial_depletion_zero": "Balance already depleted",
+        "financial_depletion_na": "No balance data",
+        "financial_export_run_rate": "⬇️ Download run rate data",
+        "financial_contract_header": "#### 📋 Contract Status",
+        "financial_no_contracts": "No active contracts found for the selected customer.",
+        "financial_no_usage_contracts": "No usage data available for active contracts.",
+        "financial_select_customer": "Select Customer to View",
+        "financial_capacity": "Capacity Purchased",
+        "financial_total_used": "Total Used",
+        "financial_overage_label": "Overage",
+        "financial_days_overage": "Days Until Overage",
+        "financial_already_overage": "Already in overage",
+        "financial_within_contract": "Within contract",
+        "financial_sufficient": "Sufficient capacity",
+        "financial_capacity_exhausted": "🔴 Capacity already exhausted — customer is in overage",
+        "financial_projected_exhaust": "⚠️ Projected to exhaust capacity by {date}",
+        "financial_not_enough_data": "Not enough data to generate the projection chart.",
+        "financial_run_rate_label": "**Consumption Run Rate**",
+        "financial_run_rate_note": "Avg daily × 365 · based on last {days}d",
+        "financial_run_rate_warn": "Avg daily × 365\n\n⚠️ Only {actual}d of data available ({requested}d requested)",
+        "financial_contract_details": "📄 Contract Details",
+        "financial_timeline": "**Timeline**",
+        "financial_projections": "**Projections**",
+        "financial_start": "Start: {date}",
+        "financial_end": "End: {date}",
+        "financial_duration": "Duration: {days} days",
+        "financial_elapsed": "Elapsed: {days} days",
+        "financial_remaining": "Remaining: {days} days",
+        "financial_daily": "Daily: {value}/day",
+        "financial_weekly_proj": "Weekly: {value}/week",
+        "financial_monthly_proj": "Monthly: {value}/month",
+        "financial_annual": "Annual: {value}/year",
+        "financial_window": "Window: last {days} days",
+        "financial_loading_history": "Loading full contract history...",
+        "financial_capacity_used_pct": "{pct:.1f}% of capacity",
+        "financial_overage_caption": "Used % and Days Until Overage are calculated against Capacity Purchased. Rollover and other adjustments may differ slightly from Snowflake's billing portal.",
+
+        # Feature Adoption tab
+        "feature_header": "### 🔬 Feature Adoption",
+        "feature_subtitle": "*Which Snowflake features are your customers using — and where are the upsell opportunities?*",
+        "feature_no_data": "No usage data available for feature analysis.",
+        "feature_matrix": "#### Adoption Matrix",
+        "feature_matrix_caption": "Credits consumed per feature per customer — blank = not used in this period",
+        "feature_breakdown": "#### Customer Feature Breakdown",
+        "feature_select_customer": "Select a customer",
+        "feature_showing": "Showing: **{name}**",
+        "feature_upsell": "**Upsell opportunities**",
+        "feature_upsell_scope_customer": "Features **{name}** hasn't used in this period — potential upsell conversations:",
+        "feature_upsell_scope_all": "Features with **no usage across any customer** in this period:",
+        "feature_all_used": "All tracked features are being used in this period.",
+        "feature_datasource": "ℹ️ Data source & schema reference",
+        "feature_usage_over_time": "Feature usage over time — {name}",
+
+        # Chart labels
+        "chart_credit_trend": "Credit Usage Trend",
+        "chart_cost_trend": "Cost Trend",
+        "chart_usage_cost_trends": "Usage and Cost Trends",
+        "chart_heatmap_title": "Credit usage by day of week — weekends typically lower",
+        "chart_axis_credits": "Credits",
+        "chart_axis_cost": "Cost",
+        "chart_axis_date": "Date",
+        "chart_axis_cost_usd": "Cost (USD)",
+        "chart_consumption": "Consumption ({currency})",
+        "chart_cumulative": "Cumulative Consumption",
+        "chart_actual": "Actual",
+        "chart_prediction": "Prediction",
+        "chart_cumulative_consump": "Cumulative Consump",
+        "chart_capacity_contract": "Capacity Contract Amt",
+        "chart_monthly_cost": "Monthly Cost",
+
+        # FEATURE_USECASES translations
+        "usecase_cortex": "Build AI-powered apps, summarize documents, classify data, and generate content — no ML expertise or external tools needed",
+        "usecase_ml_functions": "Built-in forecasting and anomaly detection — spot trends and outliers in any dataset without a data science team",
+        "usecase_snowpark": "Run Python, Java, or Scala transformations and ML workloads natively inside Snowflake — no data movement, no Spark clusters",
+        "usecase_search_optimization": "Dramatically speed up point-lookup queries on large tables — ideal for interactive apps, dashboards, and API backends",
+        "usecase_snowpipe": "Replace scheduled batch loads with continuous, automated data ingestion — data is always fresh when you need it",
+        "usecase_streams": "Track every INSERT, UPDATE, and DELETE on any table and build event-driven, incremental pipelines using Change Data Capture",
+        "usecase_serverless_tasks": "One of Snowflake's most-adopted features — automate and orchestrate data pipelines on a schedule without managing any compute",
+        "usecase_dynamic_tables": "Declare the result you want; Snowflake works out when and how to refresh it — the modern alternative to complex ETL pipelines",
+        "usecase_automatic_clustering": "Keep large tables fast as data grows without any manual tuning — queries stay performant automatically",
+        "usecase_materialized_views": "Pre-compute and cache the results of expensive queries — near-instant load times for dashboards and repeated analytical workloads",
+        "usecase_streamlit": "Build and share interactive data apps and dashboards natively inside Snowflake — no external hosting, no data copies",
+        "usecase_cortex_analyst": "Ask questions about your data in plain English and get SQL-backed answers instantly — self-service analytics for everyone",
+        "usecase_cortex_search": "Add semantic search to any application — returns relevant results even when the exact keywords don't match",
+        "usecase_cortex_code": "AI-assisted SQL and Python generation inside Snowflake — write, explain, and debug code faster",
+        "usecase_snowflake_intelligence": "Snowflake's unified AI layer — combine conversational analytics, intelligent search, and automated agents in one place",
+        "usecase_default": "Explore this feature with your customer.",
+
+        # Messages (replaces MESSAGES dict)
+        "msg_no_data": "No data found for the selected criteria.",
+        "msg_loading": "Loading data...",
+        "msg_connection_error": "Unable to connect to Snowflake. Please check your connection.",
+        "msg_permission_error": "Access denied. Please check your permissions for the BILLING schema.",
+        "msg_data_refresh": "Data refreshed every hour. For the most current information, please refresh the page.",
+        "msg_date_range_long": "Date range is longer than 1 year. This may result in slower performance.",
+        "msg_date_invalid": "Start date must be before end date.",
+        "msg_adjust_filters": "💡 Try adjusting your filters or date range to find available data.",
+        "msg_demo_fallback": "ℹ️ Live billing data is unavailable — displaying demo data.",
+        "msg_auth_expired": "🔐 **Authentication token has expired**",
+        "msg_auth_reconnect": "To reconnect, please try one of the following:\n1. **Refresh the browser page** - this will prompt for re-authentication\n2. **Run in terminal**: `snow connection test` to refresh your connection\n3. **Re-authenticate via SSO** if using federated authentication",
+        "msg_retry": "🔄 Retry Connection",
+
+        # Footer
+        "footer_data_range": "Data Range: {start} to {end}",
+        "footer_total_records": "Total Records: {count}",
+    },
+    "ja": {
+        # App-level
+        "app_title": "Snowflake クレジット使用量ダッシュボード",
+        "app_subtitle": "Snowflake 再販顧客 クレジット消費リアルタイムモニタリング",
+        "app_demo_banner": "🎭 **デモモード** — 5社の架空顧客のサンプルデータを表示中。実データを使用するには `USE_DEMO_DATA = False` に設定してください。",
+
+        # Sidebar
+        "sidebar_controls": "🎛️ ダッシュボード設定",
+        "sidebar_date_range": "📅 期間選択",
+        "sidebar_customer": "👥 顧客を選択",
+        "sidebar_refresh": "🔄 データ更新",
+        "sidebar_refresh_note": "🕐 データは1時間ごとに更新されます。最新情報を取得するにはページを更新してください。",
+        "sidebar_loading_customers": "顧客を読み込み中...",
+
+        # Date range labels
+        "date_last_7": "過去7日間",
+        "date_last_30": "過去30日間",
+        "date_last_90": "過去90日間",
+        "date_current_month": "今月",
+        "date_last_month": "先月",
+        "date_custom": "カスタム",
+        "date_start": "開始日",
+        "date_end": "終了日",
+
+        # All Customers label
+        "all_customers": "全顧客",
+
+        # Tab names
+        "tab_trends": "📊 トレンド",
+        "tab_usage": "🎯 使用パターン",
+        "tab_financial": "💰 財務状況",
+        "tab_feature": "🔬 機能採用状況",
+
+        # KPI metrics
+        "kpi_header": "📊 主要指標",
+        "kpi_total_credits": "総クレジット使用量",
+        "kpi_total_cost": "総コスト",
+        "kpi_avg_daily": "1日当たり平均消費クレジット",
+        "kpi_vs_last_week": "前週比 {value:+.1f}%",
+        "kpi_balance_header": "### 💰 残高メトリクス",
+        "kpi_total_balance": "利用可能残高合計",
+        "kpi_balance_help": "キャパシティ + ロールオーバー — オンデマンド課金前の利用可能クレジット合計",
+
+        # Portfolio overview
+        "portfolio_header": "📋 ポートフォリオ概要",
+        "portfolio_customer": "顧客",
+        "portfolio_credits": "クレジット使用量",
+        "portfolio_cost": "コスト",
+        "portfolio_balance": "残高",
+        "portfolio_depletion": "残高枯渇日数",
+        "portfolio_contract_used": "契約消費率",
+        "portfolio_overage_days": "超過日数",
+        "portfolio_ai": "AI/ML",
+        "portfolio_risk": "リスク",
+        "portfolio_depleted": "🔴 枯渇",
+        "portfolio_critical": "🔴 危険",
+        "portfolio_watch": "🟡 注意",
+        "portfolio_healthy": "🟢 正常",
+        "portfolio_risk_caption": "リスク: 🔴 危険 = 枯渇/超過/期限切れ間近 · 🟡 注意 = 閾値に接近中 · 🟢 正常 · AI/ML = Cortex/ML機能使用中",
+
+        # Alerts
+        "alert_header": "🚨 アラート & インサイト",
+        "alert_high_usage": "⚡ 高い日次クレジット使用量: 平均 {avg_daily} クレジット/日",
+        "alert_usage_growth": "📈 使用量が急増: 前週比 +{rate}%",
+        "alert_inactive": "😶 過去7日間使用なし: {names}",
+        "alert_no_ai": "🤖 AI/Cortex機能未使用（アップセル機会）: {names}",
+        "alert_depleted": "🔴 残高完全枯渇 — 超過中の顧客: {names}",
+        "alert_low_balance": "⚠️ {count} 社の残高が非常に少ない（<$1,000）",
+        "alert_contract_expire_30": "🔔 **{name}** の契約が {days} 日後に期限切れ — 今すぐ更新の相談が必要",
+        "alert_contract_expire_60": "🔔 **{name}** の契約が {days} 日後に期限切れ — 更新の検討を開始",
+        "alert_contract_expired": "🚨 **{name}** の契約が期限切れ（{days} 日前）",
+        "alert_overage": "🔴 **{name}** が超過中 — 契約キャパシティの {pct}% を消費",
+        "alert_none": "✅ アラートなし。すべての指標が正常範囲内です。",
+
+        # Trends tab
+        "trend_monthly_spend_customer": "顧客別月次コスト",
+        "trend_monthly_spend_mom": "月次コスト（前月比%変動付き）",
+        "trend_detailed_data": "📋 詳細データ",
+        "trend_usage_details": "💻 使用量詳細",
+        "trend_no_usage": "使用量データがありません。",
+        "trend_export_header": "📥 データエクスポート",
+        "trend_export_usage": "📊 使用量データをダウンロード",
+        "trend_export_balance": "💰 残高データをダウンロード",
+
+        # Usage Patterns tab
+        "usage_credit_share": "機能別クレジットシェア",
+        "usage_credits_per_feature": "機能別クレジット消費量",
+        "usage_account_breakdown": "#### アカウント別内訳",
+        "usage_credits_by_account": "アカウント別クレジット消費量",
+        "usage_single_account": "アカウントが1つのみのため、アカウント別内訳は該当しません。",
+
+        # Financial Health tab
+        "financial_projection_window": "予測ウィンドウ",
+        "financial_last_n_days": "過去 {n} 日間",
+        "financial_balance_header": "#### 💰 残高 & ランレート",
+        "financial_using_days": "直近 **{effective}** 日間のデータを使用（{effective} 日分のみ利用可能 — {requested}日間を要求）",
+        "financial_based_on": "契約期間全体の直近 {days} 日間の消費量に基づく",
+        "financial_daily_rate": "日次ランレート",
+        "financial_weekly": "週次予測",
+        "financial_monthly": "月次予測",
+        "financial_depletion": "残高が枯渇するまでの日数",
+        "financial_depletion_zero": "残高は既に枯渇",
+        "financial_depletion_na": "残高データなし",
+        "financial_export_run_rate": "⬇️ ランレートデータをダウンロード",
+        "financial_contract_header": "#### 📋 契約ステータス",
+        "financial_no_contracts": "選択した顧客のアクティブな契約が見つかりません。",
+        "financial_no_usage_contracts": "アクティブな契約の使用量データがありません。",
+        "financial_select_customer": "表示する顧客を選択",
+        "financial_capacity": "購入キャパシティ",
+        "financial_total_used": "総使用量",
+        "financial_overage_label": "超過",
+        "financial_days_overage": "超過日数",
+        "financial_already_overage": "既に超過中",
+        "financial_within_contract": "契約範囲内",
+        "financial_sufficient": "十分なキャパシティ",
+        "financial_capacity_exhausted": "🔴 キャパシティは既に枯渇 — 顧客は超過中",
+        "financial_projected_exhaust": "⚠️ {date} までにキャパシティ枯渇の見込み",
+        "financial_not_enough_data": "予測チャートを生成するのに十分なデータがありません。",
+        "financial_run_rate_label": "**消費ランレート**",
+        "financial_run_rate_note": "日平均 × 365 · 直近 {days} 日間に基づく",
+        "financial_run_rate_warn": "日平均 × 365\n\n⚠️ {actual} 日分のデータのみ利用可能（{requested} 日間を要求）",
+        "financial_contract_details": "📄 契約詳細",
+        "financial_timeline": "**タイムライン**",
+        "financial_projections": "**予測**",
+        "financial_start": "開始: {date}",
+        "financial_end": "終了: {date}",
+        "financial_duration": "期間: {days} 日",
+        "financial_elapsed": "経過: {days} 日",
+        "financial_remaining": "残り: {days} 日",
+        "financial_daily": "日次: {value}/日",
+        "financial_weekly_proj": "週次: {value}/週",
+        "financial_monthly_proj": "月次: {value}/月",
+        "financial_annual": "年次: {value}/年",
+        "financial_window": "ウィンドウ: 直近 {days} 日間",
+        "financial_loading_history": "契約履歴全体を読み込み中...",
+        "financial_capacity_used_pct": "キャパシティの {pct:.1f}%",
+        "financial_overage_caption": "消費率と超過日数は購入キャパシティに対して計算されます。ロールオーバー等の調整によりSnowflakeの請求ポータルとは若干異なる場合があります。",
+
+        # Feature Adoption tab
+        "feature_header": "### 🔬 機能採用状況",
+        "feature_subtitle": "*顧客が使用しているSnowflake機能とアップセル機会は？*",
+        "feature_no_data": "機能分析に使用できるデータがありません。",
+        "feature_matrix": "#### 機能採用状況マトリクス",
+        "feature_matrix_caption": "顧客×機能別クレジット消費量 — 空欄 = 当期間中未使用",
+        "feature_breakdown": "#### 顧客別機能内訳",
+        "feature_select_customer": "顧客を選択",
+        "feature_showing": "表示中: **{name}**",
+        "feature_upsell": "**アップセル機会**",
+        "feature_upsell_scope_customer": "**{name}** が当期間中に使用していない機能 — アップセルの候補:",
+        "feature_upsell_scope_all": "当期間中に**全顧客で使用されていない**機能:",
+        "feature_all_used": "追跡対象の全機能が当期間中に使用されています。",
+        "feature_datasource": "ℹ️ データソース & スキーマリファレンス",
+        "feature_usage_over_time": "機能別使用量推移 — {name}",
+
+        # Chart labels
+        "chart_credit_trend": "クレジット使用量トレンド",
+        "chart_cost_trend": "コストトレンド",
+        "chart_usage_cost_trends": "使用量とコストのトレンド",
+        "chart_heatmap_title": "曜日別クレジット使用量 — 週末は通常低下",
+        "chart_axis_credits": "クレジット",
+        "chart_axis_cost": "コスト",
+        "chart_axis_date": "日付",
+        "chart_axis_cost_usd": "コスト (USD)",
+        "chart_consumption": "消費量 ({currency})",
+        "chart_cumulative": "累積消費量",
+        "chart_actual": "実績",
+        "chart_prediction": "予測",
+        "chart_cumulative_consump": "累積消費量",
+        "chart_capacity_contract": "契約キャパシティ",
+        "chart_monthly_cost": "月次コスト",
+
+        # FEATURE_USECASES translations
+        "usecase_cortex": "AIアプリの構築、文書要約、データ分類、コンテンツ生成 — ML専門知識や外部ツール不要",
+        "usecase_ml_functions": "組み込みの予測・異常検知 — データサイエンスチームなしでトレンドや外れ値を発見",
+        "usecase_snowpark": "Python/Java/Scala変換やMLワークロードをSnowflake内でネイティブ実行 — データ移動不要、Sparkクラスタ不要",
+        "usecase_search_optimization": "大規模テーブルのポイントルックアップクエリを劇的に高速化 — インタラクティブアプリ、ダッシュボード、APIバックエンドに最適",
+        "usecase_snowpipe": "スケジュールバッチをリアルタイムの自動データ取り込みに置換 — 必要な時にデータは常に最新",
+        "usecase_streams": "テーブルの全INSERT/UPDATE/DELETEを追跡し、CDCによるイベント駆動型増分パイプラインを構築",
+        "usecase_serverless_tasks": "Snowflakeで最も採用されている機能の一つ — コンピュート管理不要でデータパイプラインを自動化・オーケストレーション",
+        "usecase_dynamic_tables": "求める結果を宣言するだけ — Snowflakeが更新タイミングと方法を自動決定。複雑なETLパイプラインの代替",
+        "usecase_automatic_clustering": "データ増加に伴う大規模テーブルの性能を手動チューニングなしで維持 — クエリは自動的に高速を保持",
+        "usecase_materialized_views": "高コストクエリの結果を事前計算・キャッシュ — ダッシュボードや反復分析ワークロードの読み込みをほぼ瞬時に",
+        "usecase_streamlit": "Snowflake内でインタラクティブなデータアプリとダッシュボードをネイティブに構築・共有 — 外部ホスティングやデータコピー不要",
+        "usecase_cortex_analyst": "自然言語でデータに質問し、SQLベースの回答を即座に取得 — 全員がセルフサービス分析を利用可能",
+        "usecase_cortex_search": "アプリケーションにセマンティック検索を追加 — キーワードが完全一致しなくても関連結果を返却",
+        "usecase_cortex_code": "Snowflake内でAI支援によるSQL/Python生成 — コードの作成、説明、デバッグを高速化",
+        "usecase_snowflake_intelligence": "Snowflakeの統合AIレイヤー — 対話型分析、インテリジェント検索、自動エージェントを一元化",
+        "usecase_default": "この機能を顧客と一緒に検討してみましょう。",
+
+        # Messages
+        "msg_no_data": "選択した条件に該当するデータが見つかりません。",
+        "msg_loading": "データを読み込み中...",
+        "msg_connection_error": "Snowflakeに接続できません。接続設定を確認してください。",
+        "msg_permission_error": "アクセスが拒否されました。BILLINGスキーマの権限を確認してください。",
+        "msg_data_refresh": "データは1時間ごとに更新されます。最新情報を取得するにはページを更新してください。",
+        "msg_date_range_long": "期間が1年を超えています。パフォーマンスが低下する可能性があります。",
+        "msg_date_invalid": "開始日は終了日より前でなければなりません。",
+        "msg_adjust_filters": "💡 フィルターや期間を変更してデータを検索してみてください。",
+        "msg_demo_fallback": "ℹ️ ライブ請求データが利用できないため、デモデータを表示しています。",
+        "msg_auth_expired": "🔐 **認証トークンが期限切れです**",
+        "msg_auth_reconnect": "再接続するには、以下をお試しください:\n1. **ブラウザページを更新** — 再認証が求められます\n2. **ターミナルで実行**: `snow connection test` で接続を更新\n3. **SSO再認証**（フェデレーション認証を使用している場合）",
+        "msg_retry": "🔄 再接続",
+
+        # Footer
+        "footer_data_range": "データ範囲: {start} ～ {end}",
+        "footer_total_records": "総レコード数: {count}",
+    },
+}
+
+
+def t(key, **kwargs):
+    """Return translated text for the current language. Falls back to English."""
+    lang = st.session_state.get("language", DEFAULT_LANGUAGE)
+    text = TRANSLATIONS.get(lang, TRANSLATIONS["en"]).get(key)
+    if text is None:
+        text = TRANSLATIONS["en"].get(key, key)
+    return text.format(**kwargs) if kwargs else text
+
+
+def t_usecase(feature_key):
+    """Return translated use-case description for a feature."""
+    normalized = feature_key.replace(" ", "_")
+    lang = st.session_state.get("language", DEFAULT_LANGUAGE)
+    text = TRANSLATIONS.get(lang, TRANSLATIONS["en"]).get(f"usecase_{normalized}")
+    if text is None:
+        text = FEATURE_USECASES.get(feature_key, t("usecase_default"))
+    return text
+
 
 # Demo mode flag - auto-detects via env var, defaults to True outside Snowflake
 import os
@@ -360,7 +798,7 @@ def generate_demo_contract_data():
 
 def generate_demo_customer_list():
     """Generate demo customer list"""
-    return ["All Customers"] + [c['name'] for c in DEMO_CUSTOMERS]
+    return [t("all_customers")] + [c['name'] for c in DEMO_CUSTOMERS]
 
 # =============================================================================
 # UTILITY FUNCTIONS (embedded for Streamlit in Snowflake compatibility)
@@ -410,12 +848,12 @@ def get_date_range_options():
     today = datetime.now().date()
     
     return {
-        "Last 7 days": (today - timedelta(days=7), today),
-        "Last 30 days": (today - timedelta(days=30), today),
-        "Last 90 days": (today - timedelta(days=90), today),
-        "Current Month": (today.replace(day=1), today),
-        "Last Month": get_last_month_range(),
-        "Custom": None
+        t("date_last_7"): (today - timedelta(days=7), today),
+        t("date_last_30"): (today - timedelta(days=30), today),
+        t("date_last_90"): (today - timedelta(days=90), today),
+        t("date_current_month"): (today.replace(day=1), today),
+        t("date_last_month"): get_last_month_range(),
+        t("date_custom"): None
     }
 
 def get_last_month_range():
@@ -430,11 +868,11 @@ def get_last_month_range():
 def validate_date_range(start_date, end_date):
     """Validate date range inputs"""
     if start_date > end_date:
-        st.error("Start date must be before end date.")
+        st.error(t("msg_date_invalid"))
         return False
     
     if (end_date - start_date).days > 365:
-        st.warning("Date range is longer than 1 year. This may result in slower performance.")
+        st.warning(t("msg_date_range_long"))
     
     return True
 
@@ -861,7 +1299,7 @@ def create_contract_usage_chart(usage_df, contract_metrics, customer_name):
             go.Scatter(
                 x=actual_dates,
                 y=actual_values,
-                name='Actual',
+                name=t('chart_actual'),
                 fill='tozeroy',
                 fillcolor='rgba(66, 133, 244, 0.7)',
                 line=dict(color='rgba(66, 133, 244, 1)', width=0),
@@ -876,7 +1314,7 @@ def create_contract_usage_chart(usage_df, contract_metrics, customer_name):
             go.Scatter(
                 x=prediction_dates,
                 y=prediction_daily,
-                name='Prediction',
+                name=t('chart_prediction'),
                 fill='tozeroy',
                 fillcolor='rgba(255, 167, 38, 0.7)',
                 line=dict(color='rgba(255, 167, 38, 1)', width=0),
@@ -895,7 +1333,7 @@ def create_contract_usage_chart(usage_df, contract_metrics, customer_name):
             go.Scatter(
                 x=all_dates,
                 y=all_cumulative,
-                name='Cumulative Consump',
+                name=t('chart_cumulative_consump'),
                 line=dict(color='black', width=2),
                 mode='lines',
                 legendgroup='cumulative'
@@ -909,7 +1347,7 @@ def create_contract_usage_chart(usage_df, contract_metrics, customer_name):
             go.Scatter(
                 x=[contract_start, prediction_end],
                 y=[metrics['capacity_purchased'], metrics['capacity_purchased']],
-                name='Capacity Contract Amt',
+                name=t('chart_capacity_contract'),
                 line=dict(color='gray', width=2, dash='dash'),
                 mode='lines',
                 legendgroup='capacity'
@@ -935,13 +1373,13 @@ def create_contract_usage_chart(usage_df, contract_metrics, customer_name):
         
         # Update y-axes
         fig.update_yaxes(
-            title_text=f"Consumption ({metrics['currency']})",
+            title_text=t("chart_consumption", currency=metrics['currency']),
             secondary_y=False,
             gridcolor='lightgray',
             tickformat="$,.0f"
         )
         fig.update_yaxes(
-            title_text="Cumulative Consumption",
+            title_text=t("chart_cumulative"),
             secondary_y=True,
             gridcolor='lightgray',
             tickformat="$,.0f"
@@ -1011,17 +1449,67 @@ st.markdown("""
     .stSelectbox > div > div {
         border-radius: 5px;
     }
-    /* Fix sidebar text visibility in dark mode */
-    [data-testid="stSidebar"] .stSelectbox label,
-    [data-testid="stSidebar"] .stMultiSelect label,
-    [data-testid="stSidebar"] h2,
-    [data-testid="stSidebar"] p,
-    [data-testid="stSidebar"] span {
-        color: #ffffff !important;
+    /* Fix sidebar text visibility for both light and dark mode */
+    @media (prefers-color-scheme: dark) {
+        [data-testid="stSidebar"] .stSelectbox label,
+        [data-testid="stSidebar"] .stMultiSelect label,
+        [data-testid="stSidebar"] h2,
+        [data-testid="stSidebar"] p,
+        [data-testid="stSidebar"] span {
+            color: rgba(255, 255, 255, 0.9) !important;
+        }
+        [data-testid="stSidebar"] .stSelectbox [data-baseweb="select"] > div,
+        [data-testid="stSidebar"] .stMultiSelect [data-baseweb="select"] > div {
+            color: rgba(255, 255, 255, 0.9) !important;
+        }
     }
-    [data-testid="stSidebar"] .stSelectbox [data-baseweb="select"] > div,
-    [data-testid="stSidebar"] .stMultiSelect [data-baseweb="select"] > div {
-        color: #333333 !important;
+    @media (prefers-color-scheme: light) {
+        [data-testid="stSidebar"] .stSelectbox label,
+        [data-testid="stSidebar"] .stMultiSelect label,
+        [data-testid="stSidebar"] h2,
+        [data-testid="stSidebar"] p,
+        [data-testid="stSidebar"] span {
+            color: rgba(0, 0, 0, 0.85) !important;
+        }
+        [data-testid="stSidebar"] .stSelectbox [data-baseweb="select"] > div,
+        [data-testid="stSidebar"] .stMultiSelect [data-baseweb="select"] > div {
+            color: rgba(0, 0, 0, 0.85) !important;
+        }
+    }
+    /* Upsell cards — light/dark adaptive */
+    .upsell-card {
+        padding: 0.8rem 1rem;
+        border-radius: 8px;
+        border-left: 4px solid #ffc107;
+        margin-bottom: 0.75rem;
+    }
+    @media (prefers-color-scheme: light) {
+        .upsell-card {
+            background: #fff3cd;
+        }
+        .upsell-card-title {
+            color: #333333;
+            font-size: 1rem;
+        }
+        .upsell-card-desc {
+            color: #555555;
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+    }
+    @media (prefers-color-scheme: dark) {
+        .upsell-card {
+            background: rgba(255, 193, 7, 0.15);
+        }
+        .upsell-card-title {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1rem;
+        }
+        .upsell-card-desc {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
     }
 </style>
 """, unsafe_allow_html=True)
@@ -1040,7 +1528,7 @@ def get_snowflake_session():
         if 'token' in error_msg or 'expired' in error_msg or 'authentication' in error_msg:
             st.session_state['auth_expired'] = True
             return None
-        st.error(f"❌ {MESSAGES['connection_error']}\nDetails: {str(e)}")
+        st.error(f"❌ {t('msg_connection_error')}\nDetails: {str(e)}")
         return None
 
 @st.cache_data(ttl=CACHE_TTL_SECONDS)
@@ -1049,7 +1537,7 @@ def load_usage_data(_session, start_date, end_date, customer_filter=None, usage_
     # Use demo data if flag is set
     if USE_DEMO_DATA:
         df = generate_demo_usage_data(start_date, end_date)
-        if customer_filter and customer_filter != "All Customers":
+        if customer_filter and customer_filter != t("all_customers"):
             df = df[df['SOLD_TO_CUSTOMER_NAME'] == customer_filter]
         if usage_type_filter:
             df = df[df['USAGE_TYPE'].isin(usage_type_filter)]
@@ -1075,7 +1563,7 @@ def load_usage_data(_session, start_date, end_date, customer_filter=None, usage_
         WHERE USAGE_DATE BETWEEN '{start_date}' AND '{end_date}'
         """
         
-        if customer_filter and customer_filter != "All Customers":
+        if customer_filter and customer_filter != t("all_customers"):
             safe_customer = customer_filter.replace("'", "''")
             query += f" AND SOLD_TO_CUSTOMER_NAME = '{safe_customer}'"
 
@@ -1089,9 +1577,9 @@ def load_usage_data(_session, start_date, end_date, customer_filter=None, usage_
         return clean_usage_data(df)
         
     except Exception as e:
-        st.info("ℹ️ Live billing data is unavailable — displaying demo data.")
+        st.info(t("msg_demo_fallback"))
         df = generate_demo_usage_data(start_date, end_date)
-        if customer_filter and customer_filter != "All Customers":
+        if customer_filter and customer_filter != t("all_customers"):
             df = df[df['SOLD_TO_CUSTOMER_NAME'] == customer_filter]
         if usage_type_filter:
             df = df[df['USAGE_TYPE'].isin(usage_type_filter)]
@@ -1103,7 +1591,7 @@ def load_balance_data(_session, start_date, end_date, customer_filter=None):
     # Use demo data if flag is set
     if USE_DEMO_DATA:
         df = generate_demo_balance_data(start_date, end_date)
-        if customer_filter and customer_filter != "All Customers":
+        if customer_filter and customer_filter != t("all_customers"):
             df = df[df['SOLD_TO_CUSTOMER_NAME'] == customer_filter]
         return clean_balance_data(df)
     
@@ -1123,7 +1611,7 @@ def load_balance_data(_session, start_date, end_date, customer_filter=None):
         WHERE DATE BETWEEN '{start_date}' AND '{end_date}'
         """
         
-        if customer_filter and customer_filter != "All Customers":
+        if customer_filter and customer_filter != t("all_customers"):
             safe_customer = customer_filter.replace("'", "''")
             query += f" AND SOLD_TO_CUSTOMER_NAME = '{safe_customer}'"
 
@@ -1134,7 +1622,7 @@ def load_balance_data(_session, start_date, end_date, customer_filter=None):
         
     except Exception as e:
         df = generate_demo_balance_data(start_date, end_date)
-        if customer_filter and customer_filter != "All Customers":
+        if customer_filter and customer_filter != t("all_customers"):
             df = df[df['SOLD_TO_CUSTOMER_NAME'] == customer_filter]
         return clean_balance_data(df)
 
@@ -1144,7 +1632,7 @@ def load_contract_data(_session, customer_filter=None):
     # Use demo data if flag is set
     if USE_DEMO_DATA:
         df = generate_demo_contract_data()
-        if customer_filter and customer_filter != "All Customers":
+        if customer_filter and customer_filter != t("all_customers"):
             df = df[df['SOLD_TO_CUSTOMER_NAME'] == customer_filter]
         return df
     
@@ -1162,7 +1650,7 @@ def load_contract_data(_session, customer_filter=None):
         WHERE END_DATE >= CURRENT_DATE
         """
         
-        if customer_filter and customer_filter != "All Customers":
+        if customer_filter and customer_filter != t("all_customers"):
             safe_customer = customer_filter.replace("'", "''")
             query += f" AND SOLD_TO_CUSTOMER_NAME = '{safe_customer}'"
 
@@ -1180,7 +1668,7 @@ def load_contract_data(_session, customer_filter=None):
         
     except Exception as e:
         df = generate_demo_contract_data()
-        if customer_filter and customer_filter != "All Customers":
+        if customer_filter and customer_filter != t("all_customers"):
             df = df[df['SOLD_TO_CUSTOMER_NAME'] == customer_filter]
         return df
 
@@ -1200,7 +1688,7 @@ def load_customer_list(_session):
         """
         
         df = _session.sql(query).to_pandas()
-        return ["All Customers"] + df['SOLD_TO_CUSTOMER_NAME'].tolist()
+        return [t("all_customers")] + df['SOLD_TO_CUSTOMER_NAME'].tolist()
         
     except Exception as e:
         return generate_demo_customer_list()
@@ -1219,7 +1707,7 @@ def create_enhanced_trend_chart(df):
     # Create subplot with secondary y-axis
     fig = make_subplots(
         rows=2, cols=1,
-        subplot_titles=('Credit Usage Trend', 'Cost Trend'),
+        subplot_titles=(t('chart_credit_trend'), t('chart_cost_trend')),
         vertical_spacing=0.1,
         shared_xaxes=True
     )
@@ -1255,13 +1743,13 @@ def create_enhanced_trend_chart(df):
             row=2, col=1
         )
     
-    fig.update_xaxes(title_text="Date", row=2, col=1)
-    fig.update_yaxes(title_text="Credits", row=1, col=1)
-    fig.update_yaxes(title_text="Cost", row=2, col=1)
+    fig.update_xaxes(title_text=t("chart_axis_date"), row=2, col=1)
+    fig.update_yaxes(title_text=t("chart_axis_credits"), row=1, col=1)
+    fig.update_yaxes(title_text=t("chart_axis_cost"), row=2, col=1)
     
     fig.update_layout(
         height=600,
-        title="Usage and Cost Trends",
+        title=t("chart_usage_cost_trends"),
         hovermode='x unified'
     )
     
@@ -1367,7 +1855,7 @@ def create_usage_heatmap(df):
         labels=dict(x="", y="Week of", color="Credits")
     )
     fig.update_layout(
-        title="Credit usage by day of week — weekends typically lower",
+        title=t("chart_heatmap_title"),
         xaxis_title="",
         yaxis_title="",
         height=min(480, max(220, len(heatmap_pivot) * 38 + 100)),
@@ -1379,7 +1867,7 @@ def create_usage_heatmap(df):
 
 def show_alerts_and_insights(usage_df, balance_df, contract_df=None):
     """Display intelligent alerts and insights"""
-    st.subheader("🚨 Alerts & Insights")
+    st.subheader(t("alert_header"))
 
     alerts = []
     today = datetime.now().date()
@@ -1393,13 +1881,13 @@ def show_alerts_and_insights(usage_df, balance_df, contract_df=None):
         avg_daily = usage_df.groupby('USAGE_DATE')['CREDITS_USED'].sum().mean()
         if avg_daily > 1000:
             alerts.append({'type': 'warning',
-                'message': f"⚡ High daily credit usage: {avg_daily:,.0f} credits/day average"})
+                'message': t("alert_high_usage", avg_daily=f"{avg_daily:,.0f}")})
 
         # Usage growth alert
         growth_rate = calculate_growth_rate(usage_df, 'CREDITS_USED', 'USAGE_DATE')
         if growth_rate > 50:
             alerts.append({'type': 'warning',
-                'message': f"📈 Usage growth is high: +{growth_rate}% over the last week"})
+                'message': t("alert_usage_growth", rate=growth_rate)})
 
         # Zero usage in last 7 days — potential churn risk
         cutoff_7 = usage_df['USAGE_DATE'].max() - timedelta(days=7)
@@ -1408,7 +1896,7 @@ def show_alerts_and_insights(usage_df, balance_df, contract_df=None):
         if inactive:
             names = ", ".join(inactive)
             alerts.append({'type': 'warning',
-                'message': f"😶 No usage in the last 7 days: {names}"})
+                'message': t("alert_inactive", names=names)})
 
         # No AI / Cortex usage — upsell signal
         ai_users = set(
@@ -1418,7 +1906,7 @@ def show_alerts_and_insights(usage_df, balance_df, contract_df=None):
         if non_ai:
             names = ", ".join(non_ai)
             alerts.append({'type': 'info',
-                'message': f"🤖 Not using AI/Cortex features (upsell opportunity): {names}"})
+                'message': t("alert_no_ai", names=names)})
 
     if not balance_df.empty:
         latest_balances = balance_df.loc[
@@ -1429,14 +1917,14 @@ def show_alerts_and_insights(usage_df, balance_df, contract_df=None):
         if not depleted.empty:
             names = ", ".join(depleted['SOLD_TO_CUSTOMER_NAME'].tolist())
             alerts.append({'type': 'error',
-                'message': f"🔴 Balance fully depleted — customer(s) in overage: {names}"})
+                'message': t("alert_depleted", names=names)})
         # Low balance
         low_bal = latest_balances[
             (latest_balances['TOTAL_BALANCE'] > 0) & (latest_balances['TOTAL_BALANCE'] < 1000)
         ]
         if not low_bal.empty:
             alerts.append({'type': 'warning',
-                'message': f"⚠️ {len(low_bal)} customer(s) have very low balance (<$1,000)"})
+                'message': t("alert_low_balance", count=len(low_bal))})
 
     if contract_df is not None and not contract_df.empty:
         for _, row in contract_df.iterrows():
@@ -1445,14 +1933,14 @@ def show_alerts_and_insights(usage_df, balance_df, contract_df=None):
             # Contract ending soon
             if 0 < days_left <= 30:
                 alerts.append({'type': 'error',
-                    'message': f"🔔 Contract for **{cname}** expires in {days_left} days — renewal conversation needed now"})
+                    'message': t("alert_contract_expire_30", name=cname, days=days_left)})
             elif 0 < days_left <= 60:
                 alerts.append({'type': 'warning',
-                    'message': f"🔔 Contract for **{cname}** expires in {days_left} days — start renewal discussion"})
+                    'message': t("alert_contract_expire_60", name=cname, days=days_left)})
             # Already past contract end
             elif days_left <= 0:
                 alerts.append({'type': 'error',
-                    'message': f"🚨 Contract for **{cname}** has expired ({abs(days_left)} days ago)"})
+                    'message': t("alert_contract_expired", name=cname, days=abs(days_left))})
 
         # Check for overage (usage > capacity)
         if not usage_df.empty:
@@ -1466,7 +1954,7 @@ def show_alerts_and_insights(usage_df, balance_df, contract_df=None):
                 if cust_used > row['AMOUNT'] and row['AMOUNT'] > 0:
                     pct = cust_used / row['AMOUNT'] * 100
                     alerts.append({'type': 'error',
-                        'message': f"🔴 **{cname}** is in overage — used {pct:.0f}% of contracted capacity"})
+                        'message': t("alert_overage", name=cname, pct=f"{pct:.0f}")})
 
     # Display
     if alerts:
@@ -1478,7 +1966,7 @@ def show_alerts_and_insights(usage_df, balance_df, contract_df=None):
                    'info': 'alert-info', 'success': 'alert-success'}.get(alert['type'], 'alert-info')
             st.markdown(f'<div class="{css}">{alert["message"]}</div>', unsafe_allow_html=True)
     else:
-        st.markdown('<div class="alert-success">✅ No alerts detected. All metrics are within normal ranges.</div>',
+        st.markdown(f'<div class="alert-success">{t("alert_none")}</div>',
                     unsafe_allow_html=True)
 
 def display_enhanced_metrics(usage_df, balance_df):
@@ -1494,22 +1982,22 @@ def display_enhanced_metrics(usage_df, balance_df):
     with col1:
         growth_rate = calculate_growth_rate(usage_df, 'CREDITS_USED', 'USAGE_DATE')
         st.metric(
-            "Total Credits Used",
+            t("kpi_total_credits"),
             format_credits(summary['total_credits']),
-            delta=f"{growth_rate:+.1f}% vs last week" if growth_rate != 0 else None
+            delta=t("kpi_vs_last_week", value=growth_rate) if growth_rate != 0 else None
         )
     
     with col2:
         cost_growth = calculate_growth_rate(usage_df, 'USAGE_IN_CURRENCY', 'USAGE_DATE')
         st.metric(
-            "Total Cost",
+            t("kpi_total_cost"),
             format_currency(summary['total_cost'], currency),
-            delta=f"{cost_growth:+.1f}% vs last week" if cost_growth != 0 else None
+            delta=t("kpi_vs_last_week", value=cost_growth) if cost_growth != 0 else None
         )
     
     with col3:
         st.metric(
-            "Avg Daily Credits",
+            t("kpi_avg_daily"),
             format_credits(summary['avg_daily_credits']),
             delta=None
         )
@@ -1518,7 +2006,7 @@ def display_enhanced_metrics(usage_df, balance_df):
     if not balance_df.empty:
         balance_summary = get_balance_summary(balance_df)
         
-        st.markdown("### 💰 Balance Metrics")
+        st.markdown(t("kpi_balance_header"))
         total_balance = (
             balance_summary['total_free_usage'] +
             balance_summary['total_capacity'] +
@@ -1527,14 +2015,14 @@ def display_enhanced_metrics(usage_df, balance_df):
         col1, _ = st.columns([1, 3])
         with col1:
             st.metric(
-                "Total Available Balance",
+                t("kpi_total_balance"),
                 format_currency(total_balance, currency),
-                help="Capacity + Rollover — total credits available before on-demand charges apply"
+                help=t("kpi_balance_help")
             )
 
 def show_portfolio_summary(usage_df, balance_df, contract_df):
     """One-row-per-customer portfolio health table for the All Customers view."""
-    st.subheader("📋 Portfolio Overview")
+    st.subheader(t("portfolio_header"))
     today = datetime.now().date()
     ai_features = {'cortex', 'cortex analyst', 'cortex search', 'cortex code',
                    'ml functions', 'snowflake intelligence'}
@@ -1602,35 +2090,35 @@ def show_portfolio_summary(usage_df, balance_df, contract_df):
         if days_overage is not None and days_overage < 30: risk_factors += 2
         elif days_overage is not None and days_overage < 60: risk_factors += 1
         if ci and (ci['end'] - today).days < 60: risk_factors += 1
-        risk = "🔴 Critical" if risk_factors >= 3 else "🟡 Watch" if risk_factors >= 1 else "🟢 Healthy"
+        risk = t("portfolio_critical") if risk_factors >= 3 else t("portfolio_watch") if risk_factors >= 1 else t("portfolio_healthy")
 
         rows.append({
-            'Customer': cust,
-            'Credits Used': format_credits(credits),
-            'Cost': format_currency(cost, currency),
-            'Balance': format_currency(balance, currency) if balance else '—',
-            'Days to Depletion': str(days_depletion) if days_depletion is not None else ('🔴 Depleted' if balance == 0 else '—'),
-            'Contract Used': f"{used_pct:.1f}%" if used_pct is not None else '—',
-            'Days to Overage': str(days_overage) if days_overage is not None else '—',
-            'AI/ML': '✅' if uses_ai else '❌',
-            'Risk': risk,
+            t('portfolio_customer'): cust,
+            t('portfolio_credits'): format_credits(credits),
+            t('portfolio_cost'): format_currency(cost, currency),
+            t('portfolio_balance'): format_currency(balance, currency) if balance else '—',
+            t('portfolio_depletion'): str(days_depletion) if days_depletion is not None else (t('portfolio_depleted') if balance == 0 else '—'),
+            t('portfolio_contract_used'): f"{used_pct:.1f}%" if used_pct is not None else '—',
+            t('portfolio_overage_days'): str(days_overage) if days_overage is not None else '—',
+            t('portfolio_ai'): '✅' if uses_ai else '❌',
+            t('portfolio_risk'): risk,
         })
 
     if rows:
         portfolio_df = pd.DataFrame(rows)
         st.dataframe(portfolio_df, use_container_width=True, hide_index=True)
-        st.caption("Risk: 🔴 Critical = near depletion/overage/expiry · 🟡 Watch = approaching a limit · 🟢 Healthy · AI/ML = any Cortex/ML feature active")
+        st.caption(t("portfolio_risk_caption"))
     st.markdown("---")
 
 
 def main():
     # Header with enhanced styling
-    st.markdown(f'<h1 class="main-header">{APP_ICON} {APP_TITLE}</h1>', unsafe_allow_html=True)
-    st.markdown("### Real-time credit consumption monitoring for Snowflake reseller customers")
+    st.markdown(f'<h1 class="main-header">{APP_ICON} {t("app_title")}</h1>', unsafe_allow_html=True)
+    st.markdown(f"### {t('app_subtitle')}")
     
     # Demo mode banner
     if USE_DEMO_DATA:
-        st.info("🎭 **Demo Mode Active** - Displaying sample data for 5 fictional customers. Set `USE_DEMO_DATA = False` to use live BILLING schema data.")
+        st.info(t("app_demo_banner"))
     
     st.markdown("---")
     
@@ -1641,41 +2129,57 @@ def main():
         session = get_snowflake_session()
         if not session:
             if st.session_state.get('auth_expired', False):
-                st.error("🔐 **Authentication token has expired**")
-                st.info("""
-To reconnect, please try one of the following:
-1. **Refresh the browser page** - this will prompt for re-authentication
-2. **Run in terminal**: `snow connection test` to refresh your connection
-3. **Re-authenticate via SSO** if using federated authentication
-                """)
-                if st.button("🔄 Retry Connection", type="primary"):
+                st.error(t("msg_auth_expired"))
+                st.info(t("msg_auth_reconnect"))
+                if st.button(t("msg_retry"), type="primary"):
                     st.session_state['auth_expired'] = False
                     st.cache_data.clear()
                     st.rerun()
             st.stop()
     
+    # Language selector — persist choice in URL query params (?lang=ja)
+    _lang_options = list(SUPPORTED_LANGUAGES.keys())
+    _qp_lang = st.query_params.get("lang", DEFAULT_LANGUAGE)
+    if _qp_lang not in _lang_options:
+        _qp_lang = DEFAULT_LANGUAGE
+    if "language" not in st.session_state:
+        st.session_state["language"] = _qp_lang
+
+    st.sidebar.selectbox(
+        "🌐 Language",
+        options=_lang_options,
+        format_func=lambda x: SUPPORTED_LANGUAGES[x],
+        key="language",
+        index=_lang_options.index(st.session_state["language"]),
+    )
+
+    # Sync selection back to query params so bookmarks remember the choice
+    if st.session_state["language"] != st.query_params.get("lang"):
+        st.query_params["lang"] = st.session_state["language"]
+    st.sidebar.markdown("---")
+
     # Sidebar with enhanced filters
-    st.sidebar.header("🎛️ Dashboard Controls")
+    st.sidebar.header(t("sidebar_controls"))
     
     # Quick date range selector
     date_range_options = get_date_range_options()
     selected_range = st.sidebar.selectbox(
-        "📅 Quick Date Range",
+        t("sidebar_date_range"),
         options=list(date_range_options.keys()),
         index=1  # Default to "Last 30 days"
     )
     
-    if selected_range == "Custom":
+    if selected_range == t("date_custom"):
         col1, col2 = st.sidebar.columns(2)
         with col1:
             start_date = st.date_input(
-                "Start Date",
+                t("date_start"),
                 value=datetime.now() - timedelta(days=DEFAULT_DATE_RANGE_DAYS),
                 max_value=datetime.now().date()
             )
         with col2:
             end_date = st.date_input(
-                "End Date",
+                t("date_end"),
                 value=datetime.now().date(),
                 max_value=datetime.now().date()
             )
@@ -1687,28 +2191,28 @@ To reconnect, please try one of the following:
         st.stop()
     
     # Load customer list dynamically
-    with st.spinner("Loading customers..."):
+    with st.spinner(t("sidebar_loading_customers")):
         customer_options = load_customer_list(session)
     
     # Customer filter
     customer_filter = st.sidebar.selectbox(
-        "👥 Select Customer",
+        t("sidebar_customer"),
         options=customer_options,
         index=0
     )
 
     st.sidebar.markdown("---")
-    if st.sidebar.button("🔄 Refresh Data", help="Clear cached data and session state, then reload", use_container_width=True):
+    if st.sidebar.button(t("sidebar_refresh"), help="Clear cached data and session state, then reload", use_container_width=True):
         st.cache_data.clear()
         for key in list(st.session_state.keys()):
             del st.session_state[key]
         st.rerun()
-    st.sidebar.caption("🕐 Data refreshed every hour. For the most current information, refresh the page.")
+    st.sidebar.caption(t("sidebar_refresh_note"))
 
     usage_type_filter = None
     
     # Load data with enhanced loading indicator
-    with st.spinner(MESSAGES['loading']):
+    with st.spinner(t("msg_loading")):
         progress_bar = st.progress(0)
         
         usage_df = load_usage_data(session, start_date, end_date, customer_filter, usage_type_filter)
@@ -1724,13 +2228,13 @@ To reconnect, please try one of the following:
     
     # Check for data
     if usage_df.empty:
-        st.warning(MESSAGES['no_data'])
-        st.info("💡 Try adjusting your filters or date range to find available data.")
+        st.warning(t("msg_no_data"))
+        st.info(t("msg_adjust_filters"))
         return
     
     # Tab navigation — st.radio persists across reruns via session_state,
     # unlike st.tabs which resets to the first tab on any widget-triggered rerun
-    TAB_OPTIONS = ["📊 Trends", "🎯 Usage Patterns", "💰 Financial Health", "🔬 Feature Adoption"]
+    TAB_OPTIONS = [t("tab_trends"), t("tab_usage"), t("tab_financial"), t("tab_feature")]
     if 'active_tab' not in st.session_state:
         st.session_state['active_tab'] = TAB_OPTIONS[0]
 
@@ -1743,12 +2247,12 @@ To reconnect, please try one of the following:
     )
     st.markdown("---")
 
-    if active_tab == "📊 Trends":
+    if active_tab == t("tab_trends"):
         # KPIs, portfolio summary, and alerts all live here
-        st.subheader("📊 Key Performance Indicators")
+        st.subheader(t("kpi_header"))
         display_enhanced_metrics(usage_df, balance_df)
 
-        if customer_filter == "All Customers":
+        if customer_filter == t("all_customers"):
             show_portfolio_summary(usage_df, balance_df, contract_df)
 
         show_alerts_and_insights(usage_df, balance_df, contract_df)
@@ -1766,14 +2270,14 @@ To reconnect, please try one of the following:
         # Month-over-month comparison chart
         mom_df = usage_df.copy()
         mom_df['Month'] = pd.to_datetime(mom_df['USAGE_DATE']).dt.to_period('M').dt.to_timestamp()
-        if customer_filter == "All Customers":
+        if customer_filter == t("all_customers"):
             mom_agg = mom_df.groupby(['Month', 'SOLD_TO_CUSTOMER_NAME'])['USAGE_IN_CURRENCY'].sum().reset_index()
             mom_agg.columns = ['Month', 'Customer', 'Cost']
             if mom_agg['Month'].nunique() >= 2:
                 fig_mom = px.bar(
                     mom_agg, x='Month', y='Cost', color='Customer',
-                    title='Monthly spend by customer',
-                    labels={'Cost': 'Cost (USD)', 'Month': ''},
+                    title=t("trend_monthly_spend_customer"),
+                    labels={'Cost': t("chart_axis_cost_usd"), 'Month': ''},
                     barmode='stack'
                 )
                 fig_mom.update_layout(height=360, legend=dict(orientation='h', y=-0.25),
@@ -1787,7 +2291,7 @@ To reconnect, please try one of the following:
                 fig_mom = go.Figure()
                 fig_mom.add_trace(go.Bar(
                     x=mom_agg['Month'], y=mom_agg['Cost'],
-                    name='Monthly Cost', marker_color='#1f77b4',
+                    name=t("chart_monthly_cost"), marker_color='#1f77b4',
                     text=mom_agg['Cost'].apply(lambda v: f"${v:,.0f}"),
                     textposition='outside'
                 ))
@@ -1802,15 +2306,15 @@ To reconnect, please try one of the following:
                         font=dict(color=color, size=11)
                     )
                 fig_mom.update_layout(
-                    title='Monthly spend with MoM % change',
-                    height=360, xaxis_title='', yaxis_title='Cost (USD)',
+                    title=t("trend_monthly_spend_mom"),
+                    height=360, xaxis_title='', yaxis_title=t("chart_axis_cost_usd"),
                     margin=dict(t=40, b=40)
                 )
                 st.plotly_chart(fig_mom, use_container_width=True)
 
         # Detailed data table
-        st.subheader("📋 Detailed Data")
-        with st.expander("💻 Usage Details", expanded=False):
+        st.subheader(t("trend_detailed_data"))
+        with st.expander(t("trend_usage_details"), expanded=False):
             if not usage_df.empty:
                 display_df = usage_df.copy()
                 display_df['Credits'] = display_df['CREDITS_USED'].apply(format_credits)
@@ -1831,18 +2335,18 @@ To reconnect, please try one of the following:
                     hide_index=True
                 )
             else:
-                st.info("No usage data available.")
+                st.info(t("trend_no_usage"))
 
         # Export functionality
         if FEATURES['export_enabled']:
-            st.subheader("📥 Export Data")
+            st.subheader(t("trend_export_header"))
             col1, col2, col3 = st.columns(3)
             with col1:
                 if not usage_df.empty:
                     csv_data = export_to_csv(usage_df, "usage_data")
                     if csv_data:
                         st.download_button(
-                            label="📊 Download Usage Data",
+                            label=t("trend_export_usage"),
                             data=csv_data,
                             file_name=EXPORT_TEMPLATES['usage'].format(
                                 start_date=start_date, end_date=end_date
@@ -1854,7 +2358,7 @@ To reconnect, please try one of the following:
                     csv_data = export_to_csv(balance_df, "balance_data")
                     if csv_data:
                         st.download_button(
-                            label="💰 Download Balance Data",
+                            label=t("trend_export_balance"),
                             data=csv_data,
                             file_name=EXPORT_TEMPLATES['balance'].format(
                                 start_date=start_date, end_date=end_date
@@ -1862,7 +2366,7 @@ To reconnect, please try one of the following:
                             mime="text/csv"
                         )
 
-    elif active_tab == "🎯 Usage Patterns":
+    elif active_tab == t("tab_usage"):
         usage_by_type = usage_df.groupby('USAGE_TYPE').agg(
             CREDITS_USED=('CREDITS_USED', 'sum'),
             COST=('USAGE_IN_CURRENCY', 'sum')
@@ -1880,7 +2384,7 @@ To reconnect, please try one of the following:
                 usage_by_type,
                 values='CREDITS_USED',
                 names='Feature',
-                title='Credit share by feature',
+                title=t("usage_credit_share"),
                 hole=0.35
             )
             fig_pie.update_traces(textposition='inside', textinfo='percent+label')
@@ -1893,8 +2397,8 @@ To reconnect, please try one of the following:
                 x='Feature',
                 y='CREDITS_USED',
                 color='Feature',
-                title='Credits consumed per feature',
-                labels={'CREDITS_USED': 'Total Credits', 'Feature': ''},
+                title=t("usage_credits_per_feature"),
+                labels={'CREDITS_USED': t("chart_axis_credits"), 'Feature': ''},
                 text='CREDITS_USED'
             )
             fig_bar.update_traces(
@@ -1906,7 +2410,7 @@ To reconnect, please try one of the following:
                 height=380,
                 xaxis_tickangle=-30,
                 margin=dict(t=40, b=80),
-                yaxis_title="Credits"
+                yaxis_title=t("chart_axis_credits")
             )
             st.plotly_chart(fig_bar, use_container_width=True)
 
@@ -1922,7 +2426,7 @@ To reconnect, please try one of the following:
 
         # ── Per-account breakdown ─────────────────────────────────────────────
         st.markdown("---")
-        st.markdown("#### Account-Level Breakdown")
+        st.markdown(t("usage_account_breakdown"))
 
         account_usage = (
             usage_df.groupby(['SOLD_TO_CUSTOMER_NAME', 'ACCOUNT_NAME', 'ACCOUNT_LOCATOR', 'REGION'])
@@ -1930,16 +2434,15 @@ To reconnect, please try one of the following:
             .reset_index()
             .sort_values('Credits', ascending=False)
         )
+        # Only show this section when there are multiple accounts
         n_accounts = account_usage['ACCOUNT_NAME'].nunique()
-
-        # Only show the bar chart when there are multiple accounts to compare
         if n_accounts > 1:
             fig_acct = px.bar(
                 account_usage,
                 x='ACCOUNT_NAME',
                 y='Credits',
-                color='SOLD_TO_CUSTOMER_NAME' if customer_filter == "All Customers" else 'REGION',
-                title='Credits consumed by account',
+                color='SOLD_TO_CUSTOMER_NAME' if customer_filter == t("all_customers") else 'REGION',
+                title=t("usage_credits_by_account"),
                 labels={'ACCOUNT_NAME': 'Account', 'Credits': 'Credits',
                         'SOLD_TO_CUSTOMER_NAME': 'Customer', 'REGION': 'Region'},
                 text='Credits'
@@ -1952,14 +2455,16 @@ To reconnect, please try one of the following:
             )
             st.plotly_chart(fig_acct, use_container_width=True)
 
-        # Always show the account table
-        display_acct = account_usage.copy()
-        display_acct['Credits'] = display_acct['Credits'].apply(format_credits)
-        display_acct['Cost'] = display_acct['Cost'].apply(lambda v: format_currency(v, currency))
-        display_acct.columns = ['Customer', 'Account', 'Locator', 'Region', 'Credits', 'Cost']
-        st.dataframe(display_acct, use_container_width=True, hide_index=True)
+            # Account table
+            display_acct = account_usage.copy()
+            display_acct['Credits'] = display_acct['Credits'].apply(format_credits)
+            display_acct['Cost'] = display_acct['Cost'].apply(lambda v: format_currency(v, currency))
+            display_acct.columns = ['Customer', 'Account', 'Locator', 'Region', 'Credits', 'Cost']
+            st.dataframe(display_acct, use_container_width=True, hide_index=True)
+        else:
+            st.caption(t("usage_single_account"))
 
-    elif active_tab == "💰 Financial Health":
+    elif active_tab == t("tab_financial"):
         currency = usage_df['CURRENCY'].iloc[0] if not usage_df.empty else "USD"
 
         # ── Shared projection window selector ─────────────────────────────────
@@ -1968,10 +2473,10 @@ To reconnect, please try one of the following:
         col_rr, _ = st.columns([1, 4])
         with col_rr:
             financial_run_rate_days = st.selectbox(
-                "Projection window",
+                t("financial_projection_window"),
                 options=[7, 30, 60, 90],
                 index=[7, 30, 60, 90].index(st.session_state['financial_run_rate_days']),
-                format_func=lambda x: f"Last {x} days",
+                format_func=lambda x: t("financial_last_n_days", n=x),
                 help="Days of recent consumption used to calculate run rate and projections across both sections below",
                 key="financial_run_rate_days"
             )
@@ -1981,7 +2486,7 @@ To reconnect, please try one of the following:
         if not contract_df.empty:
             contract_data_start = contract_df['START_DATE'].min()
             if contract_data_start < start_date:
-                with st.spinner("Loading full contract history..."):
+                with st.spinner(t("financial_loading_history")):
                     contract_usage_df = load_usage_data(
                         session, contract_data_start, end_date, customer_filter, None
                     )
@@ -1993,7 +2498,7 @@ To reconnect, please try one of the following:
         # ══════════════════════════════════════════════════════════════════════
         # SECTION 1 — BALANCE & RUN RATE (summary, shown first)
         # ══════════════════════════════════════════════════════════════════════
-        st.markdown("#### 💰 Balance & Run Rate")
+        st.markdown(t("financial_balance_header"))
 
         overall_run_rate = calculate_overall_run_rate(contract_usage_df, balance_df, financial_run_rate_days)
         customer_run_rates = calculate_run_rate_by_customer(contract_usage_df, balance_df, financial_run_rate_days)
@@ -2003,30 +2508,27 @@ To reconnect, please try one of the following:
         # from e.g. 60 → 90 days produces identical numbers
         effective_days = overall_run_rate.get('period_days', financial_run_rate_days) if overall_run_rate else financial_run_rate_days
         if effective_days < financial_run_rate_days:
-            st.caption(
-                f"Using last **{effective_days} days** of data "
-                f"(only {effective_days} days available — {financial_run_rate_days}d window requested)"
-            )
+            st.caption(t("financial_using_days", effective=effective_days, requested=financial_run_rate_days))
         else:
-            st.caption(f"Based on the last {financial_run_rate_days} days of consumption across the full contract period")
+            st.caption(t("financial_based_on", days=financial_run_rate_days))
 
         if overall_run_rate:
             col1, col2, col3, col4 = st.columns(4)
             with col1:
                 st.metric(
-                    "Daily Run Rate",
+                    t("financial_daily_rate"),
                     format_credits(overall_run_rate['daily_rate_credits']),
                     delta=f"{format_currency(overall_run_rate['daily_rate_cost'], currency)}/day"
                 )
             with col2:
                 st.metric(
-                    "Weekly Projection",
+                    t("financial_weekly"),
                     format_credits(overall_run_rate['weekly_rate_credits']),
                     delta=f"{format_currency(overall_run_rate['weekly_rate_cost'], currency)}/week"
                 )
             with col3:
                 st.metric(
-                    "Monthly Projection",
+                    t("financial_monthly"),
                     format_credits(overall_run_rate['monthly_rate_credits']),
                     delta=f"{format_currency(overall_run_rate['monthly_rate_cost'], currency)}/month"
                 )
@@ -2036,20 +2538,20 @@ To reconnect, please try one of the following:
                     dep_icon = "🔴" if days_remaining < 30 else "🟡" if days_remaining < 60 else "🟢"
                     depletion_date = (datetime.now().date() + timedelta(days=int(days_remaining))).strftime('%-d %b %Y')
                     st.metric(
-                        "Days Until Depletion",
+                        t("financial_depletion"),
                         f"{dep_icon} {days_remaining:.0f}",
                         delta=f"~{depletion_date} · Balance: {format_currency(overall_run_rate['total_balance'], currency)}"
                     )
                 elif days_remaining == 0:
-                    st.metric("Days Until Depletion", "🔴 0", delta="Balance already depleted")
+                    st.metric(t("financial_depletion"), "🔴 0", delta=t("financial_depletion_zero"))
                 else:
-                    st.metric("Days Until Depletion", "N/A", delta="No balance data")
+                    st.metric(t("financial_depletion"), "N/A", delta=t("financial_depletion_na"))
 
         if not customer_run_rates.empty:
             csv_run_rate = export_to_csv(customer_run_rates, "run_rate_data")
             if csv_run_rate:
                 st.download_button(
-                    label="⬇️ Download run rate data",
+                    label=t("financial_export_run_rate"),
                     data=csv_run_rate,
                     file_name=f"run_rate_{start_date}_{end_date}.csv",
                     mime="text/csv"
@@ -2060,21 +2562,21 @@ To reconnect, please try one of the following:
         # ══════════════════════════════════════════════════════════════════════
         # SECTION 2 — CONTRACT STATUS
         # ══════════════════════════════════════════════════════════════════════
-        st.markdown("#### 📋 Contract Status")
+        st.markdown(t("financial_contract_header"))
 
         if contract_df.empty:
-            st.info("No active contracts found for the selected customer.")
+            st.info(t("financial_no_contracts"))
         else:
             contract_metrics = calculate_contract_usage_metrics(
                 contract_usage_df, contract_df, financial_run_rate_days
             )
 
             if not contract_metrics:
-                st.info("No usage data available for active contracts.")
+                st.info(t("financial_no_usage_contracts"))
             else:
-                if customer_filter == "All Customers":
+                if customer_filter == t("all_customers"):
                     selected_customer = st.selectbox(
-                        "Select Customer to View",
+                        t("financial_select_customer"),
                         options=list(contract_metrics.keys()),
                         index=0,
                         key="contract_customer_select"
@@ -2090,20 +2592,20 @@ To reconnect, please try one of the following:
                     col1, col2, col3, col4 = st.columns(4)
                     with col1:
                         st.metric(
-                            "Capacity Purchased",
+                            t("financial_capacity"),
                             format_currency(metrics['capacity_purchased'], metrics['currency']),
                             delta=f"Start: {metrics['contract_start'].strftime('%d/%m/%Y')}"
                         )
                     with col2:
                         st.metric(
-                            "Total Used",
+                            t("financial_total_used"),
                             format_currency(metrics['total_used'], metrics['currency']),
-                            delta=f"{metrics['used_percent']:.1f}% of capacity"
+                            delta=t("financial_capacity_used_pct", pct=metrics['used_percent'])
                         )
                     with col3:
                         overage_val = metrics['overage']
                         st.metric(
-                            "Overage",
+                            t("financial_overage_label"),
                             format_currency(overage_val, metrics['currency']) if overage_val > 0 else "$0.00",
                             delta=f"End: {metrics['contract_end'].strftime('%d/%m/%Y')}"
                         )
@@ -2111,26 +2613,26 @@ To reconnect, please try one of the following:
                         if metrics['days_until_overage'] is not None and metrics['days_until_overage'] >= 0:
                             ov_icon = "🔴" if metrics['days_until_overage'] < 30 else "🟡" if metrics['days_until_overage'] < 60 else "🟢"
                             if metrics['days_until_overage'] == 0 and metrics['overage'] > 0:
-                                ov_delta = "Already in overage"
+                                ov_delta = t("financial_already_overage")
                             elif metrics['overage_date']:
                                 ov_delta = f"Est. overage: {metrics['overage_date'].strftime('%d/%m/%Y')}"
                             else:
-                                ov_delta = "Within contract"
-                            st.metric("Days Until Overage", f"{ov_icon} {int(metrics['days_until_overage'])}", delta=ov_delta)
+                                ov_delta = t("financial_within_contract")
+                            st.metric(t("financial_days_overage"), f"{ov_icon} {int(metrics['days_until_overage'])}", delta=ov_delta)
                         else:
-                            st.metric("Days Until Overage", "N/A", delta="Sufficient capacity")
+                            st.metric(t("financial_days_overage"), "N/A", delta=t("financial_sufficient"))
 
-                    st.caption("Used % and Days Until Overage are calculated against Capacity Purchased. Rollover and other adjustments may differ slightly from Snowflake's billing portal.")
+                    st.caption(t("financial_overage_caption"))
 
                     if metrics['days_until_overage'] is not None:
                         if metrics['days_until_overage'] == 0 and metrics['overage'] > 0:
                             st.markdown(
-                                f'<div style="color: #dc3545; font-weight: bold; text-align: right; font-size: 1.1rem; margin-top: 0.25rem;">🔴 Capacity already exhausted — customer is in overage</div>',
+                                f'<div style="color: #dc3545; font-weight: bold; text-align: right; font-size: 1.1rem; margin-top: 0.25rem;">{t("financial_capacity_exhausted")}</div>',
                                 unsafe_allow_html=True
                             )
                         elif metrics['overage_date']:
                             st.markdown(
-                                f'<div style="color: #dc3545; font-weight: bold; text-align: right; font-size: 1.1rem; margin-top: 0.25rem;">⚠️ Projected to exhaust capacity by {metrics["overage_date"].strftime("%d/%m/%Y")}</div>',
+                                f'<div style="color: #dc3545; font-weight: bold; text-align: right; font-size: 1.1rem; margin-top: 0.25rem;">{t("financial_projected_exhaust", date=metrics["overage_date"].strftime("%d/%m/%Y"))}</div>',
                                 unsafe_allow_html=True
                             )
 
@@ -2144,48 +2646,48 @@ To reconnect, please try one of the following:
                                 key=f"contract_chart_{selected_customer}_{financial_run_rate_days}"
                             )
                         else:
-                            st.info("Not enough data to generate the projection chart.")
+                            st.info(t("financial_not_enough_data"))
                     with col_aside:
-                        st.markdown("**Consumption Run Rate**")
+                        st.markdown(t("financial_run_rate_label"))
                         st.markdown(f"### {format_currency(metrics['annual_run_rate'], metrics['currency'])}")
                         actual_period = metrics.get('run_rate_period', financial_run_rate_days)
                         if actual_period < financial_run_rate_days:
-                            st.caption(f"Avg daily × 365\n\n⚠️ Only {actual_period}d of data available ({financial_run_rate_days}d requested)")
+                            st.caption(t("financial_run_rate_warn", actual=actual_period, requested=financial_run_rate_days))
                         else:
-                            st.caption(f"Avg daily × 365 · based on last {actual_period}d")
+                            st.caption(t("financial_run_rate_note", days=actual_period))
 
-                    with st.expander("📄 Contract Details", expanded=False):
+                    with st.expander(t("financial_contract_details"), expanded=False):
                         col1, col2 = st.columns(2)
                         with col1:
-                            st.markdown("**Timeline**")
-                            st.write(f"- Start: {metrics['contract_start'].strftime('%d %B %Y')}")
-                            st.write(f"- End: {metrics['contract_end'].strftime('%d %B %Y')}")
-                            st.write(f"- Duration: {metrics['days_in_contract']} days")
-                            st.write(f"- Elapsed: {metrics['days_elapsed']} days")
-                            st.write(f"- Remaining: {(metrics['contract_end'] - datetime.now().date()).days} days")
+                            st.markdown(t("financial_timeline"))
+                            st.write(f"- {t('financial_start', date=metrics['contract_start'].strftime('%d %B %Y'))}")
+                            st.write(f"- {t('financial_end', date=metrics['contract_end'].strftime('%d %B %Y'))}")
+                            st.write(f"- {t('financial_duration', days=metrics['days_in_contract'])}")
+                            st.write(f"- {t('financial_elapsed', days=metrics['days_elapsed'])}")
+                            st.write(f"- {t('financial_remaining', days=(metrics['contract_end'] - datetime.now().date()).days)}")
                         with col2:
-                            st.markdown("**Projections**")
-                            st.write(f"- Daily: {format_currency(metrics['daily_run_rate'], metrics['currency'])}/day")
-                            st.write(f"- Weekly: {format_currency(metrics['daily_run_rate'] * 7, metrics['currency'])}/week")
-                            st.write(f"- Monthly: {format_currency(metrics['daily_run_rate'] * 30, metrics['currency'])}/month")
-                            st.write(f"- Annual: {format_currency(metrics['annual_run_rate'], metrics['currency'])}/year")
-                            st.write(f"- Window: last {metrics['run_rate_period']} days")
+                            st.markdown(t("financial_projections"))
+                            st.write(f"- {t('financial_daily', value=format_currency(metrics['daily_run_rate'], metrics['currency']))}")
+                            st.write(f"- {t('financial_weekly_proj', value=format_currency(metrics['daily_run_rate'] * 7, metrics['currency']))}")
+                            st.write(f"- {t('financial_monthly_proj', value=format_currency(metrics['daily_run_rate'] * 30, metrics['currency']))}")
+                            st.write(f"- {t('financial_annual', value=format_currency(metrics['annual_run_rate'], metrics['currency']))}")
+                            st.write(f"- {t('financial_window', days=metrics['run_rate_period'])}")
     
-    elif active_tab == "🔬 Feature Adoption":
-        st.markdown("### 🔬 Feature Adoption")
-        st.markdown("*Which Snowflake features are your customers using — and where are the upsell opportunities?*")
+    elif active_tab == t("tab_feature"):
+        st.markdown(t("feature_header"))
+        st.markdown(t("feature_subtitle"))
 
         if usage_df.empty:
-            st.info("No usage data available for feature analysis.")
+            st.info(t("feature_no_data"))
         else:
             currency = usage_df['CURRENCY'].iloc[0] if not usage_df.empty else "USD"
             all_known_features = set(USAGE_TYPE_DISPLAY.keys())
             used_globally = set(usage_df['USAGE_TYPE'].str.lower().unique())
 
             # ── Adoption matrix (all-customers view) ─────────────────────────
-            if customer_filter == "All Customers":
-                st.markdown("#### Adoption Matrix")
-                st.caption("Credits consumed per feature per customer — blank = not used in this period")
+            if customer_filter == t("all_customers"):
+                st.markdown(t("feature_matrix"))
+                st.caption(t("feature_matrix_caption"))
 
                 pivot = (
                     usage_df.groupby(['SOLD_TO_CUSTOMER_NAME', 'USAGE_TYPE'])['CREDITS_USED']
@@ -2216,17 +2718,17 @@ To reconnect, please try one of the following:
                 st.markdown("---")
 
             # ── Customer deep dive ────────────────────────────────────────────
-            st.markdown("#### Customer Feature Breakdown")
+            st.markdown(t("feature_breakdown"))
 
-            if customer_filter == "All Customers":
+            if customer_filter == t("all_customers"):
                 feature_customer = st.selectbox(
-                    "Select a customer",
+                    t("feature_select_customer"),
                     options=sorted(usage_df['SOLD_TO_CUSTOMER_NAME'].unique()),
                     key="feature_customer_select"
                 )
             else:
                 feature_customer = customer_filter
-                st.markdown(f"Showing: **{feature_customer}**")
+                st.markdown(t("feature_showing", name=feature_customer))
 
             customer_feature_df = usage_df[usage_df['SOLD_TO_CUSTOMER_NAME'] == feature_customer]
 
@@ -2261,8 +2763,8 @@ To reconnect, please try one of the following:
                         x='USAGE_DATE',
                         y='CREDITS_USED',
                         color='Feature',
-                        title=f'Feature usage over time — {feature_customer}',
-                        labels={'CREDITS_USED': 'Credits', 'USAGE_DATE': 'Date'}
+                        title=t("feature_usage_over_time", name=feature_customer),
+                        labels={'CREDITS_USED': t("chart_axis_credits"), 'USAGE_DATE': t("chart_axis_date")}
                     )
                     fig_trend.update_layout(height=340, hovermode='x unified',
                                             legend=dict(orientation='h', y=-0.25))
@@ -2289,14 +2791,14 @@ To reconnect, please try one of the following:
             st.markdown("---")
 
             # ── Upsell opportunities ──────────────────────────────────────────
-            st.markdown("**Upsell opportunities**")
+            st.markdown(t("feature_upsell"))
 
-            if customer_filter != "All Customers" and not customer_feature_df.empty:
+            if customer_filter != t("all_customers") and not customer_feature_df.empty:
                 used_scope = set(customer_feature_df['USAGE_TYPE'].str.lower().unique())
-                scope_label = f"Features **{customer_filter}** hasn't used in this period — potential upsell conversations:"
+                scope_label = t("feature_upsell_scope_customer", name=customer_filter)
             else:
                 used_scope = used_globally
-                scope_label = "Features with **no usage across any customer** in this period:"
+                scope_label = t("feature_upsell_scope_all")
 
             unused_features = sorted(all_known_features - used_scope)
 
@@ -2308,21 +2810,20 @@ To reconnect, please try one of the following:
                     cols = st.columns(len(row_feats))
                     for col_idx, feat in enumerate(row_feats):
                         display_name  = USAGE_TYPE_DISPLAY.get(feat, feat.title())
-                        use_case_text = FEATURE_USECASES.get(feat, "Explore this feature with your customer.")
+                        use_case_text = t_usecase(feat)
                         with cols[col_idx]:
                             st.markdown(
-                                f'<div style="background:#fff3cd;padding:0.8rem 1rem;border-radius:8px;'
-                                f'border-left:4px solid #ffc107;margin-bottom:0.75rem;">'
-                                f'<strong style="color:#333333;font-size:1rem;">{display_name}</strong><br>'
-                                f'<span style="color:#555555;font-size:0.85rem;line-height:1.4;">{use_case_text}</span>'
+                                f'<div class="upsell-card">'
+                                f'<strong class="upsell-card-title">{display_name}</strong><br>'
+                                f'<span class="upsell-card-desc">{use_case_text}</span>'
                                 f'</div>',
                                 unsafe_allow_html=True
                             )
             else:
-                st.success("All tracked features are being used in this period.")
+                st.success(t("feature_all_used"))
 
             # ── Data source note ─────────────────────────────────────────────
-            with st.expander("ℹ️ Data source & schema reference", expanded=False):
+            with st.expander(t("feature_datasource"), expanded=False):
                 st.markdown("""
 ### Source: `SNOWFLAKE.BILLING.PARTNER_USAGE_IN_CURRENCY_DAILY`
 
@@ -2358,14 +2859,14 @@ This is the authoritative reseller view — it shows daily credit consumption pe
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        st.markdown(f"*{MESSAGES['data_refresh']}*")
+        st.markdown(f"*{t('msg_data_refresh')}*")
     
     with col2:
-        st.markdown(f"*Data Range: {start_date} to {end_date}*")
+        st.markdown(f"*{t('footer_data_range', start=start_date, end=end_date)}*")
     
     with col3:
         if not usage_df.empty:
-            st.markdown(f"*Total Records: {len(usage_df):,}*")
+            st.markdown(f"*{t('footer_total_records', count=f'{len(usage_df):,}')}*")
 
 if __name__ == "__main__":
     main() 

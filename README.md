@@ -59,6 +59,49 @@ USE_DEMO_DATA = True  # line ~107
 
 ---
 
+## Internationalization (i18n)
+
+The dashboard supports multiple languages with a built-in translation system.
+
+| Language | Code | Status |
+|----------|------|--------|
+| English  | `en` | Default |
+| Japanese | `ja` | Fully translated |
+
+Users can switch languages from the sidebar language selector. The chosen language is synced to the URL query parameter `?lang=`, so bookmarking the URL preserves the preference across sessions.
+
+| URL | Behavior |
+|-----|----------|
+| `https://<app-url>` | Opens in English (default) |
+| `https://<app-url>?lang=ja` | Opens in Japanese |
+| `https://<app-url>?lang=en` | Opens in English (explicit) |
+
+Sharing a `?lang=ja` link with colleagues opens the dashboard in Japanese for them as well. Invalid language codes fall back to English automatically.
+
+### How It Works
+
+- All UI strings are defined in the `TRANSLATIONS` dictionary at the top of `streamlit_app.py`, keyed by language code (`en`, `ja`, etc.)
+- The helper function `t(key, **kwargs)` returns the translated string for the current language, with automatic fallback to English if a key is missing
+- Feature use-case descriptions use a dedicated `t_usecase(feature_key)` helper
+- Translation keys support Python format strings for dynamic values (e.g. `t("kpi_vs_last_week", value=12.3)`)
+
+### Adding a New Language
+
+1. Add the language code and display name to `SUPPORTED_LANGUAGES`:
+   ```python
+   SUPPORTED_LANGUAGES = {"en": "English", "ja": "日本語", "ko": "한국어"}
+   ```
+2. Add a new entry in the `TRANSLATIONS` dictionary with all keys translated:
+   ```python
+   TRANSLATIONS["ko"] = {
+       "app_title": "Snowflake 크레딧 사용량 대시보드",
+       # ... all other keys
+   }
+   ```
+3. No other code changes are needed — the sidebar selector and `t()` function pick up new languages automatically.
+
+---
+
 ## Data Sources
 
 | View | Purpose |
