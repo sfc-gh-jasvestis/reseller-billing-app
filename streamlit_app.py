@@ -2112,6 +2112,28 @@ def show_portfolio_summary(usage_df, balance_df, contract_df):
 
 
 def main():
+    # Language selector — persist choice in URL query params (?lang=ja)
+    # Must be initialised before any t() calls so titles render in the correct language.
+    _lang_options = list(SUPPORTED_LANGUAGES.keys())
+    _qp_lang = st.query_params.get("lang", DEFAULT_LANGUAGE)
+    if _qp_lang not in _lang_options:
+        _qp_lang = DEFAULT_LANGUAGE
+
+    st.sidebar.selectbox(
+        "🌐 Language",
+        options=_lang_options,
+        format_func=lambda x: SUPPORTED_LANGUAGES[x],
+        key="language",
+        index=_lang_options.index(
+            st.session_state.get("language", _qp_lang)
+        ),
+    )
+
+    # Sync selection back to query params so bookmarks remember the choice
+    if st.session_state["language"] != st.query_params.get("lang"):
+        st.query_params["lang"] = st.session_state["language"]
+    st.sidebar.markdown("---")
+
     # Header with enhanced styling
     st.markdown(f'<h1 class="main-header">{APP_ICON} {t("app_title")}</h1>', unsafe_allow_html=True)
     st.markdown(f"### {t('app_subtitle')}")
@@ -2136,27 +2158,6 @@ def main():
                     st.cache_data.clear()
                     st.rerun()
             st.stop()
-    
-    # Language selector — persist choice in URL query params (?lang=ja)
-    _lang_options = list(SUPPORTED_LANGUAGES.keys())
-    _qp_lang = st.query_params.get("lang", DEFAULT_LANGUAGE)
-    if _qp_lang not in _lang_options:
-        _qp_lang = DEFAULT_LANGUAGE
-    if "language" not in st.session_state:
-        st.session_state["language"] = _qp_lang
-
-    st.sidebar.selectbox(
-        "🌐 Language",
-        options=_lang_options,
-        format_func=lambda x: SUPPORTED_LANGUAGES[x],
-        key="language",
-        index=_lang_options.index(st.session_state["language"]),
-    )
-
-    # Sync selection back to query params so bookmarks remember the choice
-    if st.session_state["language"] != st.query_params.get("lang"):
-        st.query_params["lang"] = st.session_state["language"]
-    st.sidebar.markdown("---")
 
     # Sidebar with enhanced filters
     st.sidebar.header(t("sidebar_controls"))
