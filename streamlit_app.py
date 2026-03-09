@@ -2085,8 +2085,12 @@ def show_portfolio_summary(usage_df, balance_df, contract_df):
 
         # Risk score
         risk_factors = 0
-        if days_depletion is not None and days_depletion < 30: risk_factors += 2
-        elif days_depletion is not None and days_depletion < 90: risk_factors += 1
+        if balance <= 0:  # Balance fully depleted — always critical
+            risk_factors += 3
+        elif days_depletion is not None and days_depletion < 30:
+            risk_factors += 2
+        elif days_depletion is not None and days_depletion < 90:
+            risk_factors += 1
         if days_overage is not None and days_overage < 30: risk_factors += 2
         elif days_overage is not None and days_overage < 60: risk_factors += 1
         if ci and (ci['end'] - today).days < 60: risk_factors += 1
