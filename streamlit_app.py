@@ -163,7 +163,7 @@ TRANSLATIONS = {
         "portfolio_critical": "🔴 Critical",
         "portfolio_watch": "🟡 Watch",
         "portfolio_healthy": "🟢 Healthy",
-        "portfolio_risk_caption": "Risk: 🔴 Critical = near depletion/overage/expiry · 🟡 Watch = approaching a limit · 🟢 Healthy · AI/ML = any Cortex/ML feature active",
+        "portfolio_risk_caption": "Risk: 🔴 Critical = near depletion/overage/expiry · 🟡 Watch = approaching a limit · 🟢 Healthy",
 
         # Alerts
         "alert_header": "🚨 Alerts & Insights",
@@ -370,7 +370,7 @@ TRANSLATIONS = {
         "portfolio_critical": "🔴 危険",
         "portfolio_watch": "🟡 注意",
         "portfolio_healthy": "🟢 正常",
-        "portfolio_risk_caption": "リスク: 🔴 危険 = 枯渇/超過/期限切れ間近 · 🟡 注意 = 閾値に接近中 · 🟢 正常 · AI/ML = Cortex/ML機能使用中",
+        "portfolio_risk_caption": "リスク: 🔴 危険 = 枯渇/超過/期限切れ間近 · 🟡 注意 = 閾値に接近中 · 🟢 正常",
 
         # Alerts
         "alert_header": "🚨 アラート & インサイト",
