@@ -1334,7 +1334,7 @@ def create_contract_usage_chart(usage_df, contract_metrics, customer_name):
                 x=all_dates,
                 y=all_cumulative,
                 name=t('chart_cumulative_consump'),
-                line=dict(color='black', width=2),
+                line=dict(color='#00D4AA', width=2.5),
                 mode='lines',
                 legendgroup='cumulative'
             ),
@@ -1348,7 +1348,7 @@ def create_contract_usage_chart(usage_df, contract_metrics, customer_name):
                 x=[contract_start, prediction_end],
                 y=[metrics['capacity_purchased'], metrics['capacity_purchased']],
                 name=t('chart_capacity_contract'),
-                line=dict(color='gray', width=2, dash='dash'),
+                line=dict(color='#FFD166', width=2.5, dash='dash'),
                 mode='lines',
                 legendgroup='capacity'
             ),
@@ -1368,20 +1368,21 @@ def create_contract_usage_chart(usage_df, contract_metrics, customer_name):
                 x=0.5,
                 font=dict(size=10)
             ),
-            plot_bgcolor='white'
+            plot_bgcolor='rgba(0,0,0,0)',
+            paper_bgcolor='rgba(0,0,0,0)'
         )
         
         # Update y-axes
         fig.update_yaxes(
             title_text=t("chart_consumption", currency=metrics['currency']),
             secondary_y=False,
-            gridcolor='lightgray',
+            gridcolor='rgba(128,128,128,0.3)',
             tickformat="$,.0f"
         )
         fig.update_yaxes(
             title_text=t("chart_cumulative"),
             secondary_y=True,
-            gridcolor='lightgray',
+            gridcolor='rgba(128,128,128,0.3)',
             tickformat="$,.0f"
         )
         
@@ -1389,7 +1390,7 @@ def create_contract_usage_chart(usage_df, contract_metrics, customer_name):
         fig.update_xaxes(
             tickformat="%m/%d/%Y",
             tickangle=45,
-            gridcolor='lightgray',
+            gridcolor='rgba(128,128,128,0.3)',
             nticks=20
         )
         
@@ -1426,25 +1427,42 @@ st.markdown("""
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
     .alert-success {
-        background-color: #d4edda;
-        border-color: #c3e6cb;
-        color: #155724;
         padding: 0.75rem 1.25rem;
         margin-bottom: 1rem;
         border: 1px solid transparent;
         border-radius: 0.25rem;
     }
     .alert-warning {
-        background-color: #fff3cd;
-        border-color: #ffeaa7;
-        color: #856404;
         padding: 0.75rem 1.25rem;
         margin-bottom: 1rem;
         border: 1px solid transparent;
         border-radius: 0.25rem;
     }
+    @media (prefers-color-scheme: light) {
+        .alert-success {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        .alert-warning {
+            background-color: #fff3cd;
+            border-color: #ffeaa7;
+            color: #856404;
+        }
+    }
+    @media (prefers-color-scheme: dark) {
+        .alert-success {
+            background-color: rgba(40, 167, 69, 0.2);
+            border-color: rgba(40, 167, 69, 0.4);
+            color: #81C784;
+        }
+        .alert-warning {
+            background-color: rgba(255, 193, 7, 0.15);
+            border-color: rgba(255, 193, 7, 0.3);
+            color: #FFD54F;
+        }
+    }
     .sidebar .sidebar-content {
-        background: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
     }
     .stSelectbox > div > div {
         border-radius: 5px;
@@ -1750,8 +1768,12 @@ def create_enhanced_trend_chart(df):
     fig.update_layout(
         height=600,
         title=t("chart_usage_cost_trends"),
-        hovermode='x unified'
+        hovermode='x unified',
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)'
     )
+    fig.update_xaxes(gridcolor='rgba(128,128,128,0.3)')
+    fig.update_yaxes(gridcolor='rgba(128,128,128,0.3)')
     
     return fig
 
@@ -1800,8 +1822,12 @@ def create_balance_by_customer_chart(df):
         ),
         margin=dict(t=20, b=80),
         xaxis_tickangle=-20,
-        yaxis_tickformat='$,.0f'
+        yaxis_tickformat='$,.0f',
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)'
     )
+    fig.update_xaxes(gridcolor='rgba(128,128,128,0.3)')
+    fig.update_yaxes(gridcolor='rgba(128,128,128,0.3)')
     return fig
 
 def create_usage_heatmap(df):
@@ -1850,7 +1876,7 @@ def create_usage_heatmap(df):
 
     fig = px.imshow(
         heatmap_pivot,
-        color_continuous_scale="Blues",
+        color_continuous_scale="Viridis",
         aspect="auto",
         labels=dict(x="", y="Week of", color="Credits")
     )
@@ -1860,7 +1886,9 @@ def create_usage_heatmap(df):
         yaxis_title="",
         height=min(480, max(220, len(heatmap_pivot) * 38 + 100)),
         coloraxis_colorbar=dict(title="Credits", thickness=12, len=0.7),
-        margin=dict(l=10, r=20, t=40, b=10)
+        margin=dict(l=10, r=20, t=40, b=10),
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)'
     )
     fig.update_xaxes(side="top")
     return fig
@@ -2286,7 +2314,10 @@ def main():
                     barmode='stack'
                 )
                 fig_mom.update_layout(height=360, legend=dict(orientation='h', y=-0.25),
-                                      margin=dict(t=40, b=80))
+                                      margin=dict(t=40, b=80),
+                                      plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)')
+                fig_mom.update_xaxes(gridcolor='rgba(128,128,128,0.3)')
+                fig_mom.update_yaxes(gridcolor='rgba(128,128,128,0.3)')
                 st.plotly_chart(fig_mom, use_container_width=True)
         else:
             mom_agg = mom_df.groupby('Month')['USAGE_IN_CURRENCY'].sum().reset_index()
@@ -2296,13 +2327,13 @@ def main():
                 fig_mom = go.Figure()
                 fig_mom.add_trace(go.Bar(
                     x=mom_agg['Month'], y=mom_agg['Cost'],
-                    name=t("chart_monthly_cost"), marker_color='#1f77b4',
+                    name=t("chart_monthly_cost"), marker_color='#4A90D9',
                     text=mom_agg['Cost'].apply(lambda v: f"${v:,.0f}"),
                     textposition='outside'
                 ))
                 # MoM % change annotations
                 for _, row in mom_agg.dropna(subset=['MoM %']).iterrows():
-                    color = '#2ca02c' if row['MoM %'] >= 0 else '#d62728'
+                    color = '#4CAF50' if row['MoM %'] >= 0 else '#FF5252'
                     sign = '+' if row['MoM %'] >= 0 else ''
                     fig_mom.add_annotation(
                         x=row['Month'], y=row['Cost'],
@@ -2313,8 +2344,11 @@ def main():
                 fig_mom.update_layout(
                     title=t("trend_monthly_spend_mom"),
                     height=360, xaxis_title='', yaxis_title=t("chart_axis_cost_usd"),
-                    margin=dict(t=40, b=40)
+                    margin=dict(t=40, b=40),
+                    plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)'
                 )
+                fig_mom.update_xaxes(gridcolor='rgba(128,128,128,0.3)')
+                fig_mom.update_yaxes(gridcolor='rgba(128,128,128,0.3)')
                 st.plotly_chart(fig_mom, use_container_width=True)
 
         # Detailed data table
@@ -2393,7 +2427,8 @@ def main():
                 hole=0.35
             )
             fig_pie.update_traces(textposition='inside', textinfo='percent+label')
-            fig_pie.update_layout(height=380, showlegend=False, margin=dict(t=40, b=10))
+            fig_pie.update_layout(height=380, showlegend=False, margin=dict(t=40, b=10),
+                                  plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)')
             st.plotly_chart(fig_pie, use_container_width=True)
 
         with col2:
@@ -2415,8 +2450,11 @@ def main():
                 height=380,
                 xaxis_tickangle=-30,
                 margin=dict(t=40, b=80),
-                yaxis_title=t("chart_axis_credits")
+                yaxis_title=t("chart_axis_credits"),
+                plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)'
             )
+            fig_bar.update_xaxes(gridcolor='rgba(128,128,128,0.3)')
+            fig_bar.update_yaxes(gridcolor='rgba(128,128,128,0.3)')
             st.plotly_chart(fig_bar, use_container_width=True)
 
         # Summary table below
@@ -2456,8 +2494,11 @@ def main():
             fig_acct.update_layout(
                 height=380, xaxis_tickangle=-25,
                 margin=dict(t=40, b=80),
-                legend=dict(orientation='h', y=-0.3)
+                legend=dict(orientation='h', y=-0.3),
+                plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)'
             )
+            fig_acct.update_xaxes(gridcolor='rgba(128,128,128,0.3)')
+            fig_acct.update_yaxes(gridcolor='rgba(128,128,128,0.3)')
             st.plotly_chart(fig_acct, use_container_width=True)
 
             # Account table
@@ -2473,14 +2514,12 @@ def main():
         currency = usage_df['CURRENCY'].iloc[0] if not usage_df.empty else "USD"
 
         # ── Shared projection window selector ─────────────────────────────────
-        if 'financial_run_rate_days' not in st.session_state:
-            st.session_state['financial_run_rate_days'] = 30
         col_rr, _ = st.columns([1, 4])
         with col_rr:
             financial_run_rate_days = st.selectbox(
                 t("financial_projection_window"),
                 options=[7, 30, 60, 90],
-                index=[7, 30, 60, 90].index(st.session_state['financial_run_rate_days']),
+                index=1,
                 format_func=lambda x: t("financial_last_n_days", n=x),
                 help="Days of recent consumption used to calculate run rate and projections across both sections below",
                 key="financial_run_rate_days"
@@ -2708,7 +2747,7 @@ def main():
                 fig_matrix = px.imshow(
                     matrix,
                     labels=dict(x='Feature', y='Customer', color='Credits'),
-                    color_continuous_scale='Blues',
+                    color_continuous_scale='Viridis',
                     aspect='auto',
                     text_auto='.0f'
                 )
@@ -2716,7 +2755,8 @@ def main():
                     height=max(280, len(matrix) * 60),
                     margin=dict(t=20, b=60, l=160, r=20),
                     coloraxis_showscale=False,
-                    xaxis=dict(tickangle=-35, side='bottom')
+                    xaxis=dict(tickangle=-35, side='bottom'),
+                    plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)'
                 )
                 fig_matrix.update_traces(textfont_size=10)
                 st.plotly_chart(fig_matrix, use_container_width=True)
@@ -2772,7 +2812,10 @@ def main():
                         labels={'CREDITS_USED': t("chart_axis_credits"), 'USAGE_DATE': t("chart_axis_date")}
                     )
                     fig_trend.update_layout(height=340, hovermode='x unified',
-                                            legend=dict(orientation='h', y=-0.25))
+                                            legend=dict(orientation='h', y=-0.25),
+                                            plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)')
+                    fig_trend.update_xaxes(gridcolor='rgba(128,128,128,0.3)')
+                    fig_trend.update_yaxes(gridcolor='rgba(128,128,128,0.3)')
                     st.plotly_chart(fig_trend, use_container_width=True)
 
                 with col2:
