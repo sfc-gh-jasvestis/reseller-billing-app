@@ -4,6 +4,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from datetime import datetime, timedelta
+import re
 
 # =============================================================================
 # CONFIGURATION SETTINGS (embedded for Streamlit in Snowflake compatibility)
@@ -2801,7 +2802,7 @@ def main():
                         .reset_index()
                     )
                     feature_trend['Feature'] = feature_trend['USAGE_TYPE'].apply(
-                        lambda x: USAGE_TYPE_DISPLAY.get(x, x.title())
+                        lambda x: re.sub(r'[^\w\s/()-]', '', USAGE_TYPE_DISPLAY.get(x, x.title())).strip()
                     )
                     fig_trend = px.area(
                         feature_trend,
@@ -2811,10 +2812,14 @@ def main():
                         title=t("feature_usage_over_time", name=feature_customer),
                         labels={'CREDITS_USED': t("chart_axis_credits"), 'USAGE_DATE': t("chart_axis_date")}
                     )
-                    fig_trend.update_layout(height=340, hovermode='x unified',
-                                            legend=dict(orientation='h', y=-0.25),
+                    fig_trend.update_traces(
+                        hovertemplate='%{fullData.name}: %{y:,.1f} credits<extra></extra>'
+                    )
+                    fig_trend.update_layout(height=420, hovermode='closest',
+                                            legend=dict(orientation='h', y=-0.3, font=dict(size=11)),
+                                            margin=dict(b=120),
                                             plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)')
-                    fig_trend.update_xaxes(gridcolor='rgba(128,128,128,0.3)')
+                    fig_trend.update_xaxes(gridcolor='rgba(128,128,128,0.3)', title_text='')
                     fig_trend.update_yaxes(gridcolor='rgba(128,128,128,0.3)')
                     st.plotly_chart(fig_trend, use_container_width=True)
 
