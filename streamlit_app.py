@@ -1737,7 +1737,7 @@ def create_enhanced_trend_chart(df):
     
     for i, usage_type in enumerate(usage_types):
         data = daily_usage[daily_usage['USAGE_TYPE'] == usage_type]
-        display_name = USAGE_TYPE_DISPLAY.get(usage_type, usage_type)
+        display_name = re.sub(r'[^\w\s/()-]', '', USAGE_TYPE_DISPLAY.get(usage_type, usage_type)).strip()
         
         fig.add_trace(
             go.Scatter(
@@ -1745,7 +1745,8 @@ def create_enhanced_trend_chart(df):
                 y=data['CREDITS_USED'],
                 name=f"{display_name} (Credits)",
                 line=dict(color=colors[i % len(colors)]),
-                mode='lines+markers'
+                mode='lines+markers',
+                hovertemplate='%{fullData.name}: %{y:,.1f}<extra></extra>'
             ),
             row=1, col=1
         )
@@ -1757,19 +1758,22 @@ def create_enhanced_trend_chart(df):
                 name=f"{display_name} (Cost)",
                 line=dict(color=colors[i % len(colors)], dash='dash'),
                 mode='lines+markers',
-                showlegend=False
+                showlegend=False,
+                hovertemplate='%{fullData.name}: $%{y:,.2f}<extra></extra>'
             ),
             row=2, col=1
         )
     
-    fig.update_xaxes(title_text=t("chart_axis_date"), row=2, col=1)
+    fig.update_xaxes(title_text='', row=2, col=1)
     fig.update_yaxes(title_text=t("chart_axis_credits"), row=1, col=1)
     fig.update_yaxes(title_text=t("chart_axis_cost"), row=2, col=1)
     
     fig.update_layout(
-        height=600,
+        height=650,
         title=t("chart_usage_cost_trends"),
-        hovermode='x unified',
+        hovermode='closest',
+        legend=dict(orientation='h', y=-0.15, font=dict(size=11)),
+        margin=dict(b=120),
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)'
     )
