@@ -128,3 +128,11 @@ SELECT COUNT(*) FROM SNOWFLAKE.BILLING.PARTNER_USAGE_IN_CURRENCY_DAILY;
 ---
 
 *Built for Snowflake reseller partners.*
+
+---
+
+## Legal
+
+Licensed under the Apache License, Version 2.0. See [LICENSE](LICENSE).
+
+This is a personal project and is **not an official Snowflake offering**. It comes with **no support or warranty**. Use it at your own risk. Snowflake has no obligation to maintain, update, or support this code. Do not use this code in production without thorough review and testing.
