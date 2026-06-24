@@ -134,10 +134,26 @@ TRANSLATIONS = {
         "all_customers": "All Customers",
 
         # Tab names
+        "tab_overview": "🏠 Account Overview",
         "tab_trends": "📊 Trends",
         "tab_usage": "🎯 Usage Patterns",
         "tab_financial": "💰 Financial Health",
         "tab_feature": "🔬 Feature Adoption",
+
+        # Account Overview tab (credits-only)
+        "overview_subtitle": "*Credits-only summary — safe to share with reseller partners*",
+        "overview_credits_used": "Credits Used",
+        "overview_credits_remaining": "Credits Remaining",
+        "overview_avg_daily": "Avg Daily Credits",
+        "overview_days_depletion": "Days to Depletion",
+        "overview_no_balance": "No balance data available for this period.",
+        "overview_balance_header": "#### 📦 Balance Breakdown (Credits)",
+        "overview_capacity": "Capacity Balance",
+        "overview_rollover": "Rollover Balance",
+        "overview_free_usage": "Free Usage Balance",
+        "overview_burn_chart": "Daily Credit Burn",
+        "overview_feature_breakdown": "#### 🔬 Credits by Feature",
+        "overview_account_breakdown": "#### 💻 Credits by Account",
 
         # KPI metrics
         "kpi_header": "📊 Key Performance Indicators",
@@ -341,10 +357,26 @@ TRANSLATIONS = {
         "all_customers": "全顧客",
 
         # Tab names
+        "tab_overview": "🏠 アカウント概要",
         "tab_trends": "📊 トレンド",
         "tab_usage": "🎯 使用パターン",
         "tab_financial": "💰 財務状況",
         "tab_feature": "🔬 機能採用状況",
+
+        # Account Overview tab (credits-only)
+        "overview_subtitle": "*クレジットのみの概要 — リセラーパートナーとの共有に適しています*",
+        "overview_credits_used": "使用クレジット",
+        "overview_credits_remaining": "残余クレジット",
+        "overview_avg_daily": "1日平均クレジット",
+        "overview_days_depletion": "枯渇までの日数",
+        "overview_no_balance": "この期間の残高データはありません。",
+        "overview_balance_header": "#### 📦 残高内訳（クレジット）",
+        "overview_capacity": "キャパシティ残高",
+        "overview_rollover": "ロールオーバー残高",
+        "overview_free_usage": "無料使用残高",
+        "overview_burn_chart": "日次クレジット消費",
+        "overview_feature_breakdown": "#### 🔬 機能別クレジット",
+        "overview_account_breakdown": "#### 💻 アカウント別クレジット",
 
         # KPI metrics
         "kpi_header": "📊 主要指標",
@@ -1427,25 +1459,21 @@ st.markdown("""
         margin: 0.5rem 0;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
-    .alert-success {
-        padding: 0.75rem 1.25rem;
-        margin-bottom: 1rem;
-        border: 1px solid transparent;
-        border-radius: 0.25rem;
-    }
-    .alert-warning {
-        padding: 0.75rem 1.25rem;
-        margin-bottom: 1rem;
-        border: 1px solid transparent;
-        border-radius: 0.25rem;
-    }
     @media (prefers-color-scheme: light) {
         .alert-success {
+            padding: 0.75rem 1.25rem;
+            margin-bottom: 1rem;
+            border: 1px solid transparent;
+            border-radius: 0.25rem;
             background-color: #d4edda;
             border-color: #c3e6cb;
             color: #155724;
         }
         .alert-warning {
+            padding: 0.75rem 1.25rem;
+            margin-bottom: 1rem;
+            border: 1px solid transparent;
+            border-radius: 0.25rem;
             background-color: #fff3cd;
             border-color: #ffeaa7;
             color: #856404;
@@ -1453,49 +1481,27 @@ st.markdown("""
     }
     @media (prefers-color-scheme: dark) {
         .alert-success {
+            padding: 0.75rem 1.25rem;
+            margin-bottom: 1rem;
+            border: 1px solid transparent;
+            border-radius: 0.25rem;
             background-color: rgba(40, 167, 69, 0.2);
             border-color: rgba(40, 167, 69, 0.4);
             color: #81C784;
         }
         .alert-warning {
+            padding: 0.75rem 1.25rem;
+            margin-bottom: 1rem;
+            border: 1px solid transparent;
+            border-radius: 0.25rem;
             background-color: rgba(255, 193, 7, 0.15);
             border-color: rgba(255, 193, 7, 0.3);
             color: #FFD54F;
         }
     }
-    .sidebar .sidebar-content {
-    }
     .stSelectbox > div > div {
         border-radius: 5px;
     }
-    /* Fix sidebar text visibility for both light and dark mode */
-    @media (prefers-color-scheme: dark) {
-        [data-testid="stSidebar"] .stSelectbox label,
-        [data-testid="stSidebar"] .stMultiSelect label,
-        [data-testid="stSidebar"] h2,
-        [data-testid="stSidebar"] p,
-        [data-testid="stSidebar"] span {
-            color: rgba(255, 255, 255, 0.9) !important;
-        }
-        [data-testid="stSidebar"] .stSelectbox [data-baseweb="select"] > div,
-        [data-testid="stSidebar"] .stMultiSelect [data-baseweb="select"] > div {
-            color: rgba(255, 255, 255, 0.9) !important;
-        }
-    }
-    @media (prefers-color-scheme: light) {
-        [data-testid="stSidebar"] .stSelectbox label,
-        [data-testid="stSidebar"] .stMultiSelect label,
-        [data-testid="stSidebar"] h2,
-        [data-testid="stSidebar"] p,
-        [data-testid="stSidebar"] span {
-            color: rgba(0, 0, 0, 0.85) !important;
-        }
-        [data-testid="stSidebar"] .stSelectbox [data-baseweb="select"] > div,
-        [data-testid="stSidebar"] .stMultiSelect [data-baseweb="select"] > div {
-            color: rgba(0, 0, 0, 0.85) !important;
-        }
-    }
-    /* Upsell cards — light/dark adaptive */
     .upsell-card {
         padding: 0.8rem 1rem;
         border-radius: 8px;
@@ -1508,12 +1514,9 @@ st.markdown("""
         }
         .upsell-card-title {
             color: #333333;
-            font-size: 1rem;
         }
         .upsell-card-desc {
             color: #555555;
-            font-size: 0.85rem;
-            line-height: 1.4;
         }
     }
     @media (prefers-color-scheme: dark) {
@@ -1522,13 +1525,17 @@ st.markdown("""
         }
         .upsell-card-title {
             color: rgba(255, 255, 255, 0.9);
-            font-size: 1rem;
         }
         .upsell-card-desc {
             color: rgba(255, 255, 255, 0.7);
-            font-size: 0.85rem;
-            line-height: 1.4;
         }
+    }
+    .upsell-card-title {
+        font-size: 1rem;
+    }
+    .upsell-card-desc {
+        font-size: 0.85rem;
+        line-height: 1.4;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -2272,7 +2279,7 @@ def main():
     
     # Tab navigation — st.radio persists across reruns via session_state,
     # unlike st.tabs which resets to the first tab on any widget-triggered rerun
-    TAB_OPTIONS = [t("tab_trends"), t("tab_usage"), t("tab_financial"), t("tab_feature")]
+    TAB_OPTIONS = [t("tab_overview"), t("tab_trends"), t("tab_usage"), t("tab_financial"), t("tab_feature")]
     if 'active_tab' not in st.session_state:
         st.session_state['active_tab'] = TAB_OPTIONS[0]
 
@@ -2285,7 +2292,132 @@ def main():
     )
     st.markdown("---")
 
-    if active_tab == t("tab_trends"):
+    if active_tab == t("tab_overview"):
+        # ── Account Overview — credits only, no currency values ──────────────
+        st.markdown(t("overview_subtitle"))
+
+        total_credits = usage_df['CREDITS_USED'].sum()
+        avg_daily = usage_df.groupby('USAGE_DATE')['CREDITS_USED'].sum().mean()
+
+        # Balance metrics
+        if not balance_df.empty:
+            latest_bal = balance_df.loc[balance_df.groupby('SOLD_TO_CUSTOMER_NAME')['BALANCE_DATE'].idxmax()]
+            total_remaining = latest_bal['TOTAL_BALANCE'].sum()
+            total_capacity  = latest_bal['CAPACITY_BALANCE'].sum()
+            total_rollover  = latest_bal['ROLLOVER_BALANCE'].sum()
+            total_free      = latest_bal['FREE_USAGE_BALANCE'].sum()
+            days_depletion  = int(total_remaining / avg_daily) if avg_daily > 0 and total_remaining > 0 else None
+        else:
+            total_remaining = None
+            total_capacity  = None
+            total_rollover  = None
+            total_free      = None
+            days_depletion  = None
+
+        # ── 4 KPI cards ───────────────────────────────────────────────────────
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            st.metric(t("overview_credits_used"), format_credits(total_credits))
+        with col2:
+            st.metric(
+                t("overview_credits_remaining"),
+                format_credits(total_remaining) if total_remaining is not None else "—"
+            )
+        with col3:
+            st.metric(t("overview_avg_daily"), format_credits(avg_daily))
+        with col4:
+            st.metric(
+                t("overview_days_depletion"),
+                f"{days_depletion:,}d" if days_depletion is not None else "—"
+            )
+
+        # ── Balance breakdown ─────────────────────────────────────────────────
+        if not balance_df.empty:
+            st.markdown(t("overview_balance_header"))
+            b1, b2, b3 = st.columns(3)
+            with b1:
+                st.metric(t("overview_capacity"), format_credits(total_capacity))
+            with b2:
+                st.metric(t("overview_rollover"), format_credits(total_rollover))
+            with b3:
+                st.metric(t("overview_free_usage"), format_credits(total_free))
+        else:
+            st.info(t("overview_no_balance"))
+
+        st.markdown("---")
+
+        # ── Daily credit burn chart ────────────────────────────────────────────
+        if customer_filter == t("all_customers"):
+            burn = (
+                usage_df.groupby(['USAGE_DATE', 'SOLD_TO_CUSTOMER_NAME'])['CREDITS_USED']
+                .sum().reset_index()
+            )
+            fig_burn = px.line(
+                burn, x='USAGE_DATE', y='CREDITS_USED', color='SOLD_TO_CUSTOMER_NAME',
+                title=t("overview_burn_chart"),
+                labels={'CREDITS_USED': t("chart_axis_credits"), 'USAGE_DATE': t("chart_axis_date"), 'SOLD_TO_CUSTOMER_NAME': ''}
+            )
+        else:
+            burn = usage_df.groupby('USAGE_DATE')['CREDITS_USED'].sum().reset_index()
+            fig_burn = px.line(
+                burn, x='USAGE_DATE', y='CREDITS_USED',
+                title=t("overview_burn_chart"),
+                labels={'CREDITS_USED': t("chart_axis_credits"), 'USAGE_DATE': t("chart_axis_date")}
+            )
+        fig_burn.update_layout(
+            height=CHART_HEIGHT, margin=dict(t=40, b=40),
+            plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)'
+        )
+        fig_burn.update_xaxes(gridcolor='rgba(128,128,128,0.3)')
+        fig_burn.update_yaxes(gridcolor='rgba(128,128,128,0.3)')
+        st.plotly_chart(fig_burn, use_container_width=True)
+
+        col_left, col_right = st.columns(2)
+
+        # ── Credits by feature ────────────────────────────────────────────────
+        with col_left:
+            st.markdown(t("overview_feature_breakdown"))
+            by_feature = (
+                usage_df.groupby('USAGE_TYPE')['CREDITS_USED'].sum()
+                .reset_index().sort_values('CREDITS_USED', ascending=True)
+            )
+            by_feature['Feature'] = by_feature['USAGE_TYPE'].apply(
+                lambda x: USAGE_TYPE_DISPLAY.get(x, x.title())
+            )
+            fig_feat = px.bar(
+                by_feature, x='CREDITS_USED', y='Feature', orientation='h',
+                labels={'CREDITS_USED': t("chart_axis_credits"), 'Feature': ''}
+            )
+            fig_feat.update_layout(
+                height=max(300, len(by_feature) * 32),
+                margin=dict(t=10, b=10, l=10, r=10),
+                plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)'
+            )
+            fig_feat.update_xaxes(gridcolor='rgba(128,128,128,0.3)')
+            st.plotly_chart(fig_feat, use_container_width=True)
+
+        # ── Credits by account ────────────────────────────────────────────────
+        with col_right:
+            if 'ACCOUNT_NAME' in usage_df.columns and usage_df['ACCOUNT_NAME'].nunique() > 1:
+                st.markdown(t("overview_account_breakdown"))
+                by_acct = (
+                    usage_df.groupby('ACCOUNT_NAME')['CREDITS_USED'].sum()
+                    .reset_index().sort_values('CREDITS_USED', ascending=False)
+                )
+                fig_acct = px.bar(
+                    by_acct, x='ACCOUNT_NAME', y='CREDITS_USED',
+                    labels={'CREDITS_USED': t("chart_axis_credits"), 'ACCOUNT_NAME': ''}
+                )
+                fig_acct.update_layout(
+                    height=300,
+                    margin=dict(t=10, b=60, l=10, r=10),
+                    plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)'
+                )
+                fig_acct.update_xaxes(tickangle=-30, gridcolor='rgba(128,128,128,0.3)')
+                fig_acct.update_yaxes(gridcolor='rgba(128,128,128,0.3)')
+                st.plotly_chart(fig_acct, use_container_width=True)
+
+    elif active_tab == t("tab_trends"):
         # KPIs, portfolio summary, and alerts all live here
         st.subheader(t("kpi_header"))
         display_enhanced_metrics(usage_df, balance_df)
