@@ -2418,10 +2418,7 @@ def main():
                 st.plotly_chart(fig_acct, use_container_width=True)
 
     elif active_tab == t("tab_trends"):
-        # KPIs, portfolio summary, and alerts all live here
-        st.subheader(t("kpi_header"))
-        display_enhanced_metrics(usage_df, balance_df)
-
+        # Portfolio summary, alerts, and trend charts
         if customer_filter == t("all_customers"):
             show_portfolio_summary(usage_df, balance_df, contract_df)
 
