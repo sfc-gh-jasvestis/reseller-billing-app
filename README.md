@@ -48,10 +48,15 @@ To override auto-detection, set the `USE_DEMO_DATA` environment variable: `true`
 
 | Tab | Description |
 |-----|-------------|
-| 📊 **Trends** | Daily credit and cost trends per customer |
-| 🎯 **Usage Patterns** | Customer usage breakdown and growth comparisons |
-| 💰 **Financial Health** | Balance projections, run rate, and contract capacity |
-| 🔬 **Feature Adoption** | Feature usage per customer and upsell opportunities |
+| 🏠 **Account Overview** | Credits-only summary, safe to share with customers |
+| 📊 **Trends** | Portfolio health, alerts, daily cost trends, **cost anomalies** (per customer × service, z-score vs prior 28 days) and **customer growth** (last 30 vs prior 30 days) |
+| 🎯 **Usage Patterns** | Spend by feature, by account, by **rating type** (compute / storage / data transfer) and by **service per customer** |
+| 💰 **Financial Health** | Run rate, **on-demand (overage) spend**, **effective rates** per customer with rate-change alerts, **credits & other charges**, contract status with a **forecast range** and **renewal sizing** |
+| 🔬 **Feature Adoption** | Usage per `SERVICE_TYPE` per customer and upsell opportunities |
+
+Usage totals count consumption only. Rebates, support credits and other non-consumption billing types are listed separately, and month-close adjustment rows are excluded unless **Include billing adjustments** is ticked in the sidebar.
+
+Forecasts and anomaly detection run in pandas inside the app. They don't create any Snowflake objects.
 
 ---
 
@@ -100,11 +105,14 @@ Sharing a `?lang=ja` link with colleagues opens the dashboard in Japanese for th
 
 ## Data Sources
 
-| View | Purpose |
-|------|---------|
-| `PARTNER_USAGE_IN_CURRENCY_DAILY` | Daily credit usage by customer account |
-| `PARTNER_REMAINING_BALANCE_DAILY` | Daily balance snapshots |
-| `PARTNER_CONTRACT_ITEMS` | Contract terms and capacity |
+| View | Purpose | Required |
+|------|---------|----------|
+| `PARTNER_USAGE_IN_CURRENCY_DAILY` | Daily usage and cost per customer account, incl. `SERVICE_TYPE`, `BILLING_TYPE`, `RATING_TYPE`, `IS_ADJUSTMENT` and the `overage` usage-type prefix | Yes |
+| `PARTNER_REMAINING_BALANCE_DAILY` | Daily balance snapshots | Yes |
+| `PARTNER_CONTRACT_ITEMS` | Contract terms and capacity | Yes |
+| `PARTNER_RATE_SHEET_DAILY` | Effective (discounted) price per credit per customer, service and region | Optional: without it the Rates section says it is unavailable |
+
+`SERVICE_TYPE` display names come from Snowflake's documented list, which is not exhaustive. `AI_SERVICES` (Cortex) is an assumed value. Any unlisted service type shows its raw name, so check the names against your live data once after deploying.
 
 ---
 

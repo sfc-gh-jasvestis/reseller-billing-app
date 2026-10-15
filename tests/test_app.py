@@ -25,15 +25,24 @@ class FakeResult:
 class FakeSession:
     """Minimal Snowpark stand-in that records queries and bound params."""
 
-    def __init__(self, fail=False):
+    def __init__(self, fail=False, missing=()):
         self.fail = fail
+        self.missing = set(missing)
         self.calls = []
 
     def sql(self, query, params=None):
         self.calls.append((query, params))
         if self.fail and "SNOWFLAKE.BILLING" in query:
             raise Exception("Object 'SNOWFLAKE.BILLING.PARTNER_USAGE_IN_CURRENCY_DAILY' does not exist or not authorized.")
+        for view in self.missing:
+            if view in query:
+                raise Exception(f"Object 'SNOWFLAKE.BILLING.{view}' does not exist or not authorized.")
         today = date.today()
+        if "PARTNER_RATE_SHEET_DAILY" in query:
+            return FakeResult(pd.DataFrame([{
+                "RATE_DATE": today - timedelta(days=i), "SOLD_TO_CUSTOMER_NAME": "Live Co",
+                "ACCOUNT_NAME": "live_prod", "REGION": "AWS_US_WEST_2", "SERVICE_TYPE": "WAREHOUSE_METERING",
+                "RATING_TYPE": "compute", "CURRENCY": "USD", "EFFECTIVE_RATE": 3.0} for i in range(20)]))
         if "PARTNER_REMAINING_BALANCE_DAILY" in query:
             return FakeResult(pd.DataFrame([{
                 "SOLD_TO_ORGANIZATION_NAME": "Org", "SOLD_TO_CUSTOMER_NAME": "Live Co",
@@ -52,8 +61,10 @@ class FakeSession:
                 "SOLD_TO_ORGANIZATION_NAME": "Org", "SOLD_TO_CUSTOMER_NAME": "Live Co",
                 "SOLD_TO_CONTRACT_NUMBER": "C1", "ACCOUNT_NAME": "live_prod", "ACCOUNT_LOCATOR": "LV1",
                 "REGION": "AWS_US_WEST_2", "SERVICE_LEVEL": "Enterprise", "USAGE_DATE": today - timedelta(days=i),
-                "USAGE_TYPE": "Compute", "CURRENCY": "USD", "CREDITS_USED": 10.0,
-                "USAGE_IN_CURRENCY": 30.0, "BALANCE_SOURCE": "capacity"} for i in range(20)]
+                "USAGE_TYPE": "Compute" if i else "overage compute", "CURRENCY": "USD", "CREDITS_USED": 10.0,
+                "USAGE_IN_CURRENCY": 30.0, "BALANCE_SOURCE": "capacity" if i else "overage",
+                "SERVICE_TYPE": "WAREHOUSE_METERING", "BILLING_TYPE": "consumption",
+                "RATING_TYPE": "compute", "IS_ADJUSTMENT": False} for i in range(20)]
             return FakeResult(pd.DataFrame(rows))
         return FakeResult(pd.DataFrame())
 
@@ -122,7 +133,7 @@ def test_japanese_all_customers_still_returns_data(monkeypatch):
 
 def test_every_tab_renders(monkeypatch):
     at = run_app(monkeypatch, demo_env="true")
-    for option in at.radio[0].options:
+    for option in _app().TAB_KEYS:
         at.radio[0].set_value(option).run()
         assert not at.exception, option
 
@@ -136,3 +147,135 @@ def test_customer_filter_is_bound_not_interpolated(monkeypatch):
     query, params = session.calls[-1]
     assert hostile not in query
     assert params == ["2026-01-01", "2026-01-31", hostile, "compute", "storage"]
+
+
+# --------------------------------------------------------------------------
+# Cost enhancements
+# --------------------------------------------------------------------------
+
+def _app():
+    import streamlit_app as app
+    return app
+
+
+def _demo_consumption(days=89):
+    app = _app()
+    end = date.today()
+    usage = app.clean_usage_data(app.generate_demo_usage_data(end - timedelta(days=days), end))
+    return app.split_usage(usage)
+
+
+def test_overage_prefix_parsed():
+    app = _app()
+    df = app.clean_usage_data(pd.DataFrame([
+        {"USAGE_TYPE": "overage compute", "BALANCE_SOURCE": "overage", "USAGE_DATE": date.today(),
+         "CREDITS_USED": 1.0, "USAGE_IN_CURRENCY": 3.0, "SERVICE_TYPE": None},
+        {"USAGE_TYPE": "Storage", "BALANCE_SOURCE": "capacity", "USAGE_DATE": date.today(),
+         "CREDITS_USED": 1.0, "USAGE_IN_CURRENCY": 3.0, "SERVICE_TYPE": "storage"},
+    ]))
+    assert df["IS_OVERAGE"].tolist() == [True, False]
+    assert df["USAGE_TYPE"].tolist() == ["compute", "storage"]
+    assert df["SERVICE_TYPE"].tolist() == ["COMPUTE", "STORAGE"]
+    assert df["BILLING_TYPE"].tolist() == ["consumption", "consumption"]
+
+
+def test_split_usage_separates_other_charges_and_adjustments():
+    app = _app()
+    usage = app.clean_usage_data(app.generate_demo_usage_data(date.today() - timedelta(days=29), date.today()))
+    consumption, other = app.split_usage(usage)
+    assert set(other["BILLING_TYPE"]) == {"support_credit", "rebate"}
+    assert not consumption["IS_ADJUSTMENT"].any()
+    with_adj, _ = app.split_usage(usage, include_adjustments=True)
+    assert with_adj["IS_ADJUSTMENT"].sum() == 1
+
+
+def test_demo_overage_only_for_exhausted_customer():
+    consumption, _ = _demo_consumption()
+    assert set(consumption.loc[consumption["IS_OVERAGE"], "SOLD_TO_CUSTOMER_NAME"]) == {"SmallBiz Insights"}
+
+
+def test_rates_missing_while_usage_live(monkeypatch):
+    at = run_app(monkeypatch, session=FakeSession(missing={"PARTNER_RATE_SHEET_DAILY"}))
+    assert not at.exception
+    assert "Demo Mode Active" not in texts(at, "info")
+    at.radio[0].set_value("tab_financial").run()
+    assert not at.exception
+    assert not at.error, texts(at, "error")
+    assert "PARTNER_RATE_SHEET_DAILY is not readable" in texts(at, "info")
+
+
+def test_live_overage_alert(monkeypatch):
+    at = run_app(monkeypatch, session=FakeSession())
+    at.radio[0].set_value("tab_trends").run()
+    assert not at.exception
+    assert "Live Co" in " ".join(m.value for m in at.markdown if "on-demand" in m.value)
+
+
+def test_rate_change_detected():
+    app = _app()
+    end = date.today()
+    summary, _ = app.summarize_rates(app.generate_demo_rate_data(end - timedelta(days=29), end))
+    acme = summary.set_index("CUSTOMER").loc["Acme Corporation"]
+    assert acme["FIRST_RATE"] == 2.70 and acme["LATEST_RATE"] == 2.55
+    others = summary[summary["CUSTOMER"] != "Acme Corporation"]
+    assert (others["CHANGE_PCT"].abs() < app.RATE_CHANGE_ALERT_PCT).all()
+
+
+def test_anomaly_flags_only_injected_spike():
+    app = _app()
+    consumption, _ = _demo_consumption()
+    anomalies = app.detect_anomalies(consumption)
+    assert len(anomalies) == 1
+    row = anomalies.iloc[0]
+    assert row["CUSTOMER"] == "Global Analytics Co" and row["SERVICE_TYPE"] == "WAREHOUSE_METERING"
+    assert (date.today() - row["DATE"]).days in range(12, 15)
+
+
+def _flat_series(value=100.0, days=60):
+    end = date.today()
+    return pd.Series(value, index=[end - timedelta(days=i) for i in range(days)][::-1])
+
+
+def test_forecast_band_and_exhaustion():
+    app = _app()
+    forecast = app.forecast_daily_cost(_flat_series(), 30)
+    assert len(forecast) == 30
+    assert forecast["YHAT"].round(6).eq(100.0).all()
+    assert (forecast["LO"] <= forecast["YHAT"]).all() and (forecast["YHAT"] <= forecast["HI"]).all()
+    assert app.forecast_exhaustion_date(forecast, 0, 1_000_000) is None
+    assert app.forecast_exhaustion_date(forecast, 0, 1000) == date.today() + timedelta(days=10)
+    assert app.forecast_daily_cost(_flat_series(days=10), 30) is None
+
+
+def test_renewal_sizing():
+    app = _app()
+    spend, recommended = app.estimate_renewal_capacity(
+        _flat_series(), date.today() + timedelta(days=1), 365, 10)
+    assert round(spend) == 36500
+    assert round(recommended) == 40150
+
+
+def test_growth_ranking():
+    app = _app()
+    end = date.today()
+    df = pd.DataFrame([
+        {"SOLD_TO_CUSTOMER_NAME": "A", "USAGE_DATE": end - timedelta(days=d),
+         "USAGE_IN_CURRENCY": 20.0 if d < 30 else 10.0} for d in range(60)
+    ])
+    growth = app.growth_ranking(df, end)
+    assert round(growth.iloc[0]["GROWTH_PCT"]) == 100
+
+
+@pytest.mark.parametrize("lang", ["en", "ja"])
+def test_every_tab_renders_in_each_language(monkeypatch, lang):
+    import streamlit as st
+    monkeypatch.setenv("USE_DEMO_DATA", "true")
+    for tab in _app().TAB_KEYS:
+        st.cache_data.clear()
+        at = AppTest.from_file(APP, default_timeout=60)
+        at.query_params["lang"] = lang
+        at.session_state["active_tab"] = tab
+        at.run()
+        assert not at.exception, (lang, tab, at.exception)
+        assert not at.error, (lang, tab, texts(at, "error"))
+        assert at.radio[0].value == tab

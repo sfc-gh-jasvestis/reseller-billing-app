@@ -327,6 +327,54 @@ TRANSLATIONS = {
         "msg_auth_reconnect": "To reconnect, please try one of the following:\n1. **Refresh the browser page** - this will prompt for re-authentication\n2. **Run in terminal**: `snow connection test` to refresh your connection\n3. **Re-authenticate via SSO** if using federated authentication",
         "msg_retry": "🔄 Retry Connection",
 
+        # Cost enhancements
+        "sidebar_include_adjustments": "Include billing adjustments",
+        "sidebar_include_adjustments_help": "Adjustment rows (IS_ADJUSTMENT) correct earlier usage at month close. Excluded by default.",
+        "portfolio_overage": "Overage",
+        "usage_rating_breakdown": "#### Spend by rating type",
+        "usage_service_by_customer": "#### Spend by service per customer",
+        "alert_overage_spend": "💸 **{name}** was billed {amount} at on-demand (overage) rates this period",
+        "alert_rate_change": "🏷️ Effective compute rate for **{name}** changed {pct}% ({first} → {latest} per credit)",
+        "alert_anomaly": "📍 {count} unusual cost day(s) detected — see Cost Anomalies below",
+        "trend_anomaly_header": "📍 Cost Anomalies",
+        "trend_anomaly_caption": "Days where a customer's spend on a service was at least 3 standard deviations above its prior 28-day average (min $50).",
+        "trend_anomaly_none": "No unusual cost days in this period.",
+        "trend_anomaly_expected": "Expected",
+        "trend_anomaly_marker": "Anomaly",
+        "trend_anomaly_chart": "Daily cost — {name} · {service}",
+        "trend_growth_header": "📈 Customer Growth",
+        "trend_growth_caption": "Spend in the last 30 days vs the 30 days before, ending on the selected end date.",
+        "trend_growth_recent": "Last 30 days",
+        "trend_growth_prior": "Prior 30 days",
+        "trend_growth_pct": "Growth",
+        "financial_overage_header": "#### 💸 On-Demand (Overage) Spend",
+        "financial_overage_total": "Overage spend this period",
+        "financial_overage_none": "No usage was billed at on-demand rates in this period.",
+        "financial_overage_by_customer": "Overage spend by customer",
+        "financial_overage_trend": "Daily overage spend",
+        "financial_rates_header": "#### 🏷️ Effective Rates",
+        "financial_rates_caption": "Effective compute price per credit (after discounts) from PARTNER_RATE_SHEET_DAILY, averaged across each customer's accounts.",
+        "financial_rates_unavailable": "SNOWFLAKE.BILLING.PARTNER_RATE_SHEET_DAILY is not readable in this account, so rates are not shown.",
+        "financial_rates_no_data": "No rate data for the selected period.",
+        "financial_rates_start": "Start of period",
+        "financial_rates_latest": "Latest",
+        "financial_rates_change": "Change",
+        "financial_rates_trend": "Effective compute rate over time",
+        "financial_rates_axis": "Price per credit",
+        "financial_rates_by_service": "Latest rates by service and region",
+        "financial_other_charges_header": "#### 🧾 Credits & Other Charges",
+        "financial_other_charges_caption": "Non-consumption items (rebates, support credits, priority support, etc.) — excluded from the usage totals above.",
+        "financial_other_charges_type": "Billing type",
+        "financial_forecast_exhaust": "📉 Forecast: capacity runs out around {date}, before the contract ends",
+        "financial_forecast_no_exhaust": "Forecast: capacity lasts through the contract end date",
+        "financial_renewal_header": "**Renewal Sizing**",
+        "financial_renewal_buffer": "Buffer",
+        "financial_renewal_value": "Suggested renewal capacity",
+        "financial_renewal_forecast": "Forecast spend {value}",
+        "financial_renewal_caption": "Forecast spend for a {days}-day term starting after the current contract ends, plus a {buffer}% buffer. Trend + weekday forecast from the last 90 days.",
+        "chart_forecast_band": "Forecast range",
+        "feature_service_label": "Service",
+
         # Footer
         "footer_data_range": "Data Range: {start} to {end}",
         "footer_total_records": "Total Records: {count}",
@@ -552,6 +600,54 @@ TRANSLATIONS = {
         "msg_auth_reconnect": "再接続するには、以下をお試しください:\n1. **ブラウザページを更新** — 再認証が求められます\n2. **ターミナルで実行**: `snow connection test` で接続を更新\n3. **SSO再認証**（フェデレーション認証を使用している場合）",
         "msg_retry": "🔄 再接続",
 
+        # Cost enhancements
+        "sidebar_include_adjustments": "請求調整を含める",
+        "sidebar_include_adjustments_help": "調整行（IS_ADJUSTMENT）は月次締めで過去の使用量を修正します。既定では除外されます。",
+        "portfolio_overage": "超過額",
+        "usage_rating_breakdown": "#### 課金区分別コスト",
+        "usage_service_by_customer": "#### 顧客別・サービス別コスト",
+        "alert_overage_spend": "💸 **{name}** は当期間にオンデマンド（超過）料金で {amount} 請求されています",
+        "alert_rate_change": "🏷️ **{name}** の実効コンピュート単価が {pct}% 変動（{first} → {latest} / クレジット）",
+        "alert_anomaly": "📍 異常なコスト日を {count} 件検出 — 下記「コスト異常」を参照",
+        "trend_anomaly_header": "📍 コスト異常",
+        "trend_anomaly_caption": "顧客のサービス別日次コストが直前28日平均より3標準偏差以上高かった日（最低 $50）。",
+        "trend_anomaly_none": "当期間に異常なコスト日はありません。",
+        "trend_anomaly_expected": "想定",
+        "trend_anomaly_marker": "異常",
+        "trend_anomaly_chart": "日次コスト — {name} · {service}",
+        "trend_growth_header": "📈 顧客成長",
+        "trend_growth_caption": "選択した終了日までの直近30日間と、その前の30日間のコスト比較。",
+        "trend_growth_recent": "直近30日",
+        "trend_growth_prior": "前30日",
+        "trend_growth_pct": "成長率",
+        "financial_overage_header": "#### 💸 オンデマンド（超過）コスト",
+        "financial_overage_total": "当期間の超過コスト",
+        "financial_overage_none": "当期間にオンデマンド料金で請求された使用量はありません。",
+        "financial_overage_by_customer": "顧客別超過コスト",
+        "financial_overage_trend": "日次超過コスト",
+        "financial_rates_header": "#### 🏷️ 実効単価",
+        "financial_rates_caption": "PARTNER_RATE_SHEET_DAILY の割引後コンピュート単価（顧客の全アカウント平均）。",
+        "financial_rates_unavailable": "このアカウントでは SNOWFLAKE.BILLING.PARTNER_RATE_SHEET_DAILY を読み取れないため、単価は表示されません。",
+        "financial_rates_no_data": "選択した期間の単価データがありません。",
+        "financial_rates_start": "期間開始時",
+        "financial_rates_latest": "最新",
+        "financial_rates_change": "変動",
+        "financial_rates_trend": "実効コンピュート単価の推移",
+        "financial_rates_axis": "クレジット単価",
+        "financial_rates_by_service": "サービス・リージョン別の最新単価",
+        "financial_other_charges_header": "#### 🧾 クレジット・その他の請求",
+        "financial_other_charges_caption": "消費以外の項目（リベート、サポートクレジット、プライオリティサポート等）— 上記の使用量合計からは除外。",
+        "financial_other_charges_type": "請求タイプ",
+        "financial_forecast_exhaust": "📉 予測: 契約終了前の {date} 頃にキャパシティが枯渇",
+        "financial_forecast_no_exhaust": "予測: キャパシティは契約終了日まで持続",
+        "financial_renewal_header": "**更新キャパシティの目安**",
+        "financial_renewal_buffer": "バッファ",
+        "financial_renewal_value": "推奨更新キャパシティ",
+        "financial_renewal_forecast": "予測コスト {value}",
+        "financial_renewal_caption": "現契約終了後の {days} 日間の予測コストに {buffer}% のバッファを加算。直近90日のトレンド＋曜日要因による予測。",
+        "chart_forecast_band": "予測レンジ",
+        "feature_service_label": "サービス",
+
         # Footer
         "footer_data_range": "データ範囲: {start} ～ {end}",
         "footer_total_records": "総レコード数: {count}",
@@ -588,6 +684,9 @@ USE_DEMO_DATA = True if _demo_env == "true" else False if _demo_env == "false" e
 # Language-independent sentinel for the "All Customers" selection; the label is
 # translated only for display so cached results stay valid across languages.
 ALL_CUSTOMERS = "__ALL_CUSTOMERS__"
+
+# Dashboard tabs (translation keys, in display order)
+TAB_KEYS = ["tab_overview", "tab_trends", "tab_usage", "tab_financial", "tab_feature"]
 
 # Demo data configuration - 5 customers with varying usage patterns
 DEMO_CUSTOMERS = [
@@ -658,6 +757,126 @@ FEATURE_USECASES = {
     "snowflake intelligence": "Snowflake's unified AI layer — combine conversational analytics, intelligent search, and automated agents in one place",
 }
 
+# SERVICE_TYPE values from PARTNER_USAGE_IN_CURRENCY_DAILY. Snowflake documents
+# "many, but not all" values; AI_SERVICES is not in the documented list and is an
+# assumption for Cortex usage — verify against live partner data. Unlisted
+# values are displayed with their raw name.
+SERVICE_TYPE_DISPLAY = {
+    "WAREHOUSE_METERING": "Warehouse Compute",
+    "CLOUD_SERVICES": "Cloud Services",
+    "STORAGE": "Storage",
+    "DATA_TRANSFER": "Data Transfer",
+    "SNOWPIPE": "Snowpipe",
+    "SNOWPIPE_STREAMING": "Snowpipe Streaming",
+    "SERVERLESS_TASK": "Serverless Tasks",
+    "AUTOMATIC_CLUSTERING": "Automatic Clustering",
+    "MATERIALIZED_VIEW": "Materialized Views",
+    "SEARCH_OPTIMIZATION": "Search Optimization",
+    "QUERY_ACCELERATION": "Query Acceleration",
+    "REPLICATION": "Replication",
+    "LOGGING": "Logging & Tracing",
+    "TRUST_CENTER": "Trust Center",
+    "SENSITIVE_DATA_CLASSIFICATION": "Sensitive Data Classification",
+    "SERVERLESS_ALERTS": "Serverless Alerts",
+    "AI_SERVICES": "Cortex AI",
+}
+
+# Upsell talking points per SERVICE_TYPE, shown in the Feature Adoption tab
+SERVICE_USECASES = {
+    "en": {
+        "WAREHOUSE_METERING": "Virtual warehouses for queries, transformations, Snowpark and Streamlit workloads",
+        "CLOUD_SERVICES": "Metadata, query compilation and security services that coordinate every workload",
+        "STORAGE": "Centralise more data in Snowflake to unlock sharing, governance and AI on one copy",
+        "DATA_TRANSFER": "Move or share data across regions and clouds for global and DR use cases",
+        "SNOWPIPE": "Replace scheduled batch loads with continuous, automated file ingestion",
+        "SNOWPIPE_STREAMING": "Low-latency row-level ingestion from Kafka and streaming apps — data lands in seconds",
+        "SERVERLESS_TASK": "Automate and orchestrate pipelines on a schedule without managing any compute",
+        "AUTOMATIC_CLUSTERING": "Keep large tables fast as data grows without any manual tuning",
+        "MATERIALIZED_VIEW": "Pre-compute expensive queries for near-instant dashboards",
+        "SEARCH_OPTIMIZATION": "Speed up point lookups on large tables for interactive apps and APIs",
+        "QUERY_ACCELERATION": "Offload bursts of large scans to serverless compute instead of upsizing warehouses",
+        "REPLICATION": "Business continuity and cross-region data availability with failover",
+        "LOGGING": "Logs, traces and metrics for pipelines and apps, queryable in SQL",
+        "TRUST_CENTER": "Continuous security posture scanning against CIS benchmarks",
+        "SENSITIVE_DATA_CLASSIFICATION": "Automatically find and tag PII and sensitive columns for governance",
+        "SERVERLESS_ALERTS": "Data-driven alerts and notifications without a running warehouse",
+        "AI_SERVICES": "Cortex AI functions, Analyst, Search and agents — AI on governed data with no data movement",
+    },
+    "ja": {
+        "WAREHOUSE_METERING": "クエリ、変換処理、Snowpark・Streamlit ワークロード用の仮想ウェアハウス",
+        "CLOUD_SERVICES": "全ワークロードを支えるメタデータ、クエリコンパイル、セキュリティサービス",
+        "STORAGE": "データを Snowflake に集約し、共有・ガバナンス・AI を単一コピーで実現",
+        "DATA_TRANSFER": "リージョン・クラウド間でのデータ移動・共有（グローバル展開や DR 用途）",
+        "SNOWPIPE": "スケジュールバッチを継続的な自動ファイル取り込みに置換",
+        "SNOWPIPE_STREAMING": "Kafka やストリーミングアプリからの低レイテンシ行単位取り込み — 数秒でデータ到着",
+        "SERVERLESS_TASK": "コンピュート管理不要でパイプラインをスケジュール実行・オーケストレーション",
+        "AUTOMATIC_CLUSTERING": "データ増加後も手動チューニングなしで大規模テーブルを高速に維持",
+        "MATERIALIZED_VIEW": "高コストクエリを事前計算し、ダッシュボードをほぼ瞬時に表示",
+        "SEARCH_OPTIMIZATION": "大規模テーブルのポイントルックアップを高速化（アプリ・API 向け）",
+        "QUERY_ACCELERATION": "ウェアハウスを拡大せず、大量スキャンの突発負荷をサーバーレスにオフロード",
+        "REPLICATION": "フェイルオーバーによる事業継続とリージョン間のデータ可用性",
+        "LOGGING": "パイプラインやアプリのログ・トレース・メトリクスを SQL で分析",
+        "TRUST_CENTER": "CIS ベンチマークに基づくセキュリティ態勢の継続スキャン",
+        "SENSITIVE_DATA_CLASSIFICATION": "PII・機密列を自動検出してタグ付けし、ガバナンスを強化",
+        "SERVERLESS_ALERTS": "ウェアハウス不要のデータ駆動型アラートと通知",
+        "AI_SERVICES": "Cortex AI 関数、Analyst、Search、エージェント — データを移動せずガバナンス下で AI を活用",
+    },
+}
+
+# Demo pricing: effective $/credit by service level, plus a mid-period rate change
+DEMO_TIER_RATES = {"standard": 3.00, "enterprise": 2.70, "business_critical": 2.40}
+DEMO_RATE_CHANGES = {"Acme Corporation": {"days_ago": 20, "rate": 2.55}}
+RATING_RATE_FACTOR = {"compute": 1.0, "storage": 0.9, "data_transfer": 1.0, "other": 1.0}
+
+# Demo USAGE_TYPE -> (SERVICE_TYPE, RATING_TYPE)
+DEMO_SERVICE_MAP = {
+    "compute": ("WAREHOUSE_METERING", "compute"),
+    "storage": ("STORAGE", "storage"),
+    "data transfer": ("DATA_TRANSFER", "data_transfer"),
+    "cloud services": ("CLOUD_SERVICES", "compute"),
+    "snowpipe": ("SNOWPIPE", "compute"),
+    "streams": ("WAREHOUSE_METERING", "compute"),
+    "serverless tasks": ("SERVERLESS_TASK", "compute"),
+    "dynamic tables": ("WAREHOUSE_METERING", "compute"),
+    "snowpark": ("WAREHOUSE_METERING", "compute"),
+    "streamlit": ("WAREHOUSE_METERING", "compute"),
+    "automatic clustering": ("AUTOMATIC_CLUSTERING", "compute"),
+    "materialized views": ("MATERIALIZED_VIEW", "compute"),
+    "search optimization": ("SEARCH_OPTIMIZATION", "compute"),
+    "cortex": ("AI_SERVICES", "compute"),
+    "cortex analyst": ("AI_SERVICES", "compute"),
+    "cortex search": ("AI_SERVICES", "compute"),
+    "cortex code": ("AI_SERVICES", "compute"),
+    "snowflake intelligence": ("AI_SERVICES", "compute"),
+    "ml functions": ("AI_SERVICES", "compute"),
+}
+
+# Alert when a customer's effective compute rate moves by at least this much
+RATE_CHANGE_ALERT_PCT = 0.5
+
+
+def service_display(service_type):
+    """Readable name for a SERVICE_TYPE value"""
+    return SERVICE_TYPE_DISPLAY.get(service_type, str(service_type).replace("_", " ").title())
+
+
+def t_service_usecase(service_type):
+    """Translated upsell text for a SERVICE_TYPE value"""
+    lang = st.session_state.get("language", DEFAULT_LANGUAGE)
+    return (SERVICE_USECASES.get(lang, {}).get(service_type)
+            or SERVICE_USECASES["en"].get(service_type)
+            or t("usecase_default"))
+
+
+def demo_effective_rate(customer, day, rating_type="compute"):
+    """Demo effective price per credit for a customer on a given day"""
+    base = DEMO_TIER_RATES.get(customer["tier"], 3.00)
+    change = DEMO_RATE_CHANGES.get(customer["name"])
+    if change and day >= datetime.now().date() - timedelta(days=change["days_ago"]):
+        base = change["rate"]
+    return round(base * RATING_RATE_FACTOR.get(rating_type, 1.0), 4)
+
+
 # =============================================================================
 # DEMO DATA GENERATION FUNCTIONS
 # =============================================================================
@@ -665,7 +884,13 @@ import numpy as np
 import random
 
 def generate_demo_usage_data(start_date, end_date):
-    """Generate realistic demo usage data for 5 customers"""
+    """Generate realistic demo usage data for 5 customers.
+
+    Mirrors PARTNER_USAGE_IN_CURRENCY_DAILY: costs use each customer's demo
+    effective rate, usage after a customer's capacity is exhausted is tagged as
+    overage, and a few non-consumption rows (support credit, rebate, adjustment)
+    plus one cost spike are included so every dashboard section has data.
+    """
     random.seed(42)
     np.random.seed(42)
 
@@ -693,9 +918,37 @@ def generate_demo_usage_data(start_date, end_date):
     }
 
     balance_sources = ['capacity', 'rollover']
+    today = datetime.now().date()
+    # Cost spike for the anomaly demo, placed on a weekday (weekend usage is lower)
+    spike_day = today - timedelta(days=12)
+    while spike_day.weekday() >= 5:
+        spike_day -= timedelta(days=1)
+    adjustment_day = today - timedelta(days=15)
 
     data = []
     date_range = pd.date_range(start=start_date, end=end_date)
+
+    def row(customer, acct, day, usage_type, credits, cost, balance_source,
+            service_type, rating_type, billing_type='consumption', is_adjustment=False):
+        return {
+            'SOLD_TO_ORGANIZATION_NAME': customer['org'],
+            'SOLD_TO_CUSTOMER_NAME': customer['name'],
+            'SOLD_TO_CONTRACT_NUMBER': customer['contract'],
+            'ACCOUNT_NAME': acct['account_name'],
+            'ACCOUNT_LOCATOR': acct['account_locator'],
+            'REGION': acct['region'],
+            'SERVICE_LEVEL': customer['tier'],
+            'USAGE_DATE': day,
+            'USAGE_TYPE': usage_type,
+            'CURRENCY': 'USD',
+            'CREDITS_USED': credits,
+            'USAGE_IN_CURRENCY': cost,
+            'BALANCE_SOURCE': balance_source,
+            'SERVICE_TYPE': service_type,
+            'BILLING_TYPE': billing_type,
+            'RATING_TYPE': rating_type,
+            'IS_ADJUSTMENT': is_adjustment,
+        }
 
     for customer in DEMO_CUSTOMERS:
         accounts = DEMO_ACCOUNTS.get(customer['name'], [
@@ -708,34 +961,48 @@ def generate_demo_usage_data(start_date, end_date):
         base_daily_credits = 100 * customer['usage_multiplier']
         type_multipliers = TIER_FEATURES.get(customer['tier'], TIER_FEATURES['standard'])
 
+        # Usage after the contracted capacity is used up is billed as overage
+        info = DEMO_CONTRACT_INFO.get(customer['name'], {'amount': 50000, 'days_ago': 180, 'duration': 365})
+        contract_start = today - timedelta(days=info['days_ago'])
+        est_daily_cost = base_daily_credits * DEMO_TIER_RATES.get(customer['tier'], 3.00)
+        exhaust_day = contract_start + timedelta(days=int(info['amount'] / est_daily_cost))
+
         for date in date_range:
+            day = date.date()
             day_factor = 0.4 if date.weekday() >= 5 else 1.0
             trend_factor = 1 + (date - date_range[0]).days * 0.002
+            in_overage = day >= exhaust_day
 
             for acct, weight in zip(accounts, account_weights):
                 random_factor = np.random.uniform(0.7, 1.3)
                 for usage_type, multiplier in type_multipliers.items():
                     credits = base_daily_credits * weight * multiplier * day_factor * trend_factor * random_factor
                     credits = max(0, credits + np.random.normal(0, credits * 0.1))
+                    if customer['name'] == 'Global Analytics Co' and usage_type == 'compute' and day == spike_day:
+                        credits *= 4
 
                     if credits > 0.01:
-                        cost = credits * 3.00  # $3 per credit
-                        data.append({
-                            'SOLD_TO_ORGANIZATION_NAME': customer['org'],
-                            'SOLD_TO_CUSTOMER_NAME': customer['name'],
-                            'SOLD_TO_CONTRACT_NUMBER': customer['contract'],
-                            'ACCOUNT_NAME': acct['account_name'],
-                            'ACCOUNT_LOCATOR': acct['account_locator'],
-                            'REGION': acct['region'],
-                            'SERVICE_LEVEL': customer['tier'],
-                            'USAGE_DATE': date.date(),
-                            'USAGE_TYPE': usage_type,
-                            'CURRENCY': 'USD',
-                            'CREDITS_USED': round(credits, 4),
-                            'USAGE_IN_CURRENCY': round(cost, 2),
-                            'BALANCE_SOURCE': random.choice(balance_sources)
-                        })
-    
+                        service_type, rating_type = DEMO_SERVICE_MAP.get(
+                            usage_type, (usage_type.upper().replace(' ', '_'), 'compute'))
+                        rate = demo_effective_rate(customer, day, rating_type)
+                        data.append(row(
+                            customer, acct, day,
+                            f"overage {usage_type}" if in_overage else usage_type,
+                            round(credits, 4), round(credits * rate, 2),
+                            'overage' if in_overage else random.choice(balance_sources),
+                            service_type, rating_type))
+
+            primary = accounts[0]
+            if customer['name'] == 'DataDriven Solutions' and day.day == 1:
+                data.append(row(customer, primary, day, 'support credit', 0.0, -500.0, 'capacity',
+                                'SUPPORT_CREDIT', 'other', billing_type='support_credit'))
+            if customer['name'] == 'TechStart Labs' and day.day == 15:
+                data.append(row(customer, primary, day, 'rebate', 0.0, -75.0, 'rebate',
+                                'REBATE', 'other', billing_type='rebate'))
+            if customer['name'] == 'Acme Corporation' and day == adjustment_day:
+                data.append(row(customer, primary, day, 'compute', -40.0, -108.0, 'capacity',
+                                'WAREHOUSE_METERING', 'compute', is_adjustment=True))
+
     df = pd.DataFrame(data)
     df['USAGE_DATE'] = pd.to_datetime(df['USAGE_DATE']).dt.date
     return df
@@ -769,7 +1036,7 @@ def generate_demo_balance_data(start_date, end_date):
         info            = DEMO_CONTRACT_INFO.get(customer['name'], {'amount': 50000, 'days_ago': 180, 'duration': 365})
         contract_amount = info['amount']
         contract_start  = today - timedelta(days=info['days_ago'])
-        daily_burn      = 100 * customer['usage_multiplier'] * 3.00  # $3/credit
+        daily_burn      = 100 * customer['usage_multiplier'] * DEMO_TIER_RATES.get(customer['tier'], 3.00)
 
         # Days elapsed from this customer's contract start to the balance window start
         days_elapsed = max(0, (bal_start - contract_start).days)
@@ -840,6 +1107,28 @@ def generate_demo_contract_data():
 
     return pd.DataFrame(data)
 
+def generate_demo_rate_data(start_date, end_date):
+    """Demo PARTNER_RATE_SHEET_DAILY rows, consistent with demo usage costs"""
+    rating_services = [('compute', 'WAREHOUSE_METERING'), ('storage', 'STORAGE'),
+                       ('data_transfer', 'DATA_TRANSFER')]
+    data = []
+    for date in pd.date_range(start=start_date, end=end_date):
+        day = date.date()
+        for customer in DEMO_CUSTOMERS:
+            for acct in DEMO_ACCOUNTS.get(customer['name'], []):
+                for rating_type, service_type in rating_services:
+                    data.append({
+                        'RATE_DATE': day,
+                        'SOLD_TO_CUSTOMER_NAME': customer['name'],
+                        'ACCOUNT_NAME': acct['account_name'],
+                        'REGION': acct['region'],
+                        'SERVICE_TYPE': service_type,
+                        'RATING_TYPE': rating_type,
+                        'CURRENCY': 'USD',
+                        'EFFECTIVE_RATE': demo_effective_rate(customer, day, rating_type),
+                    })
+    return pd.DataFrame(data)
+
 def generate_demo_customer_list():
     """Generate demo customer list"""
     return [ALL_CUSTOMERS] + [c['name'] for c in DEMO_CUSTOMERS]
@@ -888,16 +1177,16 @@ def format_credits(credits):
         return "0.00"
 
 def get_date_range_options():
-    """Get predefined date range options"""
+    """Predefined date ranges keyed by translation key (labels are translated for display)"""
     today = datetime.now().date()
     
     return {
-        t("date_last_7"): (today - timedelta(days=7), today),
-        t("date_last_30"): (today - timedelta(days=30), today),
-        t("date_last_90"): (today - timedelta(days=90), today),
-        t("date_current_month"): (today.replace(day=1), today),
-        t("date_last_month"): get_last_month_range(),
-        t("date_custom"): None
+        "date_last_7": (today - timedelta(days=7), today),
+        "date_last_30": (today - timedelta(days=30), today),
+        "date_last_90": (today - timedelta(days=90), today),
+        "date_current_month": (today.replace(day=1), today),
+        "date_last_month": get_last_month_range(),
+        "date_custom": None
     }
 
 def get_last_month_range():
@@ -942,8 +1231,45 @@ def clean_usage_data(df):
     for col in ['USAGE_TYPE', 'BALANCE_SOURCE']:
         if col in df.columns:
             df[col] = df[col].fillna('unknown').str.strip().str.lower()
-    
+
+    if 'USAGE_TYPE' in df.columns:
+        # Usage billed at on-demand prices is reported as "overage <usage type>"
+        df['IS_OVERAGE'] = df['USAGE_TYPE'].str.startswith('overage')
+        df['USAGE_TYPE'] = df['USAGE_TYPE'].str.replace(r'^overage\s+', '', regex=True)
+        if 'BALANCE_SOURCE' in df.columns:
+            df['IS_OVERAGE'] |= df['BALANCE_SOURCE'].eq('overage')
+        fallback_service = df['USAGE_TYPE'].str.upper().str.replace(' ', '_')
+        if 'SERVICE_TYPE' in df.columns:
+            df['SERVICE_TYPE'] = df['SERVICE_TYPE'].fillna(fallback_service).astype(str).str.strip().str.upper()
+        else:
+            df['SERVICE_TYPE'] = fallback_service
+
+    for col, default in [('BILLING_TYPE', 'consumption'), ('RATING_TYPE', 'other')]:
+        if col in df.columns:
+            df[col] = df[col].fillna(default).astype(str).str.strip().str.lower()
+        else:
+            df[col] = default
+
+    if 'IS_ADJUSTMENT' in df.columns:
+        df['IS_ADJUSTMENT'] = df['IS_ADJUSTMENT'].fillna(False).astype(bool)
+    else:
+        df['IS_ADJUSTMENT'] = False
+
     return df
+
+
+def split_usage(df, include_adjustments=False):
+    """Separate consumption rows from other charges (rebates, support credits, ...).
+
+    Adjustment rows are dropped from consumption unless include_adjustments is set.
+    """
+    if df.empty or 'BILLING_TYPE' not in df.columns:
+        return df, df.iloc[0:0]
+    is_consumption = df['BILLING_TYPE'] == 'consumption'
+    usage = df[is_consumption]
+    if not include_adjustments:
+        usage = usage[~usage['IS_ADJUSTMENT']]
+    return usage, df[~is_consumption]
 
 def clean_balance_data(df):
     """Clean and prepare balance data"""
@@ -1282,165 +1608,253 @@ def calculate_contract_usage_metrics(usage_df, contract_df, run_rate_days=30):
     
     return metrics
 
+# =============================================================================
+# COST ANALYTICS (pandas only — no Snowflake ML objects are created)
+# =============================================================================
+
+def summarize_rates(rates_df):
+    """Per-customer effective compute $/credit at the start and end of the period.
+
+    Returns (summary, daily) where daily is the per-customer average rate by date.
+    """
+    cols = ['CUSTOMER', 'CURRENCY', 'FIRST_RATE', 'LATEST_RATE', 'CHANGE_PCT']
+    if rates_df is None or rates_df.empty:
+        return pd.DataFrame(columns=cols), pd.DataFrame()
+    compute = rates_df[rates_df['RATING_TYPE'] == 'compute']
+    if compute.empty:
+        compute = rates_df
+    daily = (compute.groupby(['SOLD_TO_CUSTOMER_NAME', 'RATE_DATE', 'CURRENCY'])['EFFECTIVE_RATE']
+             .mean().reset_index().sort_values('RATE_DATE'))
+    rows = []
+    for (cust, currency), g in daily.groupby(['SOLD_TO_CUSTOMER_NAME', 'CURRENCY']):
+        first, latest = g['EFFECTIVE_RATE'].iloc[0], g['EFFECTIVE_RATE'].iloc[-1]
+        rows.append({
+            'CUSTOMER': cust, 'CURRENCY': currency,
+            'FIRST_RATE': first, 'LATEST_RATE': latest,
+            'CHANGE_PCT': (latest - first) / first * 100 if first else 0.0,
+        })
+    return pd.DataFrame(rows, columns=cols).sort_values('CUSTOMER'), daily
+
+
+def detect_anomalies(usage_df, window=28, min_history=14, z_threshold=3.0, min_cost=50.0):
+    """Flag customer x service days whose cost is z_threshold std devs above the prior window."""
+    cols = ['CUSTOMER', 'SERVICE_TYPE', 'DATE', 'COST', 'EXPECTED', 'Z']
+    if usage_df.empty:
+        return pd.DataFrame(columns=cols)
+    daily = (usage_df.groupby(['SOLD_TO_CUSTOMER_NAME', 'SERVICE_TYPE', 'USAGE_DATE'])['USAGE_IN_CURRENCY']
+             .sum().reset_index())
+    rows = []
+    for (cust, service), g in daily.groupby(['SOLD_TO_CUSTOMER_NAME', 'SERVICE_TYPE']):
+        series = (g.set_index(pd.to_datetime(g['USAGE_DATE']))['USAGE_IN_CURRENCY']
+                  .sort_index().asfreq('D', fill_value=0.0))
+        prior = series.shift(1).rolling(window, min_periods=min_history)
+        mean, std = prior.mean(), prior.std()
+        z = (series - mean) / std
+        flagged = ((z >= z_threshold) & (series >= min_cost) & (std > 0)).fillna(False)
+        for ts in series.index[flagged]:
+            rows.append({'CUSTOMER': cust, 'SERVICE_TYPE': service, 'DATE': ts.date(),
+                         'COST': series[ts], 'EXPECTED': mean[ts], 'Z': z[ts]})
+    return pd.DataFrame(rows, columns=cols).sort_values('DATE', ascending=False).reset_index(drop=True)
+
+
+def growth_ranking(usage_df, as_of, days=30):
+    """Customer spend in the last `days` vs the `days` before that, sorted by growth."""
+    cols = ['CUSTOMER', 'RECENT', 'PRIOR', 'GROWTH_PCT']
+    if usage_df.empty:
+        return pd.DataFrame(columns=cols)
+    recent_start = as_of - timedelta(days=days)
+    prior_start = as_of - timedelta(days=2 * days)
+    dates = usage_df['USAGE_DATE']
+    by_customer = lambda mask: usage_df[mask].groupby('SOLD_TO_CUSTOMER_NAME')['USAGE_IN_CURRENCY'].sum()
+    out = pd.DataFrame({
+        'RECENT': by_customer((dates > recent_start) & (dates <= as_of)),
+        'PRIOR': by_customer((dates > prior_start) & (dates <= recent_start)),
+    }).fillna(0.0)
+    out['GROWTH_PCT'] = (out['RECENT'] - out['PRIOR']) / out['PRIOR'].replace(0, np.nan) * 100
+    out = out.rename_axis('CUSTOMER').reset_index()
+    return out.sort_values('GROWTH_PCT', ascending=False, na_position='last')[cols]
+
+
+def customer_daily_cost(usage_df, customer_name):
+    """Daily cost Series (indexed by date) for one customer"""
+    cdf = usage_df[usage_df['SOLD_TO_CUSTOMER_NAME'] == customer_name]
+    return cdf.groupby('USAGE_DATE')['USAGE_IN_CURRENCY'].sum().sort_index()
+
+
+def forecast_daily_cost(daily_cost, horizon_days, history_days=90):
+    """Linear trend + weekday-seasonality forecast of daily cost.
+
+    Fits the last `history_days` (needs at least 14) and returns a DataFrame of
+    DATE, YHAT, LO, HI (95% band from residual spread), or None.
+    """
+    if daily_cost is None or len(daily_cost) == 0 or horizon_days <= 0:
+        return None
+    series = pd.Series(daily_cost.values, index=pd.to_datetime(daily_cost.index)).groupby(level=0).sum()
+    series = series.sort_index().asfreq('D', fill_value=0.0).iloc[-history_days:]
+    if len(series) < 14 or series.sum() <= 0:
+        return None
+
+    weekday = np.asarray(series.index.dayofweek)
+    factor = (series.groupby(weekday).mean() / series.mean()).reindex(range(7)).fillna(1.0)
+    factor = factor.where(factor > 0, 1.0).values
+    deseasonalized = series.values / factor[weekday]
+
+    t_hist = np.arange(len(series))
+    slope, intercept = np.polyfit(t_hist, deseasonalized, 1)
+    sigma = float(np.std(deseasonalized - (intercept + slope * t_hist), ddof=1))
+
+    future = pd.date_range(series.index[-1] + pd.Timedelta(days=1), periods=int(horizon_days), freq='D')
+    t_future = np.arange(len(series), len(series) + len(future))
+    seasonal = factor[np.asarray(future.dayofweek)]
+    base = np.clip(intercept + slope * t_future, 0, None)
+    return pd.DataFrame({
+        'DATE': future.date,
+        'YHAT': base * seasonal,
+        'LO': np.clip(base - 1.96 * sigma, 0, None) * seasonal,
+        'HI': (base + 1.96 * sigma) * seasonal,
+    })
+
+
+def forecast_exhaustion_date(forecast, consumed, capacity):
+    """First forecast date where cumulative spend reaches capacity, else None"""
+    if forecast is None or capacity <= 0 or consumed >= capacity:
+        return None
+    cumulative = consumed + forecast['YHAT'].cumsum()
+    hit = forecast.loc[cumulative >= capacity - 1e-6, "DATE"]  # tolerate float rounding
+    return hit.iloc[0] if not hit.empty else None
+
+
+def estimate_renewal_capacity(daily_cost, renewal_start, term_days, buffer_pct):
+    """Forecast spend for a `term_days` term from renewal_start, plus a buffer.
+
+    Returns (forecast_spend, recommended_capacity) or None without enough history.
+    """
+    if daily_cost is None or len(daily_cost) == 0 or term_days <= 0:
+        return None
+    last = pd.to_datetime(daily_cost.index).max().date()
+    start = max(renewal_start, last + timedelta(days=1))
+    horizon = min((start - last).days + term_days, 1100)
+    forecast = forecast_daily_cost(daily_cost, horizon)
+    if forecast is None:
+        return None
+    window = forecast[(forecast['DATE'] >= start) & (forecast['DATE'] < start + timedelta(days=term_days))]
+    spend = float(window['YHAT'].sum())
+    return spend, spend * (1 + buffer_pct / 100)
+
 def create_contract_usage_chart(usage_df, contract_metrics, customer_name):
     """
-    Create contract usage visualization with actual vs predicted consumption and dual y-axes
-    
-    Args:
-        usage_df: DataFrame with usage data
-        contract_metrics: Dictionary with contract metrics for the customer
-        customer_name: Name of the customer
-    
-    Returns:
-        Plotly figure object with dual y-axes (daily consumption left, cumulative right)
+    Contract usage chart: actual daily consumption, forecast daily consumption
+    (trend + weekday forecast with a 95% band, or the flat run rate when history
+    is too short), and cumulative consumption vs contracted capacity on a second axis.
     """
-    from plotly.subplots import make_subplots
-    
     if usage_df.empty or not contract_metrics:
         return None
-    
+
     metrics = contract_metrics.get(customer_name)
-    if not metrics:
+    if not metrics or metrics['daily_run_rate'] <= 0:
         return None
-    
-    # Filter usage for this customer
-    customer_usage = usage_df[usage_df['SOLD_TO_CUSTOMER_NAME'] == customer_name].copy()
-    customer_usage = customer_usage.sort_values('USAGE_DATE')
-    
-    # Calculate cumulative consumption
-    customer_usage['CUMULATIVE_USAGE'] = customer_usage['USAGE_IN_CURRENCY'].cumsum()
-    
-    # Create prediction line
-    contract_start = metrics['contract_start']
-    contract_end = metrics['contract_end']
+
+    # One point per day (usage has a row per account and usage type)
+    daily = customer_daily_cost(usage_df, customer_name)
+    actual_dates = list(daily.index)
+    actual_values = daily.tolist()
+    actual_cumulative = daily.cumsum().tolist()
+    current_cumulative = actual_cumulative[-1] if actual_cumulative else 0
+
     today = datetime.now().date()
-    
-    # Generate dates for prediction
-    if metrics['daily_run_rate'] > 0:
-        # Actual dates
-        actual_dates = customer_usage['USAGE_DATE'].tolist()
-        actual_values = customer_usage['USAGE_IN_CURRENCY'].tolist()
-        actual_cumulative = customer_usage['CUMULATIVE_USAGE'].tolist()
-        
-        # Prediction from today — extend at least 90 days forward so the
-        # slope change is always visible, even when the contract end is near
-        # or already past (customer is in overage)
-        current_cumulative = customer_usage['CUMULATIVE_USAGE'].iloc[-1] if not customer_usage.empty else 0
-        prediction_end = max(contract_end, today + timedelta(days=90))
-        prediction_dates = pd.date_range(start=today, end=prediction_end, freq='D')
-        
-        prediction_daily = [metrics['daily_run_rate'] for _ in prediction_dates]
-        prediction_cumulative = []
-        for i, date in enumerate(prediction_dates):
-            predicted = current_cumulative + (metrics['daily_run_rate'] * i)
-            prediction_cumulative.append(predicted)
-        
-        # Create figure with secondary y-axis
-        fig = make_subplots(specs=[[{"secondary_y": True}]])
-        
-        # Add actual consumption area (blue) - left y-axis
-        fig.add_trace(
-            go.Scatter(
-                x=actual_dates,
-                y=actual_values,
-                name=t('chart_actual'),
-                fill='tozeroy',
-                fillcolor='rgba(66, 133, 244, 0.7)',
-                line=dict(color='rgba(66, 133, 244, 1)', width=0),
-                mode='none',
-                legendgroup='actual'
-            ),
-            secondary_y=False
-        )
-        
-        # Add predicted consumption area (orange) - left y-axis
-        fig.add_trace(
-            go.Scatter(
-                x=prediction_dates,
-                y=prediction_daily,
-                name=t('chart_prediction'),
-                fill='tozeroy',
-                fillcolor='rgba(255, 167, 38, 0.7)',
-                line=dict(color='rgba(255, 167, 38, 1)', width=0),
-                mode='none',
-                legendgroup='prediction'
-            ),
-            secondary_y=False
-        )
-        
-        # Combine all dates and cumulative values for the line
-        all_dates = actual_dates + prediction_dates.tolist()
-        all_cumulative = actual_cumulative + prediction_cumulative
-        
-        # Add cumulative consumption line (black) - right y-axis
-        fig.add_trace(
-            go.Scatter(
-                x=all_dates,
-                y=all_cumulative,
-                name=t('chart_cumulative_consump'),
-                line=dict(color='#00D4AA', width=2.5),
-                mode='lines',
-                legendgroup='cumulative'
-            ),
-            secondary_y=True
-        )
-        
-        # Add capacity contract amount line (gray horizontal) - right y-axis
-        # Extend to prediction_end so it stays visible across the full chart window
-        fig.add_trace(
-            go.Scatter(
-                x=[contract_start, prediction_end],
-                y=[metrics['capacity_purchased'], metrics['capacity_purchased']],
-                name=t('chart_capacity_contract'),
-                line=dict(color='#FFD166', width=2.5, dash='dash'),
-                mode='lines',
-                legendgroup='capacity'
-            ),
-            secondary_y=True
-        )
-        
-        # Update layout
-        fig.update_layout(
-            hovermode='x unified',
-            height=450,
-            margin=dict(l=50, r=50, t=30, b=80),
-            legend=dict(
-                orientation="h",
-                yanchor="top",
-                y=-0.15,
-                xanchor="center",
-                x=0.5,
-                font=dict(size=10)
-            ),
-            plot_bgcolor='rgba(0,0,0,0)',
-            paper_bgcolor='rgba(0,0,0,0)'
-        )
-        
-        # Update y-axes
-        fig.update_yaxes(
-            title_text=t("chart_consumption", currency=metrics['currency']),
-            secondary_y=False,
-            gridcolor='rgba(128,128,128,0.3)',
-            tickformat="$,.0f"
-        )
-        fig.update_yaxes(
-            title_text=t("chart_cumulative"),
-            secondary_y=True,
-            gridcolor='rgba(128,128,128,0.3)',
-            tickformat="$,.0f"
-        )
-        
-        # Update x-axis
-        fig.update_xaxes(
-            tickformat="%m/%d/%Y",
-            tickangle=45,
-            gridcolor='rgba(128,128,128,0.3)',
-            nticks=20
-        )
-        
-        return fig
-    
-    return None
+    last_date = actual_dates[-1] if actual_dates else today
+    # Extend at least 90 days forward so the slope is visible even near contract end
+    prediction_end = max(metrics['contract_end'], today + timedelta(days=90))
+    horizon = max((prediction_end - last_date).days, 1)
+
+    forecast = forecast_daily_cost(daily, horizon)
+    if forecast is None:
+        rate = metrics['daily_run_rate']
+        dates = pd.date_range(start=last_date + timedelta(days=1), periods=horizon, freq='D').date
+        forecast = pd.DataFrame({'DATE': dates, 'YHAT': rate, 'LO': rate, 'HI': rate})
+
+    prediction_dates = list(forecast['DATE'])
+    cum_yhat = (current_cumulative + forecast['YHAT'].cumsum()).tolist()
+    cum_lo = (current_cumulative + forecast['LO'].cumsum()).tolist()
+    cum_hi = (current_cumulative + forecast['HI'].cumsum()).tolist()
+
+    fig = make_subplots(specs=[[{"secondary_y": True}]])
+
+    fig.add_trace(
+        go.Scatter(
+            x=actual_dates, y=actual_values, name=t('chart_actual'),
+            fill='tozeroy', fillcolor='rgba(66, 133, 244, 0.7)',
+            line=dict(color='rgba(66, 133, 244, 1)', width=0), mode='none',
+            legendgroup='actual'
+        ),
+        secondary_y=False
+    )
+    fig.add_trace(
+        go.Scatter(
+            x=prediction_dates, y=forecast['YHAT'], name=t('chart_prediction'),
+            fill='tozeroy', fillcolor='rgba(255, 167, 38, 0.7)',
+            line=dict(color='rgba(255, 167, 38, 1)', width=0), mode='none',
+            legendgroup='prediction'
+        ),
+        secondary_y=False
+    )
+
+    # Forecast band on cumulative consumption (upper edge, then lower edge filled to it)
+    fig.add_trace(
+        go.Scatter(
+            x=prediction_dates, y=cum_hi, mode='lines', line=dict(width=0),
+            showlegend=False, hoverinfo='skip', legendgroup='band'
+        ),
+        secondary_y=True
+    )
+    fig.add_trace(
+        go.Scatter(
+            x=prediction_dates, y=cum_lo, mode='lines', line=dict(width=0),
+            fill='tonexty', fillcolor='rgba(0, 212, 170, 0.15)',
+            name=t('chart_forecast_band'), hoverinfo='skip', legendgroup='band'
+        ),
+        secondary_y=True
+    )
+
+    fig.add_trace(
+        go.Scatter(
+            x=actual_dates + prediction_dates, y=actual_cumulative + cum_yhat,
+            name=t('chart_cumulative_consump'), line=dict(color='#00D4AA', width=2.5),
+            mode='lines', legendgroup='cumulative'
+        ),
+        secondary_y=True
+    )
+
+    # Capacity line extends to prediction_end so it stays visible across the chart
+    fig.add_trace(
+        go.Scatter(
+            x=[metrics['contract_start'], prediction_end],
+            y=[metrics['capacity_purchased'], metrics['capacity_purchased']],
+            name=t('chart_capacity_contract'), line=dict(color='#FFD166', width=2.5, dash='dash'),
+            mode='lines', legendgroup='capacity'
+        ),
+        secondary_y=True
+    )
+
+    fig.update_layout(
+        hovermode='x unified',
+        height=450,
+        margin=dict(l=50, r=50, t=30, b=80),
+        legend=dict(orientation="h", yanchor="top", y=-0.15, xanchor="center", x=0.5, font=dict(size=10)),
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)'
+    )
+    fig.update_yaxes(
+        title_text=t("chart_consumption", currency=metrics['currency']),
+        secondary_y=False, gridcolor='rgba(128,128,128,0.3)', tickformat="$,.0f"
+    )
+    fig.update_yaxes(
+        title_text=t("chart_cumulative"),
+        secondary_y=True, gridcolor='rgba(128,128,128,0.3)', tickformat="$,.0f"
+    )
+    fig.update_xaxes(tickformat="%m/%d/%Y", tickangle=45, gridcolor='rgba(128,128,128,0.3)', nticks=20)
+
+    return fig
 
 # Page configuration
 st.set_page_config(
@@ -1582,20 +1996,27 @@ def _run_query(session, query, params):
 
 @st.cache_data(ttl=CACHE_TTL_SECONDS)
 def billing_views_available(_session):
-    """True when the session can read the reseller BILLING views.
+    """Map of VIEWS key -> whether the session can read that BILLING view.
 
     The PARTNER_* views exist only in reseller/distributor org accounts and are
-    readable only by ACCOUNTADMIN, so this is probed once instead of letting
+    readable only by ACCOUNTADMIN, so they are probed once instead of letting
     every loader fail independently.
     """
-    if _session is None:
-        return False
-    try:
-        for view in ("USAGE", "BALANCE", "CONTRACT"):
-            _session.sql(f"SELECT 1 FROM {BILLING_SCHEMA}.{VIEWS[view]} LIMIT 0").collect()
-        return True
-    except Exception:
-        return False
+    available = {}
+    for key, view in VIEWS.items():
+        if _session is None:
+            available[key] = False
+            continue
+        try:
+            _session.sql(f"SELECT 1 FROM {BILLING_SCHEMA}.{view} LIMIT 0").collect()
+            available[key] = True
+        except Exception:
+            available[key] = False
+    return available
+
+
+# Views without which live mode cannot run (the rate sheet is optional)
+REQUIRED_VIEWS = ("USAGE", "BALANCE", "CONTRACT")
 
 @st.cache_data(ttl=CACHE_TTL_SECONDS)
 def load_usage_data(_session, start_date, end_date, customer_filter=None, usage_type_filter=None):
@@ -1618,7 +2039,11 @@ def load_usage_data(_session, start_date, end_date, customer_filter=None, usage_
         CURRENCY,
         USAGE as CREDITS_USED,
         USAGE_IN_CURRENCY,
-        BALANCE_SOURCE
+        BALANCE_SOURCE,
+        SERVICE_TYPE,
+        BILLING_TYPE,
+        RATING_TYPE,
+        IS_ADJUSTMENT
     FROM {BILLING_SCHEMA}.{VIEWS['USAGE']}
     WHERE USAGE_DATE BETWEEN ? AND ?
     """
@@ -1718,6 +2143,41 @@ def load_customer_list(_session):
 
     df = _run_query(_session, query, [])
     return [ALL_CUSTOMERS] + df['SOLD_TO_CUSTOMER_NAME'].tolist()
+
+@st.cache_data(ttl=CACHE_TTL_SECONDS)
+def load_rate_data(_session, start_date, end_date, customer_filter=None):
+    """Load effective rates from PARTNER_RATE_SHEET_DAILY, or demo rates when _session is None"""
+    if _session is None:
+        df = _filter_demo(generate_demo_rate_data(start_date, end_date), customer_filter)
+    else:
+        query = f"""
+        SELECT
+            DATE as RATE_DATE,
+            SOLD_TO_CUSTOMER_NAME,
+            ACCOUNT_NAME,
+            REGION,
+            SERVICE_TYPE,
+            RATING_TYPE,
+            CURRENCY,
+            EFFECTIVE_RATE
+        FROM {BILLING_SCHEMA}.{VIEWS['RATES']}
+        WHERE DATE BETWEEN ? AND ?
+        """
+        params = [str(start_date), str(end_date)]
+
+        if customer_filter and customer_filter != ALL_CUSTOMERS:
+            query += " AND SOLD_TO_CUSTOMER_NAME = ?"
+            params.append(customer_filter)
+
+        query += " ORDER BY DATE, SOLD_TO_CUSTOMER_NAME"
+        df = _run_query(_session, query, params)
+
+    if not df.empty:
+        df['RATE_DATE'] = pd.to_datetime(df['RATE_DATE']).dt.date
+        df['RATING_TYPE'] = df['RATING_TYPE'].fillna('other').astype(str).str.strip().str.lower()
+        df['SERVICE_TYPE'] = df['SERVICE_TYPE'].fillna('').astype(str).str.strip().str.upper()
+        df['EFFECTIVE_RATE'] = pd.to_numeric(df['EFFECTIVE_RATE'], errors='coerce')
+    return df
 
 def create_enhanced_trend_chart(df):
     """Create enhanced trend chart with multiple metrics"""
@@ -1899,7 +2359,7 @@ def create_usage_heatmap(df):
     fig.update_xaxes(side="top")
     return fig
 
-def show_alerts_and_insights(usage_df, balance_df, contract_df=None):
+def show_alerts_and_insights(usage_df, balance_df, contract_df=None, rates_summary=None, anomalies=None):
     """Display intelligent alerts and insights"""
     st.subheader(t("alert_header"))
 
@@ -1941,6 +2401,25 @@ def show_alerts_and_insights(usage_df, balance_df, contract_df=None):
             names = ", ".join(non_ai)
             alerts.append({'type': 'info',
                 'message': t("alert_no_ai", names=names)})
+
+        # Usage billed at on-demand (overage) prices
+        if 'IS_OVERAGE' in usage_df.columns:
+            overage = (usage_df[usage_df['IS_OVERAGE']]
+                       .groupby('SOLD_TO_CUSTOMER_NAME')['USAGE_IN_CURRENCY'].sum())
+            for cname, amount in overage[overage > 0].items():
+                alerts.append({'type': 'error',
+                    'message': t("alert_overage_spend", name=cname, amount=format_currency(amount))})
+
+    if rates_summary is not None and not rates_summary.empty:
+        changed = rates_summary[rates_summary['CHANGE_PCT'].abs() >= RATE_CHANGE_ALERT_PCT]
+        for _, r in changed.iterrows():
+            alerts.append({'type': 'info',
+                'message': t("alert_rate_change", name=r['CUSTOMER'], pct=f"{r['CHANGE_PCT']:+.1f}",
+                             first=format_currency(r['FIRST_RATE'], r['CURRENCY']),
+                             latest=format_currency(r['LATEST_RATE'], r['CURRENCY']))})
+
+    if anomalies is not None and not anomalies.empty:
+        alerts.append({'type': 'warning', 'message': t("alert_anomaly", count=len(anomalies))})
 
     if not balance_df.empty:
         latest_balances = balance_df.loc[
@@ -2128,6 +2607,10 @@ def show_portfolio_summary(usage_df, balance_df, contract_df):
         if days_overage is not None and days_overage < 30: risk_factors += 2
         elif days_overage is not None and days_overage < 60: risk_factors += 1
         if ci and (ci['end'] - today).days < 60: risk_factors += 1
+        overage_cost = (cdf.loc[cdf['IS_OVERAGE'], 'USAGE_IN_CURRENCY'].sum()
+                        if 'IS_OVERAGE' in cdf.columns else 0)
+        if overage_cost > 0:
+            risk_factors += 2
         risk = t("portfolio_critical") if risk_factors >= 3 else t("portfolio_watch") if risk_factors >= 1 else t("portfolio_healthy")
 
         rows.append({
@@ -2138,6 +2621,7 @@ def show_portfolio_summary(usage_df, balance_df, contract_df):
             t('portfolio_depletion'): str(days_depletion) if days_depletion is not None else (t('portfolio_depleted') if balance == 0 else '—'),
             t('portfolio_contract_used'): f"{used_pct:.1f}%" if used_pct is not None else '—',
             t('portfolio_overage_days'): str(days_overage) if days_overage is not None else '—',
+            t('portfolio_overage'): format_currency(overage_cost, currency) if overage_cost > 0 else '—',
             t('portfolio_ai'): '✅' if uses_ai else '❌',
             t('portfolio_risk'): risk,
         })
@@ -2179,6 +2663,7 @@ def main():
     # Resolve data mode. session stays None in demo mode; loaders use that
     # to return generated data, so live and demo rows are never mixed.
     session = None
+    rates_enabled = True
     if USE_DEMO_DATA is not True:
         session = get_snowflake_session()
         if not session:
@@ -2190,12 +2675,17 @@ def main():
                     st.cache_data.clear()
                     st.rerun()
             st.stop()
-        if not billing_views_available(session):
+        available = billing_views_available(session)
+        if not all(available.get(k) for k in REQUIRED_VIEWS):
             if USE_DEMO_DATA is False:
                 st.error(t("msg_live_unavailable"))
                 st.stop()
             st.info(t("msg_demo_fallback"))
             session = None
+        else:
+            # Rate sheet is optional: without it the Rates section says so
+            # instead of showing demo rates next to live usage
+            rates_enabled = available.get("RATES", False)
 
     if session is None:
         st.info(t("app_demo_banner"))
@@ -2210,10 +2700,11 @@ def main():
     selected_range = st.sidebar.selectbox(
         t("sidebar_date_range"),
         options=list(date_range_options.keys()),
-        index=1  # Default to "Last 30 days"
+        index=1,  # Default to "Last 30 days"
+        format_func={k: t(k) for k in date_range_options}.get
     )
     
-    if selected_range == t("date_custom"):
+    if selected_range == "date_custom":
         col1, col2 = st.sidebar.columns(2)
         with col1:
             start_date = st.date_input(
@@ -2247,7 +2738,7 @@ def main():
         t("sidebar_customer"),
         options=customer_options,
         index=0,
-        format_func=lambda c: t("all_customers") if c == ALL_CUSTOMERS else c
+        format_func=lambda c, all_label=t("all_customers"): all_label if c == ALL_CUSTOMERS else c
     )
 
     st.sidebar.markdown("---")
@@ -2257,6 +2748,12 @@ def main():
             del st.session_state[key]
         st.rerun()
     st.sidebar.caption(t("sidebar_refresh_note"))
+    include_adjustments = st.sidebar.checkbox(
+        t("sidebar_include_adjustments"),
+        value=False,
+        help=t("sidebar_include_adjustments_help"),
+        key="include_adjustments"
+    )
 
     usage_type_filter = None
     
@@ -2273,12 +2770,26 @@ def main():
 
             # Load contract data at top level — needed for smart alerts + portfolio table
             contract_df = load_contract_data(session, customer_filter)
+            progress_bar.progress(70)
+
+            # 90 days of history for anomaly baselines and growth comparison
+            history_start = min(start_date, end_date - timedelta(days=89))
+            history_df = load_usage_data(session, history_start, end_date, customer_filter, None)
+            rates_df = load_rate_data(session, start_date, end_date, customer_filter) if rates_enabled else None
             progress_bar.progress(100)
             progress_bar.empty()
     except Exception as e:
         st.error(t("msg_query_error", error=e))
         st.stop()
     
+    # Consumption only in usage totals; rebates, credits etc. are shown separately
+    usage_df, other_charges_df = split_usage(usage_df, include_adjustments)
+    history_df, _ = split_usage(history_df, include_adjustments)
+    rates_summary, rates_daily = summarize_rates(rates_df)
+    anomalies_df = detect_anomalies(history_df)
+    if not anomalies_df.empty:
+        anomalies_df = anomalies_df[(anomalies_df['DATE'] >= start_date) & (anomalies_df['DATE'] <= end_date)]
+
     # Check for data
     if usage_df.empty:
         st.warning(t("msg_no_data"))
@@ -2287,20 +2798,21 @@ def main():
     
     # Tab navigation — st.radio persists across reruns via session_state,
     # unlike st.tabs which resets to the first tab on any widget-triggered rerun
-    TAB_OPTIONS = [t("tab_overview"), t("tab_trends"), t("tab_usage"), t("tab_financial"), t("tab_feature")]
-    if 'active_tab' not in st.session_state:
-        st.session_state['active_tab'] = TAB_OPTIONS[0]
+    # Values are translation keys so the selected tab survives a language change
+    if st.session_state.get('active_tab') not in TAB_KEYS:
+        st.session_state['active_tab'] = TAB_KEYS[0]
 
     active_tab = st.radio(
         "Navigation",
-        options=TAB_OPTIONS,
+        options=TAB_KEYS,
+        format_func={k: t(k) for k in TAB_KEYS}.get,
         horizontal=True,
         label_visibility="collapsed",
         key="active_tab"
     )
     st.markdown("---")
 
-    if active_tab == t("tab_overview"):
+    if active_tab == "tab_overview":
         # ── Account Overview — credits only, no currency values ──────────────
         st.markdown(t("overview_subtitle"))
 
@@ -2425,12 +2937,67 @@ def main():
                 fig_acct.update_yaxes(gridcolor='rgba(128,128,128,0.3)')
                 st.plotly_chart(fig_acct, use_container_width=True)
 
-    elif active_tab == t("tab_trends"):
+    elif active_tab == "tab_trends":
         # Portfolio summary, alerts, and trend charts
         if customer_filter == ALL_CUSTOMERS:
             show_portfolio_summary(usage_df, balance_df, contract_df)
 
-        show_alerts_and_insights(usage_df, balance_df, contract_df)
+        show_alerts_and_insights(usage_df, balance_df, contract_df, rates_summary, anomalies_df)
+        currency = usage_df['CURRENCY'].iloc[0] if not usage_df.empty else "USD"
+
+        # ── Cost anomalies ────────────────────────────────────────────────────
+        st.subheader(t("trend_anomaly_header"))
+        st.caption(t("trend_anomaly_caption"))
+        if anomalies_df.empty:
+            st.success(t("trend_anomaly_none"))
+        else:
+            shown = anomalies_df.copy()
+            shown['Service'] = shown['SERVICE_TYPE'].apply(service_display)
+            st.dataframe(pd.DataFrame({
+                t('portfolio_customer'): shown['CUSTOMER'],
+                t('feature_service_label'): shown['Service'],
+                t('chart_axis_date'): shown['DATE'],
+                t('chart_axis_cost'): shown['COST'].apply(lambda v: format_currency(v, currency)),
+                t('trend_anomaly_expected'): shown['EXPECTED'].apply(lambda v: format_currency(v, currency)),
+                'z': shown['Z'].round(1),
+            }), use_container_width=True, hide_index=True)
+
+            # Chart the most recent anomaly's customer/service with flagged days marked
+            top = shown.iloc[0]
+            series = (history_df[(history_df['SOLD_TO_CUSTOMER_NAME'] == top['CUSTOMER']) &
+                                 (history_df['SERVICE_TYPE'] == top['SERVICE_TYPE'])]
+                      .groupby('USAGE_DATE')['USAGE_IN_CURRENCY'].sum().reset_index())
+            flagged = shown[(shown['CUSTOMER'] == top['CUSTOMER']) & (shown['SERVICE_TYPE'] == top['SERVICE_TYPE'])]
+            fig_anom = go.Figure()
+            fig_anom.add_trace(go.Scatter(
+                x=series['USAGE_DATE'], y=series['USAGE_IN_CURRENCY'], mode='lines',
+                name=t('chart_axis_cost'), line=dict(color='#4A90D9')
+            ))
+            fig_anom.add_trace(go.Scatter(
+                x=flagged['DATE'], y=flagged['COST'], mode='markers', name=t('trend_anomaly_marker'),
+                marker=dict(color='#FF5252', size=12, symbol='x')
+            ))
+            fig_anom.update_layout(
+                title=t('trend_anomaly_chart', name=top['CUSTOMER'], service=top['Service']),
+                height=320, margin=dict(t=40, b=40), yaxis_tickformat='$,.0f',
+                legend=dict(orientation='h', y=-0.2),
+                plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)'
+            )
+            fig_anom.update_xaxes(gridcolor='rgba(128,128,128,0.3)')
+            fig_anom.update_yaxes(gridcolor='rgba(128,128,128,0.3)')
+            st.plotly_chart(fig_anom, use_container_width=True)
+
+        # ── Customer growth ranking ───────────────────────────────────────────
+        growth = growth_ranking(history_df, end_date)
+        if not growth.empty:
+            st.subheader(t("trend_growth_header"))
+            st.caption(t("trend_growth_caption"))
+            st.dataframe(pd.DataFrame({
+                t('portfolio_customer'): growth['CUSTOMER'],
+                t('trend_growth_recent'): growth['RECENT'].apply(lambda v: format_currency(v, currency)),
+                t('trend_growth_prior'): growth['PRIOR'].apply(lambda v: format_currency(v, currency)),
+                t('trend_growth_pct'): growth['GROWTH_PCT'].apply(lambda v: f"{v:+.1f}%" if pd.notna(v) else '—'),
+            }), use_container_width=True, hide_index=True)
 
         trend_chart = create_enhanced_trend_chart(usage_df)
         if trend_chart:
@@ -2547,7 +3114,7 @@ def main():
                             mime="text/csv"
                         )
 
-    elif active_tab == t("tab_usage"):
+    elif active_tab == "tab_usage":
         usage_by_type = usage_df.groupby('USAGE_TYPE').agg(
             CREDITS_USED=('CREDITS_USED', 'sum'),
             COST=('USAGE_IN_CURRENCY', 'sum')
@@ -2652,7 +3219,39 @@ def main():
         else:
             st.caption(t("usage_single_account"))
 
-    elif active_tab == t("tab_financial"):
+        # ── Spend by rating type and by service per customer ─────────────────
+        st.markdown("---")
+        col_rating, col_service = st.columns([2, 3])
+        with col_rating:
+            st.markdown(t("usage_rating_breakdown"))
+            by_rating = usage_df.groupby('RATING_TYPE')['USAGE_IN_CURRENCY'].sum().reset_index()
+            by_rating['Rating'] = by_rating['RATING_TYPE'].str.replace('_', ' ').str.title()
+            fig_rating = px.pie(by_rating, values='USAGE_IN_CURRENCY', names='Rating', hole=0.35)
+            fig_rating.update_traces(textposition='inside', textinfo='percent+label')
+            fig_rating.update_layout(height=340, showlegend=False, margin=dict(t=10, b=10),
+                                     plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)')
+            st.plotly_chart(fig_rating, use_container_width=True)
+        with col_service:
+            st.markdown(t("usage_service_by_customer"))
+            by_service = (usage_df.groupby(['SOLD_TO_CUSTOMER_NAME', 'SERVICE_TYPE'])['USAGE_IN_CURRENCY']
+                          .sum().reset_index())
+            by_service['Service'] = by_service['SERVICE_TYPE'].apply(service_display)
+            fig_service = px.bar(
+                by_service, x='SOLD_TO_CUSTOMER_NAME', y='USAGE_IN_CURRENCY', color='Service',
+                barmode='stack',
+                labels={'USAGE_IN_CURRENCY': t('chart_axis_cost_usd'), 'SOLD_TO_CUSTOMER_NAME': '',
+                        'Service': t('feature_service_label')}
+            )
+            fig_service.update_layout(
+                height=340, legend=dict(orientation='h', y=-0.3, font=dict(size=10)),
+                margin=dict(t=10, b=80), yaxis_tickformat='$,.0f',
+                plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)'
+            )
+            fig_service.update_xaxes(gridcolor='rgba(128,128,128,0.3)')
+            fig_service.update_yaxes(gridcolor='rgba(128,128,128,0.3)')
+            st.plotly_chart(fig_service, use_container_width=True)
+
+    elif active_tab == "tab_financial":
         currency = usage_df['CURRENCY'].iloc[0] if not usage_df.empty else "USD"
 
         # ── Shared projection window selector ─────────────────────────────────
@@ -2674,9 +3273,9 @@ def main():
             if contract_data_start < start_date:
                 try:
                     with st.spinner(t("financial_loading_history")):
-                        contract_usage_df = load_usage_data(
+                        contract_usage_df, _ = split_usage(load_usage_data(
                             session, contract_data_start, end_date, customer_filter, None
-                        )
+                        ), include_adjustments)
                 except Exception as e:
                     st.error(t("msg_query_error", error=e))
                     st.stop()
@@ -2750,6 +3349,110 @@ def main():
         st.markdown("---")
 
         # ══════════════════════════════════════════════════════════════════════
+        # ON-DEMAND (OVERAGE) SPEND
+        # ══════════════════════════════════════════════════════════════════════
+        st.markdown(t("financial_overage_header"))
+        overage_df = usage_df[usage_df['IS_OVERAGE']] if 'IS_OVERAGE' in usage_df.columns else usage_df.iloc[0:0]
+        if overage_df.empty:
+            st.success(t("financial_overage_none"))
+        else:
+            st.metric(t("financial_overage_total"),
+                      format_currency(overage_df['USAGE_IN_CURRENCY'].sum(), currency))
+            col_ob, col_ot = st.columns(2)
+            with col_ob:
+                overage_by_customer = (overage_df.groupby('SOLD_TO_CUSTOMER_NAME')['USAGE_IN_CURRENCY']
+                                       .sum().reset_index().sort_values('USAGE_IN_CURRENCY', ascending=False))
+                fig_ob = px.bar(
+                    overage_by_customer, x='SOLD_TO_CUSTOMER_NAME', y='USAGE_IN_CURRENCY',
+                    title=t("financial_overage_by_customer"),
+                    labels={'USAGE_IN_CURRENCY': t('chart_axis_cost_usd'), 'SOLD_TO_CUSTOMER_NAME': ''}
+                )
+                fig_ob.update_traces(marker_color='#FF5252')
+                fig_ob.update_layout(height=320, margin=dict(t=40, b=40), yaxis_tickformat='$,.0f',
+                                     plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)')
+                fig_ob.update_yaxes(gridcolor='rgba(128,128,128,0.3)')
+                st.plotly_chart(fig_ob, use_container_width=True)
+            with col_ot:
+                overage_trend = overage_df.groupby('USAGE_DATE')['USAGE_IN_CURRENCY'].sum().reset_index()
+                fig_ot = px.line(
+                    overage_trend, x='USAGE_DATE', y='USAGE_IN_CURRENCY',
+                    title=t("financial_overage_trend"),
+                    labels={'USAGE_IN_CURRENCY': t('chart_axis_cost_usd'), 'USAGE_DATE': ''}
+                )
+                fig_ot.update_traces(line_color='#FF5252')
+                fig_ot.update_layout(height=320, margin=dict(t=40, b=40), yaxis_tickformat='$,.0f',
+                                     plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)')
+                fig_ot.update_xaxes(gridcolor='rgba(128,128,128,0.3)')
+                fig_ot.update_yaxes(gridcolor='rgba(128,128,128,0.3)')
+                st.plotly_chart(fig_ot, use_container_width=True)
+
+        st.markdown("---")
+
+        # ══════════════════════════════════════════════════════════════════════
+        # EFFECTIVE RATES (PARTNER_RATE_SHEET_DAILY)
+        # ══════════════════════════════════════════════════════════════════════
+        st.markdown(t("financial_rates_header"))
+        if rates_df is None:
+            st.info(t("financial_rates_unavailable"))
+        elif rates_summary.empty:
+            st.info(t("financial_rates_no_data"))
+        else:
+            st.caption(t("financial_rates_caption"))
+            col_rt, col_rc = st.columns([2, 3])
+            with col_rt:
+                st.dataframe(pd.DataFrame({
+                    t('portfolio_customer'): rates_summary['CUSTOMER'],
+                    t('financial_rates_start'): [format_currency(v, c) for v, c in
+                                                 zip(rates_summary['FIRST_RATE'], rates_summary['CURRENCY'])],
+                    t('financial_rates_latest'): [format_currency(v, c) for v, c in
+                                                  zip(rates_summary['LATEST_RATE'], rates_summary['CURRENCY'])],
+                    t('financial_rates_change'): rates_summary['CHANGE_PCT'].apply(lambda v: f"{v:+.1f}%"),
+                }), use_container_width=True, hide_index=True)
+            with col_rc:
+                fig_rate = px.line(
+                    rates_daily, x='RATE_DATE', y='EFFECTIVE_RATE', color='SOLD_TO_CUSTOMER_NAME',
+                    title=t("financial_rates_trend"),
+                    labels={'EFFECTIVE_RATE': t('financial_rates_axis'), 'RATE_DATE': '',
+                            'SOLD_TO_CUSTOMER_NAME': ''}
+                )
+                fig_rate.update_traces(line_shape='hv')
+                fig_rate.update_layout(height=320, margin=dict(t=40, b=40), yaxis_tickformat='$,.2f',
+                                       legend=dict(orientation='h', y=-0.25),
+                                       plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)')
+                fig_rate.update_xaxes(gridcolor='rgba(128,128,128,0.3)')
+                fig_rate.update_yaxes(gridcolor='rgba(128,128,128,0.3)')
+                st.plotly_chart(fig_rate, use_container_width=True)
+            with st.expander(t("financial_rates_by_service"), expanded=False):
+                latest_rates = rates_df[rates_df['RATE_DATE'] == rates_df['RATE_DATE'].max()]
+                latest_rates = (latest_rates
+                                .groupby(['SOLD_TO_CUSTOMER_NAME', 'SERVICE_TYPE', 'REGION', 'CURRENCY'])
+                                ['EFFECTIVE_RATE'].mean().reset_index())
+                st.dataframe(pd.DataFrame({
+                    t('portfolio_customer'): latest_rates['SOLD_TO_CUSTOMER_NAME'],
+                    t('feature_service_label'): latest_rates['SERVICE_TYPE'].apply(service_display),
+                    'Region': latest_rates['REGION'],
+                    t('financial_rates_latest'): [format_currency(v, c) for v, c in
+                                                  zip(latest_rates['EFFECTIVE_RATE'], latest_rates['CURRENCY'])],
+                }), use_container_width=True, hide_index=True)
+
+        st.markdown("---")
+
+        # ══════════════════════════════════════════════════════════════════════
+        # CREDITS & OTHER CHARGES (non-consumption billing types)
+        # ══════════════════════════════════════════════════════════════════════
+        if not other_charges_df.empty:
+            st.markdown(t("financial_other_charges_header"))
+            st.caption(t("financial_other_charges_caption"))
+            other = (other_charges_df.groupby(['SOLD_TO_CUSTOMER_NAME', 'BILLING_TYPE'])['USAGE_IN_CURRENCY']
+                     .sum().reset_index())
+            st.dataframe(pd.DataFrame({
+                t('portfolio_customer'): other['SOLD_TO_CUSTOMER_NAME'],
+                t('financial_other_charges_type'): other['BILLING_TYPE'].str.replace('_', ' ').str.title(),
+                t('chart_axis_cost'): other['USAGE_IN_CURRENCY'].apply(lambda v: format_currency(v, currency)),
+            }), use_container_width=True, hide_index=True)
+            st.markdown("---")
+
+        # ══════════════════════════════════════════════════════════════════════
         # SECTION 2 — CONTRACT STATUS
         # ══════════════════════════════════════════════════════════════════════
         st.markdown(t("financial_contract_header"))
@@ -2814,6 +3517,18 @@ def main():
 
                     st.caption(t("financial_overage_caption"))
 
+                    # Trend + weekday forecast of when remaining capacity runs out
+                    contract_daily = customer_daily_cost(contract_usage_df, selected_customer)
+                    forecast_horizon = max((metrics['contract_end'] - datetime.now().date()).days, 0) + 365
+                    contract_forecast = forecast_daily_cost(contract_daily, forecast_horizon)
+                    if contract_forecast is not None and metrics['remaining_capacity'] > 0:
+                        exhaust = forecast_exhaustion_date(
+                            contract_forecast, metrics['total_used'], metrics['capacity_purchased'])
+                        if exhaust and exhaust <= metrics['contract_end']:
+                            st.warning(t("financial_forecast_exhaust", date=exhaust.strftime('%d/%m/%Y')))
+                        else:
+                            st.caption(t("financial_forecast_no_exhaust"))
+
                     if metrics['days_until_overage'] is not None:
                         if metrics['days_until_overage'] == 0 and metrics['overage'] > 0:
                             st.markdown(
@@ -2846,6 +3561,32 @@ def main():
                         else:
                             st.caption(t("financial_run_rate_note", days=actual_period))
 
+                    st.markdown(t("financial_renewal_header"))
+                    col_buffer, col_renewal = st.columns([1, 2])
+                    with col_buffer:
+                        renewal_buffer = st.slider(
+                            t("financial_renewal_buffer"), min_value=0, max_value=50, value=10, step=5,
+                            format="%d%%", key="renewal_buffer"
+                        )
+                    renewal = estimate_renewal_capacity(
+                        contract_daily, metrics['contract_end'] + timedelta(days=1),
+                        metrics['days_in_contract'], renewal_buffer
+                    )
+                    with col_renewal:
+                        if renewal:
+                            renewal_spend, renewal_capacity = renewal
+                            st.metric(
+                                t("financial_renewal_value"),
+                                format_currency(renewal_capacity, metrics['currency']),
+                                delta=t("financial_renewal_forecast",
+                                        value=format_currency(renewal_spend, metrics['currency'])),
+                                delta_color="off"
+                            )
+                            st.caption(t("financial_renewal_caption",
+                                         days=metrics['days_in_contract'], buffer=renewal_buffer))
+                        else:
+                            st.info(t("financial_not_enough_data"))
+
                     with st.expander(t("financial_contract_details"), expanded=False):
                         col1, col2 = st.columns(2)
                         with col1:
@@ -2863,7 +3604,7 @@ def main():
                             st.write(f"- {t('financial_annual', value=format_currency(metrics['annual_run_rate'], metrics['currency']))}")
                             st.write(f"- {t('financial_window', days=metrics['run_rate_period'])}")
     
-    elif active_tab == t("tab_feature"):
+    elif active_tab == "tab_feature":
         st.markdown(t("feature_header"))
         st.markdown(t("feature_subtitle"))
 
@@ -2871,8 +3612,8 @@ def main():
             st.info(t("feature_no_data"))
         else:
             currency = usage_df['CURRENCY'].iloc[0] if not usage_df.empty else "USD"
-            all_known_features = set(USAGE_TYPE_DISPLAY.keys())
-            used_globally = set(usage_df['USAGE_TYPE'].str.lower().unique())
+            all_known_features = set(SERVICE_TYPE_DISPLAY.keys())
+            used_globally = set(usage_df['SERVICE_TYPE'].unique())
 
             # ── Adoption matrix (all-customers view) ─────────────────────────
             if customer_filter == ALL_CUSTOMERS:
@@ -2880,11 +3621,11 @@ def main():
                 st.caption(t("feature_matrix_caption"))
 
                 pivot = (
-                    usage_df.groupby(['SOLD_TO_CUSTOMER_NAME', 'USAGE_TYPE'])['CREDITS_USED']
+                    usage_df.groupby(['SOLD_TO_CUSTOMER_NAME', 'SERVICE_TYPE'])['CREDITS_USED']
                     .sum().reset_index()
                 )
-                pivot['Feature'] = pivot['USAGE_TYPE'].apply(
-                    lambda x: USAGE_TYPE_DISPLAY.get(x, x.title())
+                pivot['Feature'] = pivot['SERVICE_TYPE'].apply(
+                    lambda x: service_display(x)
                 )
                 matrix = pivot.pivot(
                     index='SOLD_TO_CUSTOMER_NAME', columns='Feature', values='CREDITS_USED'
@@ -2924,7 +3665,7 @@ def main():
             customer_feature_df = usage_df[usage_df['SOLD_TO_CUSTOMER_NAME'] == feature_customer]
 
             if not customer_feature_df.empty:
-                cust_feature_summary = customer_feature_df.groupby('USAGE_TYPE').agg(
+                cust_feature_summary = customer_feature_df.groupby('SERVICE_TYPE').agg(
                     total_credits=('CREDITS_USED', 'sum'),
                     total_cost=('USAGE_IN_CURRENCY', 'sum'),
                     days_active=('USAGE_DATE', 'nunique'),
@@ -2942,12 +3683,12 @@ def main():
                 with col1:
                     feature_trend = (
                         customer_feature_df
-                        .groupby(['USAGE_DATE', 'USAGE_TYPE'])['CREDITS_USED']
+                        .groupby(['USAGE_DATE', 'SERVICE_TYPE'])['CREDITS_USED']
                         .sum()
                         .reset_index()
                     )
-                    feature_trend['Feature'] = feature_trend['USAGE_TYPE'].apply(
-                        lambda x: re.sub(r'[^\w\s/()-]', '', USAGE_TYPE_DISPLAY.get(x, x.title())).strip()
+                    feature_trend['Feature'] = feature_trend['SERVICE_TYPE'].apply(
+                        lambda x: service_display(x)
                     )
                     fig_trend = px.area(
                         feature_trend,
@@ -2970,8 +3711,8 @@ def main():
 
                 with col2:
                     display_cust = cust_feature_summary.copy()
-                    display_cust['Feature'] = display_cust['USAGE_TYPE'].apply(
-                        lambda x: USAGE_TYPE_DISPLAY.get(x, x.title())
+                    display_cust['Feature'] = display_cust['SERVICE_TYPE'].apply(
+                        lambda x: service_display(x)
                     )
                     display_cust['Credits'] = display_cust['total_credits'].apply(format_credits)
                     display_cust['Cost'] = display_cust.apply(
@@ -2992,7 +3733,7 @@ def main():
             st.markdown(t("feature_upsell"))
 
             if customer_filter != ALL_CUSTOMERS and not customer_feature_df.empty:
-                used_scope = set(customer_feature_df['USAGE_TYPE'].str.lower().unique())
+                used_scope = set(customer_feature_df['SERVICE_TYPE'].unique())
                 scope_label = t("feature_upsell_scope_customer", name=customer_filter)
             else:
                 used_scope = used_globally
@@ -3007,8 +3748,8 @@ def main():
                     row_feats = unused_features[row_start:row_start + 2]
                     cols = st.columns(len(row_feats))
                     for col_idx, feat in enumerate(row_feats):
-                        display_name  = USAGE_TYPE_DISPLAY.get(feat, feat.title())
-                        use_case_text = t_usecase(feat)
+                        display_name  = service_display(feat)
+                        use_case_text = t_service_usecase(feat)
                         with cols[col_idx]:
                             st.markdown(
                                 f'<div class="upsell-card">'
@@ -3022,35 +3763,13 @@ def main():
 
             # ── Data source note ─────────────────────────────────────────────
             with st.expander(t("feature_datasource"), expanded=False):
-                st.markdown("""
-### Source: `SNOWFLAKE.BILLING.PARTNER_USAGE_IN_CURRENCY_DAILY`
-
-This is the authoritative reseller view — it shows daily credit consumption per customer account broken down by `USAGE_TYPE`. As a reseller this is the only Snowflake schema that exposes **your customers'** usage directly.
-
-| `USAGE_TYPE` | Feature | Credit type |
-|---|---|---|
-| `compute` | 💻 Compute | Virtual warehouse credits |
-| `storage` | 💾 Storage | TB/month |
-| `data transfer` | 🌐 Data Transfer | Egress credits |
-| `cloud services` | ☁️ Cloud Services | Metadata & API credits |
-| `snowpipe` | 🚰 Snowpipe | Serverless ingest credits |
-| `serverless tasks` | ⚡ Tasks | Serverless task credits |
-| `automatic clustering` | ♻️ Auto Clustering | Clustering credits |
-| `materialized views` | 📊 Materialized Views | Refresh credits |
-| `search optimization` | 🔍 Search Optimization | Maintenance credits |
-| `snowpark` | 🐍 Snowpark | Compute credits |
-| `dynamic tables` | 🔄 Dynamic Tables | Refresh credits |
-| `streams` | 🌊 Streams | Change tracking credits |
-| `streamlit` | 📱 Streamlit | App compute credits |
-| `cortex` | 🤖 Cortex AI Functions | Token-based credits |
-| `cortex analyst` | 💬 Cortex Analyst | Query credits |
-| `cortex search` | 🔎 Cortex Search | Index + serving credits |
-| `cortex code` | 💡 Cortex Code | Token-based credits |
-| `snowflake intelligence` | ✨ Snowflake Intelligence | Usage credits |
-| `ml functions` | 🧠 ML Functions | Compute credits |
-
-> **Demo mode:** synthetic data matches this schema exactly. Connect to your SPN account to see your customer(s) consumption.
-                """)
+                st.markdown(
+                    "**Source:** `SNOWFLAKE.BILLING.PARTNER_USAGE_IN_CURRENCY_DAILY`, grouped by "
+                    "`SERVICE_TYPE` (consumption rows only).\n\n"
+                    + "\n".join(f"- `{k}` — {v}" for k, v in SERVICE_TYPE_DISPLAY.items())
+                    + "\n\nService types not listed are shown with their raw name. "
+                    "Demo mode uses synthetic data in the same shape."
+                )
 
     # Footer
     st.markdown("---")
