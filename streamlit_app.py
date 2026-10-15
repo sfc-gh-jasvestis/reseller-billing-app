@@ -110,7 +110,9 @@ TRANSLATIONS = {
         # App-level
         "app_title": "Snowflake Credit Usage Dashboard",
         "app_subtitle": "Real-time credit consumption monitoring for Snowflake reseller customers",
-        "app_demo_banner": "🎭 **Demo Mode Active** - Displaying sample data for 5 fictional customers. Set `USE_DEMO_DATA = False` to use live BILLING schema data.",
+        "app_demo_banner": "🎭 **Demo Mode Active** - Displaying sample data for 5 fictional customers.",
+        "msg_live_unavailable": "Live billing data is required (`USE_DEMO_DATA=false`) but the `SNOWFLAKE.BILLING` partner views are not readable. They exist only in a reseller/distributor organization account and require the app owner role to be ACCOUNTADMIN.",
+        "msg_query_error": "❌ Error loading billing data: {error}",
 
         # Sidebar
         "sidebar_controls": "🎛️ Dashboard Controls",
@@ -333,7 +335,9 @@ TRANSLATIONS = {
         # App-level
         "app_title": "Snowflake クレジット使用量ダッシュボード",
         "app_subtitle": "Snowflake 再販顧客 クレジット消費リアルタイムモニタリング",
-        "app_demo_banner": "🎭 **デモモード** — 5社の架空顧客のサンプルデータを表示中。実データを使用するには `USE_DEMO_DATA = False` に設定してください。",
+        "app_demo_banner": "🎭 **デモモード** — 5社の架空顧客のサンプルデータを表示中。",
+        "msg_live_unavailable": "ライブ請求データが必要です（`USE_DEMO_DATA=false`）が、`SNOWFLAKE.BILLING` のパートナービューを読み取れません。これらのビューはリセラー/ディストリビューターの組織アカウントにのみ存在し、アプリのオーナーロールが ACCOUNTADMIN である必要があります。",
+        "msg_query_error": "❌ 請求データの読み込みエラー: {error}",
 
         # Sidebar
         "sidebar_controls": "🎛️ ダッシュボード設定",
@@ -574,9 +578,16 @@ def t_usecase(feature_key):
     return text
 
 
-# Demo mode flag - auto-detects via env var, defaults to True outside Snowflake
+# Demo mode: None = auto-detect (live data when the BILLING views are readable,
+# demo data otherwise), True = always demo, False = always live.
+# The USE_DEMO_DATA env var ("true"/"false") overrides auto-detection.
 import os
-USE_DEMO_DATA = os.environ.get("USE_DEMO_DATA", "true").lower() != "false"
+_demo_env = os.environ.get("USE_DEMO_DATA", "").strip().lower()
+USE_DEMO_DATA = True if _demo_env == "true" else False if _demo_env == "false" else None
+
+# Language-independent sentinel for the "All Customers" selection; the label is
+# translated only for display so cached results stay valid across languages.
+ALL_CUSTOMERS = "__ALL_CUSTOMERS__"
 
 # Demo data configuration - 5 customers with varying usage patterns
 DEMO_CUSTOMERS = [
@@ -831,7 +842,7 @@ def generate_demo_contract_data():
 
 def generate_demo_customer_list():
     """Generate demo customer list"""
-    return [t("all_customers")] + [c['name'] for c in DEMO_CUSTOMERS]
+    return [ALL_CUSTOMERS] + [c['name'] for c in DEMO_CUSTOMERS]
 
 # =============================================================================
 # UTILITY FUNCTIONS (embedded for Streamlit in Snowflake compatibility)
@@ -1557,167 +1568,156 @@ def get_snowflake_session():
         st.error(f"❌ {t('msg_connection_error')}\nDetails: {str(e)}")
         return None
 
+def _filter_demo(df, customer_filter=None, usage_type_filter=None):
+    """Apply sidebar filters to generated demo data"""
+    if customer_filter and customer_filter != ALL_CUSTOMERS:
+        df = df[df['SOLD_TO_CUSTOMER_NAME'] == customer_filter]
+    if usage_type_filter:
+        df = df[df['USAGE_TYPE'].isin(usage_type_filter)]
+    return df
+
+def _run_query(session, query, params):
+    """Run a bound-parameter query and return a pandas DataFrame"""
+    return session.sql(query, params=params).to_pandas()
+
+@st.cache_data(ttl=CACHE_TTL_SECONDS)
+def billing_views_available(_session):
+    """True when the session can read the reseller BILLING views.
+
+    The PARTNER_* views exist only in reseller/distributor org accounts and are
+    readable only by ACCOUNTADMIN, so this is probed once instead of letting
+    every loader fail independently.
+    """
+    if _session is None:
+        return False
+    try:
+        for view in ("USAGE", "BALANCE", "CONTRACT"):
+            _session.sql(f"SELECT 1 FROM {BILLING_SCHEMA}.{VIEWS[view]} LIMIT 0").collect()
+        return True
+    except Exception:
+        return False
+
 @st.cache_data(ttl=CACHE_TTL_SECONDS)
 def load_usage_data(_session, start_date, end_date, customer_filter=None, usage_type_filter=None):
-    """Enhanced usage data loading with additional filters - falls back to demo data"""
-    # Use demo data if flag is set
-    if USE_DEMO_DATA:
-        df = generate_demo_usage_data(start_date, end_date)
-        if customer_filter and customer_filter != t("all_customers"):
-            df = df[df['SOLD_TO_CUSTOMER_NAME'] == customer_filter]
-        if usage_type_filter:
-            df = df[df['USAGE_TYPE'].isin(usage_type_filter)]
-        return clean_usage_data(df)
-    
-    try:
-        query = f"""
-        SELECT 
-            SOLD_TO_ORGANIZATION_NAME,
-            SOLD_TO_CUSTOMER_NAME,
-            SOLD_TO_CONTRACT_NUMBER,
-            ACCOUNT_NAME,
-            ACCOUNT_LOCATOR,
-            REGION,
-            SERVICE_LEVEL,
-            USAGE_DATE,
-            USAGE_TYPE,
-            CURRENCY,
-            USAGE as CREDITS_USED,
-            USAGE_IN_CURRENCY,
-            BALANCE_SOURCE
-        FROM {BILLING_SCHEMA}.{VIEWS['USAGE']}
-        WHERE USAGE_DATE BETWEEN '{start_date}' AND '{end_date}'
-        """
-        
-        if customer_filter and customer_filter != t("all_customers"):
-            safe_customer = customer_filter.replace("'", "''")
-            query += f" AND SOLD_TO_CUSTOMER_NAME = '{safe_customer}'"
+    """Load usage from PARTNER_USAGE_IN_CURRENCY_DAILY, or demo data when _session is None"""
+    if _session is None:
+        return clean_usage_data(_filter_demo(generate_demo_usage_data(start_date, end_date),
+                                             customer_filter, usage_type_filter))
 
-        if usage_type_filter:
-            usage_types = "', '".join(usage_type_filter)
-            query += f" AND USAGE_TYPE IN ('{usage_types}')"
-            
-        query += f" ORDER BY USAGE_DATE DESC, SOLD_TO_CUSTOMER_NAME LIMIT {QUERY_LIMITS['max_rows']}"
-        
-        df = _session.sql(query).to_pandas()
-        return clean_usage_data(df)
-        
-    except Exception as e:
-        st.info(t("msg_demo_fallback"))
-        df = generate_demo_usage_data(start_date, end_date)
-        if customer_filter and customer_filter != t("all_customers"):
-            df = df[df['SOLD_TO_CUSTOMER_NAME'] == customer_filter]
-        if usage_type_filter:
-            df = df[df['USAGE_TYPE'].isin(usage_type_filter)]
-        return clean_usage_data(df)
+    query = f"""
+    SELECT 
+        SOLD_TO_ORGANIZATION_NAME,
+        SOLD_TO_CUSTOMER_NAME,
+        SOLD_TO_CONTRACT_NUMBER,
+        ACCOUNT_NAME,
+        ACCOUNT_LOCATOR,
+        REGION,
+        SERVICE_LEVEL,
+        USAGE_DATE,
+        USAGE_TYPE,
+        CURRENCY,
+        USAGE as CREDITS_USED,
+        USAGE_IN_CURRENCY,
+        BALANCE_SOURCE
+    FROM {BILLING_SCHEMA}.{VIEWS['USAGE']}
+    WHERE USAGE_DATE BETWEEN ? AND ?
+    """
+    params = [str(start_date), str(end_date)]
+
+    if customer_filter and customer_filter != ALL_CUSTOMERS:
+        query += " AND SOLD_TO_CUSTOMER_NAME = ?"
+        params.append(customer_filter)
+
+    if usage_type_filter:
+        query += f" AND USAGE_TYPE IN ({', '.join('?' for _ in usage_type_filter)})"
+        params.extend(usage_type_filter)
+
+    query += f" ORDER BY USAGE_DATE DESC, SOLD_TO_CUSTOMER_NAME LIMIT {int(QUERY_LIMITS['max_rows'])}"
+
+    return clean_usage_data(_run_query(_session, query, params))
 
 @st.cache_data(ttl=CACHE_TTL_SECONDS)
 def load_balance_data(_session, start_date, end_date, customer_filter=None):
-    """Enhanced balance data loading - falls back to demo data"""
-    # Use demo data if flag is set
-    if USE_DEMO_DATA:
-        df = generate_demo_balance_data(start_date, end_date)
-        if customer_filter and customer_filter != t("all_customers"):
-            df = df[df['SOLD_TO_CUSTOMER_NAME'] == customer_filter]
-        return clean_balance_data(df)
-    
-    try:
-        query = f"""
-        SELECT 
-            SOLD_TO_ORGANIZATION_NAME,
-            SOLD_TO_CUSTOMER_NAME,
-            SOLD_TO_CONTRACT_NUMBER,
-            DATE as BALANCE_DATE,
-            CURRENCY,
-            FREE_USAGE_BALANCE,
-            CAPACITY_BALANCE,
-            ON_DEMAND_CONSUMPTION_BALANCE,
-            ROLLOVER_BALANCE
-        FROM {BILLING_SCHEMA}.{VIEWS['BALANCE']}
-        WHERE DATE BETWEEN '{start_date}' AND '{end_date}'
-        """
-        
-        if customer_filter and customer_filter != t("all_customers"):
-            safe_customer = customer_filter.replace("'", "''")
-            query += f" AND SOLD_TO_CUSTOMER_NAME = '{safe_customer}'"
+    """Load balances from PARTNER_REMAINING_BALANCE_DAILY, or demo data when _session is None"""
+    if _session is None:
+        return clean_balance_data(_filter_demo(generate_demo_balance_data(start_date, end_date),
+                                               customer_filter))
 
-        query += " ORDER BY DATE DESC, SOLD_TO_CUSTOMER_NAME"
-        
-        df = _session.sql(query).to_pandas()
-        return clean_balance_data(df)
-        
-    except Exception as e:
-        df = generate_demo_balance_data(start_date, end_date)
-        if customer_filter and customer_filter != t("all_customers"):
-            df = df[df['SOLD_TO_CUSTOMER_NAME'] == customer_filter]
-        return clean_balance_data(df)
+    query = f"""
+    SELECT 
+        SOLD_TO_ORGANIZATION_NAME,
+        SOLD_TO_CUSTOMER_NAME,
+        SOLD_TO_CONTRACT_NUMBER,
+        DATE as BALANCE_DATE,
+        CURRENCY,
+        FREE_USAGE_BALANCE,
+        CAPACITY_BALANCE,
+        ON_DEMAND_CONSUMPTION_BALANCE,
+        ROLLOVER_BALANCE
+    FROM {BILLING_SCHEMA}.{VIEWS['BALANCE']}
+    WHERE DATE BETWEEN ? AND ?
+    """
+    params = [str(start_date), str(end_date)]
+
+    if customer_filter and customer_filter != ALL_CUSTOMERS:
+        query += " AND SOLD_TO_CUSTOMER_NAME = ?"
+        params.append(customer_filter)
+
+    query += " ORDER BY DATE DESC, SOLD_TO_CUSTOMER_NAME"
+
+    return clean_balance_data(_run_query(_session, query, params))
 
 @st.cache_data(ttl=CACHE_TTL_SECONDS)
 def load_contract_data(_session, customer_filter=None):
-    """Load contract data from PARTNER_CONTRACT_ITEMS - falls back to demo data"""
-    # Use demo data if flag is set
-    if USE_DEMO_DATA:
-        df = generate_demo_contract_data()
-        if customer_filter and customer_filter != t("all_customers"):
-            df = df[df['SOLD_TO_CUSTOMER_NAME'] == customer_filter]
-        return df
-    
-    try:
-        query = f"""
-        SELECT 
-            SOLD_TO_CUSTOMER_NAME,
-            SOLD_TO_CONTRACT_NUMBER,
-            START_DATE,
-            END_DATE,
-            AMOUNT,
-            CURRENCY,
-            CONTRACT_ITEM
-        FROM {BILLING_SCHEMA}.{VIEWS['CONTRACT']}
-        WHERE END_DATE >= CURRENT_DATE
-        """
-        
-        if customer_filter and customer_filter != t("all_customers"):
-            safe_customer = customer_filter.replace("'", "''")
-            query += f" AND SOLD_TO_CUSTOMER_NAME = '{safe_customer}'"
+    """Load active contracts from PARTNER_CONTRACT_ITEMS, or demo data when _session is None"""
+    if _session is None:
+        return _filter_demo(generate_demo_contract_data(), customer_filter)
 
-        query += " ORDER BY SOLD_TO_CUSTOMER_NAME, START_DATE DESC"
-        
-        df = _session.sql(query).to_pandas()
-        
-        # Convert date columns
-        if not df.empty:
-            df['START_DATE'] = pd.to_datetime(df['START_DATE']).dt.date
-            df['END_DATE'] = pd.to_datetime(df['END_DATE']).dt.date
-            df['AMOUNT'] = df['AMOUNT'].fillna(0)
-        
-        return df
-        
-    except Exception as e:
-        df = generate_demo_contract_data()
-        if customer_filter and customer_filter != t("all_customers"):
-            df = df[df['SOLD_TO_CUSTOMER_NAME'] == customer_filter]
-        return df
+    query = f"""
+    SELECT 
+        SOLD_TO_CUSTOMER_NAME,
+        SOLD_TO_CONTRACT_NUMBER,
+        START_DATE,
+        END_DATE,
+        AMOUNT,
+        CURRENCY,
+        CONTRACT_ITEM
+    FROM {BILLING_SCHEMA}.{VIEWS['CONTRACT']}
+    WHERE END_DATE >= CURRENT_DATE
+    """
+    params = []
+
+    if customer_filter and customer_filter != ALL_CUSTOMERS:
+        query += " AND SOLD_TO_CUSTOMER_NAME = ?"
+        params.append(customer_filter)
+
+    query += " ORDER BY SOLD_TO_CUSTOMER_NAME, START_DATE DESC"
+
+    df = _run_query(_session, query, params)
+
+    # Convert date columns
+    if not df.empty:
+        df['START_DATE'] = pd.to_datetime(df['START_DATE']).dt.date
+        df['END_DATE'] = pd.to_datetime(df['END_DATE']).dt.date
+        df['AMOUNT'] = df['AMOUNT'].fillna(0)
+
+    return df
 
 @st.cache_data(ttl=CACHE_TTL_SECONDS)
 def load_customer_list(_session):
-    """Load available customers dynamically - falls back to demo data"""
-    # Use demo data if flag is set
-    if USE_DEMO_DATA:
+    """Load customers with usage in the last 90 days, or demo customers when _session is None"""
+    if _session is None:
         return generate_demo_customer_list()
-    
-    try:
-        query = f"""
-        SELECT DISTINCT SOLD_TO_CUSTOMER_NAME
-        FROM {BILLING_SCHEMA}.{VIEWS['USAGE']}
-        WHERE USAGE_DATE >= CURRENT_DATE - 90
-        ORDER BY SOLD_TO_CUSTOMER_NAME
-        """
-        
-        df = _session.sql(query).to_pandas()
-        return [t("all_customers")] + df['SOLD_TO_CUSTOMER_NAME'].tolist()
-        
-    except Exception as e:
-        return generate_demo_customer_list()
+
+    query = f"""
+    SELECT DISTINCT SOLD_TO_CUSTOMER_NAME
+    FROM {BILLING_SCHEMA}.{VIEWS['USAGE']}
+    WHERE USAGE_DATE >= CURRENT_DATE - 90
+    ORDER BY SOLD_TO_CUSTOMER_NAME
+    """
+
+    df = _run_query(_session, query, [])
+    return [ALL_CUSTOMERS] + df['SOLD_TO_CUSTOMER_NAME'].tolist()
 
 def create_enhanced_trend_chart(df):
     """Create enhanced trend chart with multiple metrics"""
@@ -1855,13 +1855,7 @@ def create_usage_heatmap(df):
 
     heatmap_data = df.groupby(['WEEK_START', 'DAY_OF_WEEK'])['CREDITS_USED'].sum().reset_index()
 
-    # Keep week order sorted by actual date
-    week_order = (
-        df.drop_duplicates('WEEK_START')
-        .assign(SORT_DATE=pd.to_datetime(df.drop_duplicates('USAGE_DATE')
-                .groupby(lambda _: True).first()['USAGE_DATE']))
-    )
-    # Simple sort: re-derive the original Monday dates for ordering
+    # Order rows by the actual Monday date of each week
     df['_WEEK_MON'] = dates - pd.to_timedelta(dates.dt.dayofweek, unit='d')
     week_sort = (
         df[['WEEK_START', '_WEEK_MON']]
@@ -2182,16 +2176,10 @@ def main():
     st.markdown(f'<h1 class="main-header">{APP_ICON} {t("app_title")}</h1>', unsafe_allow_html=True)
     st.markdown(f"### {t('app_subtitle')}")
     
-    # Demo mode banner
-    if USE_DEMO_DATA:
-        st.info(t("app_demo_banner"))
-    
-    st.markdown("---")
-    
-    # Get Snowflake session (skip when demo mode)
-    if USE_DEMO_DATA:
-        session = None
-    else:
+    # Resolve data mode. session stays None in demo mode; loaders use that
+    # to return generated data, so live and demo rows are never mixed.
+    session = None
+    if USE_DEMO_DATA is not True:
         session = get_snowflake_session()
         if not session:
             if st.session_state.get('auth_expired', False):
@@ -2202,6 +2190,17 @@ def main():
                     st.cache_data.clear()
                     st.rerun()
             st.stop()
+        if not billing_views_available(session):
+            if USE_DEMO_DATA is False:
+                st.error(t("msg_live_unavailable"))
+                st.stop()
+            st.info(t("msg_demo_fallback"))
+            session = None
+
+    if session is None:
+        st.info(t("app_demo_banner"))
+    
+    st.markdown("---")
 
     # Sidebar with enhanced filters
     st.sidebar.header(t("sidebar_controls"))
@@ -2236,14 +2235,19 @@ def main():
         st.stop()
     
     # Load customer list dynamically
-    with st.spinner(t("sidebar_loading_customers")):
-        customer_options = load_customer_list(session)
+    try:
+        with st.spinner(t("sidebar_loading_customers")):
+            customer_options = load_customer_list(session)
+    except Exception as e:
+        st.error(t("msg_query_error", error=e))
+        st.stop()
     
     # Customer filter
     customer_filter = st.sidebar.selectbox(
         t("sidebar_customer"),
         options=customer_options,
-        index=0
+        index=0,
+        format_func=lambda c: t("all_customers") if c == ALL_CUSTOMERS else c
     )
 
     st.sidebar.markdown("---")
@@ -2257,19 +2261,23 @@ def main():
     usage_type_filter = None
     
     # Load data with enhanced loading indicator
-    with st.spinner(t("msg_loading")):
-        progress_bar = st.progress(0)
-        
-        usage_df = load_usage_data(session, start_date, end_date, customer_filter, usage_type_filter)
-        progress_bar.progress(25)
-        
-        balance_df = load_balance_data(session, start_date, end_date, customer_filter)
-        progress_bar.progress(55)
+    try:
+        with st.spinner(t("msg_loading")):
+            progress_bar = st.progress(0)
+            
+            usage_df = load_usage_data(session, start_date, end_date, customer_filter, usage_type_filter)
+            progress_bar.progress(25)
+            
+            balance_df = load_balance_data(session, start_date, end_date, customer_filter)
+            progress_bar.progress(55)
 
-        # Load contract data at top level — needed for smart alerts + portfolio table
-        contract_df = load_contract_data(session, customer_filter)
-        progress_bar.progress(100)
-        progress_bar.empty()
+            # Load contract data at top level — needed for smart alerts + portfolio table
+            contract_df = load_contract_data(session, customer_filter)
+            progress_bar.progress(100)
+            progress_bar.empty()
+    except Exception as e:
+        st.error(t("msg_query_error", error=e))
+        st.stop()
     
     # Check for data
     if usage_df.empty:
@@ -2347,7 +2355,7 @@ def main():
         st.markdown("---")
 
         # ── Daily credit burn chart ────────────────────────────────────────────
-        if customer_filter == t("all_customers"):
+        if customer_filter == ALL_CUSTOMERS:
             burn = (
                 usage_df.groupby(['USAGE_DATE', 'SOLD_TO_CUSTOMER_NAME'])['CREDITS_USED']
                 .sum().reset_index()
@@ -2419,7 +2427,7 @@ def main():
 
     elif active_tab == t("tab_trends"):
         # Portfolio summary, alerts, and trend charts
-        if customer_filter == t("all_customers"):
+        if customer_filter == ALL_CUSTOMERS:
             show_portfolio_summary(usage_df, balance_df, contract_df)
 
         show_alerts_and_insights(usage_df, balance_df, contract_df)
@@ -2437,7 +2445,7 @@ def main():
         # Month-over-month comparison chart
         mom_df = usage_df.copy()
         mom_df['Month'] = pd.to_datetime(mom_df['USAGE_DATE']).dt.to_period('M').dt.to_timestamp()
-        if customer_filter == t("all_customers"):
+        if customer_filter == ALL_CUSTOMERS:
             mom_agg = mom_df.groupby(['Month', 'SOLD_TO_CUSTOMER_NAME'])['USAGE_IN_CURRENCY'].sum().reset_index()
             mom_agg.columns = ['Month', 'Customer', 'Cost']
             if mom_agg['Month'].nunique() >= 2:
@@ -2618,7 +2626,7 @@ def main():
                 account_usage,
                 x='ACCOUNT_NAME',
                 y='Credits',
-                color='SOLD_TO_CUSTOMER_NAME' if customer_filter == t("all_customers") else 'REGION',
+                color='SOLD_TO_CUSTOMER_NAME' if customer_filter == ALL_CUSTOMERS else 'REGION',
                 title=t("usage_credits_by_account"),
                 labels={'ACCOUNT_NAME': 'Account', 'Credits': 'Credits',
                         'SOLD_TO_CUSTOMER_NAME': 'Customer', 'REGION': 'Region'},
@@ -2664,10 +2672,14 @@ def main():
         if not contract_df.empty:
             contract_data_start = contract_df['START_DATE'].min()
             if contract_data_start < start_date:
-                with st.spinner(t("financial_loading_history")):
-                    contract_usage_df = load_usage_data(
-                        session, contract_data_start, end_date, customer_filter, None
-                    )
+                try:
+                    with st.spinner(t("financial_loading_history")):
+                        contract_usage_df = load_usage_data(
+                            session, contract_data_start, end_date, customer_filter, None
+                        )
+                except Exception as e:
+                    st.error(t("msg_query_error", error=e))
+                    st.stop()
             else:
                 contract_usage_df = usage_df
         else:
@@ -2752,7 +2764,7 @@ def main():
             if not contract_metrics:
                 st.info(t("financial_no_usage_contracts"))
             else:
-                if customer_filter == t("all_customers"):
+                if customer_filter == ALL_CUSTOMERS:
                     selected_customer = st.selectbox(
                         t("financial_select_customer"),
                         options=list(contract_metrics.keys()),
@@ -2863,7 +2875,7 @@ def main():
             used_globally = set(usage_df['USAGE_TYPE'].str.lower().unique())
 
             # ── Adoption matrix (all-customers view) ─────────────────────────
-            if customer_filter == t("all_customers"):
+            if customer_filter == ALL_CUSTOMERS:
                 st.markdown(t("feature_matrix"))
                 st.caption(t("feature_matrix_caption"))
 
@@ -2899,7 +2911,7 @@ def main():
             # ── Customer deep dive ────────────────────────────────────────────
             st.markdown(t("feature_breakdown"))
 
-            if customer_filter == t("all_customers"):
+            if customer_filter == ALL_CUSTOMERS:
                 feature_customer = st.selectbox(
                     t("feature_select_customer"),
                     options=sorted(usage_df['SOLD_TO_CUSTOMER_NAME'].unique()),
@@ -2979,7 +2991,7 @@ def main():
             # ── Upsell opportunities ──────────────────────────────────────────
             st.markdown(t("feature_upsell"))
 
-            if customer_filter != t("all_customers") and not customer_feature_df.empty:
+            if customer_filter != ALL_CUSTOMERS and not customer_feature_df.empty:
                 used_scope = set(customer_feature_df['USAGE_TYPE'].str.lower().unique())
                 scope_label = t("feature_upsell_scope_customer", name=customer_filter)
             else:

@@ -12,18 +12,20 @@ A **Streamlit in Snowflake** app for monitoring customer credit consumption, con
 ## Deploy in 2 Steps
 
 ### Prerequisites
-- Snowflake account with Streamlit in Snowflake enabled
-- Access to `SNOWFLAKE.BILLING` schema (request via Snowflake Support if needed)
-- `ACCOUNTADMIN` role
+- Run in your **reseller/distributor organization account** (or an account with ORGADMIN enabled) — the `SNOWFLAKE.BILLING` partner views do not exist anywhere else
+- `ACCOUNTADMIN` role — only ACCOUNTADMIN can read the BILLING views, and the app runs with its **owner's** rights, so ACCOUNTADMIN must own the app
+- Snowflake CLI (`snow`) or SnowSQL to upload files
 
-### Step 1 — Run `deploy.sql` in a Snowflake Worksheet
+### Step 1 — Run `deploy.sql`
 
-Opens a worksheet, pastes the file, and runs it. This creates the warehouse, role, and Streamlit app automatically.
+Run it as ACCOUNTADMIN, including the `PUT` commands from the repository root (uploads `streamlit_app.py` and `environment.yml`). It creates the warehouse, stage, app, and a viewer role.
 
 ### Step 2 — Grant access to your users
 ```sql
 GRANT ROLE BILLING_DASHBOARD_USER TO USER <username>;
 ```
+
+Viewers need only USAGE on the app (granted by `deploy.sql`); they don't need any BILLING grants.
 
 That's it. The app is now available under **Projects → Streamlit → `billing_dashboard`**.
 
@@ -35,16 +37,10 @@ The app detects which mode to use **automatically** — no configuration require
 
 | Scenario | What happens |
 |----------|-------------|
-| BILLING schema is accessible | Live customer data loads; no banner shown |
-| BILLING schema is inaccessible | App falls back to demo data and shows an info banner |
+| BILLING views are readable | Live customer data loads; no banner shown |
+| BILLING views are missing or unreadable | App uses demo data and shows an info banner (never mixes live and demo rows) |
 
-Once deployed in your SPN account and the `BILLING_DASHBOARD_USER` role has been granted, live data loads seamlessly on first open.
-
-To force demo mode at any time (e.g. for a sales demo), set this flag near the top of `streamlit_app.py`:
-
-```python
-USE_DEMO_DATA = True  # line ~107
-```
+To override auto-detection, set the `USE_DEMO_DATA` environment variable: `true` forces demo data (e.g. for a sales demo); `false` forces live data and shows an error if the views can't be read.
 
 ---
 
@@ -116,7 +112,8 @@ Sharing a `?lang=ja` link with colleagues opens the dashboard in Japanese for th
 
 | Issue | Fix |
 |-------|-----|
-| `Object does not exist or not authorized` | Request `SNOWFLAKE.BILLING` access from Snowflake Support |
+| `Object does not exist or not authorized` on a `PARTNER_*` view | The account isn't a reseller org account, or the app owner isn't ACCOUNTADMIN. Check `SHOW VIEWS LIKE 'PARTNER_%' IN SCHEMA SNOWFLAKE.BILLING;` |
+| Errors don't match this code | The deployed app may be an older version — re-upload the files (`deploy.sql` Step 3) |
 | No data showing | Check the date range filter in the sidebar |
 | Stale data | Click **Refresh Data** in the sidebar |
 
