@@ -39,21 +39,28 @@ class FakeSession:
                 raise Exception(f"Object 'SNOWFLAKE.BILLING.{view}' does not exist or not authorized.")
         today = date.today()
         if "PARTNER_RATE_SHEET_DAILY" in query:
-            return FakeResult(pd.DataFrame([{
+            rows = [{
                 "RATE_DATE": today - timedelta(days=i), "SOLD_TO_CUSTOMER_NAME": "Live Co",
                 "ACCOUNT_NAME": "live_prod", "REGION": "AWS_US_WEST_2", "SERVICE_TYPE": "WAREHOUSE_METERING",
-                "RATING_TYPE": "compute", "CURRENCY": "USD", "EFFECTIVE_RATE": 3.0} for i in range(20)]))
+                "RATING_TYPE": "compute", "BILLING_TYPE": "consumption", "IS_ADJUSTMENT": False,
+                "CURRENCY": "USD", "EFFECTIVE_RATE": 3.0} for i in range(20)]
+            # Rows that must not reach the effective-rate averages
+            rows.append({**rows[0], "IS_ADJUSTMENT": True, "EFFECTIVE_RATE": 99.0})
+            rows.append({**rows[0], "BILLING_TYPE": "rebate", "EFFECTIVE_RATE": 50.0})
+            return FakeResult(pd.DataFrame(rows))
         if "PARTNER_REMAINING_BALANCE_DAILY" in query:
             return FakeResult(pd.DataFrame([{
                 "SOLD_TO_ORGANIZATION_NAME": "Org", "SOLD_TO_CUSTOMER_NAME": "Live Co",
                 "SOLD_TO_CONTRACT_NUMBER": "C1", "BALANCE_DATE": today, "CURRENCY": "USD",
                 "FREE_USAGE_BALANCE": 0.0, "CAPACITY_BALANCE": 5000.0,
-                "ON_DEMAND_CONSUMPTION_BALANCE": 0.0, "ROLLOVER_BALANCE": 0.0}]))
+                "ON_DEMAND_CONSUMPTION_BALANCE": 0.0, "ROLLOVER_BALANCE": 0.0,
+                "MARKETPLACE_CAPACITY_DRAWDOWN_BALANCE": 1500.0}]))
         if "PARTNER_CONTRACT_ITEMS" in query:
             return FakeResult(pd.DataFrame([{
                 "SOLD_TO_CUSTOMER_NAME": "Live Co", "SOLD_TO_CONTRACT_NUMBER": "C1",
                 "START_DATE": today - timedelta(days=60), "END_DATE": today + timedelta(days=300),
-                "AMOUNT": 20000.0, "CURRENCY": "USD", "CONTRACT_ITEM": "Capacity"}]))
+                "EXPIRATION_DATE": today + timedelta(days=300), "AMOUNT": 20000.0, "CURRENCY": "USD",
+                "CONTRACT_ITEM": "Capacity", "CONTRACT_MODIFIED_DATE": today - timedelta(days=5)}]))
         if "SELECT DISTINCT" in query:
             return FakeResult(pd.DataFrame({"SOLD_TO_CUSTOMER_NAME": ["Live Co"]}))
         if "PARTNER_USAGE_IN_CURRENCY_DAILY" in query:
@@ -264,6 +271,85 @@ def test_growth_ranking():
     ])
     growth = app.growth_ranking(df, end)
     assert round(growth.iloc[0]["GROWTH_PCT"]) == 100
+
+
+# --------------------------------------------------------------------------
+# BILLING schema columns added after the 2026-11 docs review
+# --------------------------------------------------------------------------
+
+def test_marketplace_drawdown_is_part_of_capacity():
+    app = _app()
+    end = date.today()
+    bal = app.clean_balance_data(app.generate_demo_balance_data(end - timedelta(days=29), end))
+    mcd = bal["MARKETPLACE_CAPACITY_DRAWDOWN_BALANCE"]
+    assert (mcd > 0).any() and (mcd <= bal["CAPACITY_BALANCE"]).all()
+    assert (bal["TOTAL_BALANCE"] == bal["FREE_USAGE_BALANCE"] + bal["CAPACITY_BALANCE"]
+            + bal["ROLLOVER_BALANCE"]).all()
+    legacy = app.clean_balance_data(pd.DataFrame([{"BALANCE_DATE": end, "CAPACITY_BALANCE": 10.0}]))
+    assert legacy["MARKETPLACE_CAPACITY_DRAWDOWN_BALANCE"].tolist() == [0.0]
+
+
+def test_overview_shows_marketplace_drawdown(monkeypatch):
+    at = run_app(monkeypatch, demo_env="true")
+    assert not at.exception
+    assert "Marketplace Drawdown" in [m.label for m in at.metric]
+
+
+def test_rates_use_consumption_rows_only():
+    app = _app()
+    session = FakeSession()
+    app.load_rate_data.clear()
+    rates = app.load_rate_data(session, date.today() - timedelta(days=30), date.today())
+    query, _ = session.calls[-1]
+    assert "BILLING_TYPE" in query and "IS_ADJUSTMENT" in query
+    assert set(rates["EFFECTIVE_RATE"]) == {3.0}
+    summary, _ = app.summarize_rates(rates)
+    assert summary.iloc[0]["LATEST_RATE"] == 3.0
+
+
+def test_contract_dates_and_amendments():
+    app = _app()
+    session = FakeSession()
+    app.load_contract_data.clear()
+    contracts = app.load_contract_data(session)
+    query, _ = session.calls[-1]
+    assert "EXPIRATION_DATE" in query and "CONTRACT_MODIFIED_DATE" in query
+    assert "WHERE END_DATE >= CURRENT_DATE" in query
+    assert app.recent_contract_amendments(contracts) == {"Live Co": date.today() - timedelta(days=5)}
+    # Demo: Acme's mid-term rate change is its only amendment
+    demo = app.recent_contract_amendments(app.generate_demo_contract_data())
+    assert demo == {"Acme Corporation": date.today() - timedelta(days=20)}
+    # A contract last modified before it started is not an amendment
+    unchanged = contracts.assign(CONTRACT_MODIFIED_DATE=contracts["START_DATE"] - timedelta(days=1))
+    assert app.recent_contract_amendments(unchanged) == {}
+
+
+def test_live_amendment_alert_and_contract_details(monkeypatch):
+    at = run_app(monkeypatch, session=FakeSession())
+    at.radio[0].set_value("tab_trends").run()
+    assert not at.exception
+    assert "Live Co" in " ".join(m.value for m in at.markdown if "was modified on" in m.value)
+    at.radio[0].set_value("tab_financial").run()
+    assert not at.exception
+    assert "This contract was modified on" in texts(at, "info")
+    details = " ".join(m.value for m in at.markdown)
+    assert "Expiration:" in details and "Last modified:" in details
+
+
+def test_new_service_types_and_upsell_candidates(monkeypatch):
+    app = _app()
+    documented = {"ARCHIVE_STORAGE_RETRIEVAL_FILE_PROCESSING", "ARCHIVE_STORAGE_WRITE", "COPY_FILES",
+                  "EGRESS_COST_OPTIMIZER", "INTERNAL_DATA_TRANSFER", "OUTBOUND_PRIVATELINK_DATA_PROCESSED",
+                  "OUTBOUND_PRIVATELINK_ENDPOINTS", "STORAGE_LIFECYCLE_POLICY_EXECUTION"}
+    assert documented <= set(app.SERVICE_TYPE_DISPLAY)
+    assert set(app.SERVICE_USECASES["en"]) == set(app.SERVICE_USECASES["ja"])
+    assert set(app.SERVICE_USECASES["en"]) <= set(app.SERVICE_TYPE_DISPLAY)
+    at = run_app(monkeypatch, demo_env="true")
+    at.radio[0].set_value("tab_feature").run()
+    assert not at.exception
+    cards = " ".join(m.value for m in at.markdown if "upsell-card" in m.value)
+    assert "Storage Lifecycle Policies" in cards
+    assert "Internal Data Transfer" not in cards
 
 
 @pytest.mark.parametrize("lang", ["en", "ja"])
