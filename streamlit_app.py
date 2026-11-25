@@ -254,6 +254,7 @@ TRANSLATIONS = {
         "financial_end": "End: {date}",
         "financial_expiration": "Expiration: {date}",
         "financial_modified": "Last modified: {date}",
+        "financial_free_usage": "Free usage credits: {value} (not counted as capacity)",
         "financial_contract_amended": "📝 This contract was modified on {date}. Usage and balance figures can change until month close.",
         "alert_contract_amended": "📝 Contract for **{name}** was modified on {date} — usage and balances can change until month close",
         "financial_duration": "Duration: {days} days",
@@ -533,6 +534,7 @@ TRANSLATIONS = {
         "financial_end": "終了: {date}",
         "financial_expiration": "失効日: {date}",
         "financial_modified": "最終更新日: {date}",
+        "financial_free_usage": "無料使用クレジット: {value}（キャパシティには含めません）",
         "financial_contract_amended": "📝 この契約は {date} に変更されました。月次締めまで使用量・残高の数値は変わる可能性があります。",
         "alert_contract_amended": "📝 **{name}** の契約が {date} に変更されました — 月次締めまで使用量・残高は変わる可能性があります",
         "financial_duration": "期間: {days} 日",
@@ -752,6 +754,13 @@ DEMO_CONTRACT_INFO = {
 
 # Demo Marketplace Capacity Drawdown commitment (part of capacity, not extra balance)
 DEMO_MARKETPLACE_DRAWDOWN = {'Global Analytics Co': 25000}
+
+# Demo contract items besides the base capacity item: (CONTRACT_ITEM, days after
+# contract start, amount). Additional capacity is part of DEMO_CONTRACT_INFO's amount.
+DEMO_EXTRA_CONTRACT_ITEMS = {
+    'Acme Corporation':     [('additional capacity', 120, 30000)],
+    'DataDriven Solutions': [('free usage', 0, 5000)],
+}
 
 # Generic upsell use cases per feature — shown in the Feature Adoption tab
 FEATURE_USECASES = {
@@ -1123,7 +1132,7 @@ def generate_demo_balance_data(start_date, end_date):
     return df
 
 def generate_demo_contract_data():
-    """Generate realistic demo contract data for 5 customers.
+    """Generate demo PARTNER_CONTRACT_ITEMS rows (one per contract item) for 5 customers.
 
     A mid-term rate change is shown as a contract amendment on the same day.
     """
@@ -1137,17 +1146,23 @@ def generate_demo_contract_data():
         change = DEMO_RATE_CHANGES.get(customer['name'])
         modified = today - timedelta(days=change['days_ago']) if change else start
 
-        data.append({
-            'SOLD_TO_CUSTOMER_NAME':    customer['name'],
-            'SOLD_TO_CONTRACT_NUMBER':  customer['contract'],
-            'START_DATE':               start,
-            'END_DATE':                 end,
-            'EXPIRATION_DATE':          end,
-            'AMOUNT':                   info['amount'],
-            'CURRENCY':                 'USD',
-            'CONTRACT_ITEM':            'Snowflake Credits',
-            'CONTRACT_MODIFIED_DATE':   modified,
-        })
+        extras = DEMO_EXTRA_CONTRACT_ITEMS.get(customer['name'], [])
+        additional = sum(amount for item, _, amount in extras if item == 'additional capacity')
+        items = [('capacity', start, info['amount'] - additional)] + [
+            (item, start + timedelta(days=days), amount) for item, days, amount in extras]
+
+        for item, item_start, amount in items:
+            data.append({
+                'SOLD_TO_CUSTOMER_NAME':    customer['name'],
+                'SOLD_TO_CONTRACT_NUMBER':  customer['contract'],
+                'START_DATE':               item_start,
+                'END_DATE':                 end,
+                'EXPIRATION_DATE':          end,
+                'AMOUNT':                   amount,
+                'CURRENCY':                 'USD',
+                'CONTRACT_ITEM':            item,
+                'CONTRACT_MODIFIED_DATE':   modified,
+            })
 
     return pd.DataFrame(data)
 
@@ -1562,6 +1577,39 @@ def calculate_overall_run_rate(usage_df, balance_df=None, run_rate_days=7):
     
     return run_rate
 
+def summarize_contracts(items_df):
+    """Collapse PARTNER_CONTRACT_ITEMS rows (one per contract item) into one row per customer.
+
+    AMOUNT becomes the capacity purchased: every item except free usage, i.e. capacity
+    plus additional capacity. Free usage is kept in FREE_USAGE_AMOUNT. If a customer has
+    several active contracts (e.g. a renewal signed early), the one in effect today is
+    used, otherwise the next one to start.
+    """
+    if items_df.empty:
+        return items_df
+    today = datetime.now().date()
+    df = items_df.copy()
+    for col in ['EXPIRATION_DATE', 'CONTRACT_MODIFIED_DATE']:
+        if col not in df.columns:
+            df[col] = None
+    item = (df['CONTRACT_ITEM'] if 'CONTRACT_ITEM' in df.columns else pd.Series('', index=df.index))
+    is_free = item.fillna('').astype(str).str.strip().str.lower().eq('free usage')
+    df['CAPACITY_AMOUNT'] = df['AMOUNT'].where(~is_free, 0.0)
+    df['FREE_USAGE_AMOUNT'] = df['AMOUNT'].where(is_free, 0.0)
+
+    contracts = (df.groupby(['SOLD_TO_CUSTOMER_NAME', 'SOLD_TO_CONTRACT_NUMBER', 'CURRENCY'], dropna=False)
+                 .agg(START_DATE=('START_DATE', 'min'), END_DATE=('END_DATE', 'max'),
+                      EXPIRATION_DATE=('EXPIRATION_DATE', 'max'),
+                      CONTRACT_MODIFIED_DATE=('CONTRACT_MODIFIED_DATE', 'max'),
+                      AMOUNT=('CAPACITY_AMOUNT', 'sum'), FREE_USAGE_AMOUNT=('FREE_USAGE_AMOUNT', 'sum'))
+                 .reset_index())
+    in_effect = contracts[contracts['START_DATE'] <= today].sort_values('START_DATE', ascending=False)
+    upcoming = contracts[contracts['START_DATE'] > today].sort_values('START_DATE')
+    return (pd.concat([in_effect, upcoming])
+            .drop_duplicates('SOLD_TO_CUSTOMER_NAME')
+            .sort_values('SOLD_TO_CUSTOMER_NAME')
+            .reset_index(drop=True))
+
 def calculate_contract_usage_metrics(usage_df, contract_df, run_rate_days=30):
     """
     Calculate contract usage metrics including capacity, overage, and projections
@@ -1656,6 +1704,7 @@ def calculate_contract_usage_metrics(usage_df, contract_df, run_rate_days=30):
             'days_elapsed': days_elapsed,
             'expiration_date': contract.get('EXPIRATION_DATE'),
             'modified_date': contract.get('CONTRACT_MODIFIED_DATE'),
+            'free_usage': contract.get('FREE_USAGE_AMOUNT', 0),
         }
     
     return metrics
@@ -2157,9 +2206,9 @@ def load_balance_data(_session, start_date, end_date, customer_filter=None):
 
 @st.cache_data(ttl=CACHE_TTL_SECONDS)
 def load_contract_data(_session, customer_filter=None):
-    """Load active contracts from PARTNER_CONTRACT_ITEMS, or demo data when _session is None"""
+    """Load active contracts from PARTNER_CONTRACT_ITEMS (one row per customer), or demo data when _session is None"""
     if _session is None:
-        return _filter_demo(generate_demo_contract_data(), customer_filter)
+        return summarize_contracts(_filter_demo(generate_demo_contract_data(), customer_filter))
 
     query = f"""
     SELECT 
@@ -2193,7 +2242,7 @@ def load_contract_data(_session, customer_filter=None):
             df[col] = pd.to_datetime(df[col], errors='coerce').dt.date if col in df.columns else None
         df['AMOUNT'] = df['AMOUNT'].fillna(0)
 
-    return df
+    return summarize_contracts(df)
 
 @st.cache_data(ttl=CACHE_TTL_SECONDS)
 def load_customer_list(_session):
@@ -3685,6 +3734,8 @@ def main():
                                 st.write(f"- {t('financial_expiration', date=metrics['expiration_date'].strftime('%d %B %Y'))}")
                             if pd.notna(metrics['modified_date']):
                                 st.write(f"- {t('financial_modified', date=metrics['modified_date'].strftime('%d %B %Y'))}")
+                            if metrics['free_usage'] > 0:
+                                st.write(f"- {t('financial_free_usage', value=format_currency(metrics['free_usage'], metrics['currency']))}")
                             st.write(f"- {t('financial_duration', days=metrics['days_in_contract'])}")
                             st.write(f"- {t('financial_elapsed', days=metrics['days_elapsed'])}")
                             st.write(f"- {t('financial_remaining', days=(metrics['contract_end'] - datetime.now().date()).days)}")

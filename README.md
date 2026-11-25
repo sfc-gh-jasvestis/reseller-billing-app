@@ -114,6 +114,8 @@ Sharing a `?lang=ja` link with colleagues opens the dashboard in Japanese for th
 
 Active contracts are those with `END_DATE` on or after today. `EXPIRATION_DATE` is shown in the contract details but not used for filtering, because Snowflake's docs don't describe how it differs from `END_DATE`.
 
+`PARTNER_CONTRACT_ITEMS` has one row per contract item, and the app combines them per customer. Capacity purchased is `capacity` plus `additional capacity`. `free usage` is shown separately and isn't counted as capacity. If a customer has more than one active contract (for example, a renewal signed early), the app uses the one in effect today.
+
 `SERVICE_TYPE` display names come from Snowflake's documented list, which is not exhaustive. `AI_SERVICES` (Cortex) is an assumed value. Any unlisted service type shows its raw name, so check the names against your live data once after deploying. Charges that follow from another feature (archive storage, PrivateLink data processed, internal data transfer, `COPY_FILES`) get a display name but are not suggested as upsells.
 
 ---

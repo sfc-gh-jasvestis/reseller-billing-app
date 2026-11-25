@@ -56,11 +56,17 @@ class FakeSession:
                 "ON_DEMAND_CONSUMPTION_BALANCE": 0.0, "ROLLOVER_BALANCE": 0.0,
                 "MARKETPLACE_CAPACITY_DRAWDOWN_BALANCE": 1500.0}]))
         if "PARTNER_CONTRACT_ITEMS" in query:
-            return FakeResult(pd.DataFrame([{
+            capacity = {
                 "SOLD_TO_CUSTOMER_NAME": "Live Co", "SOLD_TO_CONTRACT_NUMBER": "C1",
                 "START_DATE": today - timedelta(days=60), "END_DATE": today + timedelta(days=300),
                 "EXPIRATION_DATE": today + timedelta(days=300), "AMOUNT": 20000.0, "CURRENCY": "USD",
-                "CONTRACT_ITEM": "Capacity", "CONTRACT_MODIFIED_DATE": today - timedelta(days=5)}]))
+                "CONTRACT_ITEM": "capacity", "CONTRACT_MODIFIED_DATE": today - timedelta(days=5)}
+            # One row per contract item; the small free-usage item must not be read as capacity
+            return FakeResult(pd.DataFrame([
+                capacity,
+                {**capacity, "CONTRACT_ITEM": "free usage", "AMOUNT": 100.0,
+                 "CONTRACT_MODIFIED_DATE": today - timedelta(days=60)},
+            ]))
         if "SELECT DISTINCT" in query:
             return FakeResult(pd.DataFrame({"SOLD_TO_CUSTOMER_NAME": ["Live Co"]}))
         if "PARTNER_USAGE_IN_CURRENCY_DAILY" in query:
@@ -350,6 +356,71 @@ def test_new_service_types_and_upsell_candidates(monkeypatch):
     cards = " ".join(m.value for m in at.markdown if "upsell-card" in m.value)
     assert "Storage Lifecycle Policies" in cards
     assert "Internal Data Transfer" not in cards
+
+
+# --------------------------------------------------------------------------
+# PARTNER_CONTRACT_ITEMS has one row per contract item
+# --------------------------------------------------------------------------
+
+def _item(customer, contract, start_offset, end_offset, item, amount, modified_offset=None):
+    today = date.today()
+    return {"SOLD_TO_CUSTOMER_NAME": customer, "SOLD_TO_CONTRACT_NUMBER": contract,
+            "START_DATE": today + timedelta(days=start_offset), "END_DATE": today + timedelta(days=end_offset),
+            "EXPIRATION_DATE": today + timedelta(days=end_offset), "AMOUNT": amount, "CURRENCY": "USD",
+            "CONTRACT_ITEM": item,
+            "CONTRACT_MODIFIED_DATE": today + timedelta(days=modified_offset if modified_offset is not None
+                                                        else start_offset)}
+
+
+def test_contract_items_collapse_to_one_row_per_customer():
+    app = _app()
+    today = date.today()
+    items = pd.DataFrame([
+        _item("A", "A1", -100, 265, "capacity", 20000.0),
+        _item("A", "A1", -30, 265, "additional capacity", 5000.0, modified_offset=-3),
+        _item("A", "A1", -100, 265, "free usage", 1000.0),
+        # B renewed early: the contract in effect today wins over the upcoming one
+        _item("B", "B1", -355, 10, "capacity", 8000.0),
+        _item("B", "B2", 11, 376, "capacity", 12000.0),
+        # C has only signed an upcoming contract
+        _item("C", "C1", 5, 370, "capacity", 3000.0),
+    ])
+    contracts = app.summarize_contracts(items).set_index("SOLD_TO_CUSTOMER_NAME")
+    assert len(contracts) == 3
+    a = contracts.loc["A"]
+    assert a["AMOUNT"] == 25000.0 and a["FREE_USAGE_AMOUNT"] == 1000.0
+    assert a["START_DATE"] == today - timedelta(days=100)
+    assert a["CONTRACT_MODIFIED_DATE"] == today - timedelta(days=3)
+    assert contracts.loc["B", "SOLD_TO_CONTRACT_NUMBER"] == "B1"
+    assert contracts.loc["C", "SOLD_TO_CONTRACT_NUMBER"] == "C1"
+    # A missing CONTRACT_MODIFIED_DATE does not break the collapse
+    no_dates = app.summarize_contracts(items.drop(columns=["EXPIRATION_DATE", "CONTRACT_MODIFIED_DATE"]))
+    assert len(no_dates) == 3 and app.recent_contract_amendments(no_dates) == {}
+
+
+def test_demo_contracts_use_documented_items():
+    app = _app()
+    raw = app.generate_demo_contract_data()
+    assert set(raw["CONTRACT_ITEM"]) == {"capacity", "additional capacity", "free usage"}
+    contracts = app.load_contract_data(None).set_index("SOLD_TO_CUSTOMER_NAME")
+    assert len(contracts) == len(app.DEMO_CUSTOMERS)
+    for name, info in app.DEMO_CONTRACT_INFO.items():
+        assert contracts.loc[name, "AMOUNT"] == info["amount"], name
+    assert contracts.loc["DataDriven Solutions", "FREE_USAGE_AMOUNT"] == 5000
+
+
+def test_free_usage_item_not_treated_as_capacity(monkeypatch):
+    # Before the fix, the 100 USD free-usage row overwrote the 20,000 USD capacity,
+    # so Live Co was reported as being in overage
+    at = run_app(monkeypatch, session=FakeSession())
+    at.radio[0].set_value("tab_trends").run()
+    assert not at.exception
+    assert "is in overage" not in " ".join(m.value for m in at.markdown)
+    at.radio[0].set_value("tab_financial").run()
+    assert not at.exception
+    metric_values = " ".join(str(m.value) for m in at.metric)
+    assert "$20,000" in metric_values
+    assert "Free usage credits: $100" in " ".join(m.value for m in at.markdown)
 
 
 @pytest.mark.parametrize("lang", ["en", "ja"])
