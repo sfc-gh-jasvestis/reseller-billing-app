@@ -153,6 +153,8 @@ TRANSLATIONS = {
         "overview_capacity": "Capacity Balance",
         "overview_rollover": "Rollover Balance",
         "overview_free_usage": "Free Usage Balance",
+        "overview_marketplace_drawdown": "Marketplace Drawdown",
+        "overview_marketplace_drawdown_help": "Part of Capacity Balance that can be spent on Snowflake Marketplace purchases. Already included in Capacity, not additional balance.",
         "overview_burn_chart": "Daily Credit Burn",
         "overview_feature_breakdown": "#### 🔬 Credits by Feature",
         "overview_account_breakdown": "#### 💻 Credits by Account",
@@ -250,6 +252,11 @@ TRANSLATIONS = {
         "financial_projections": "**Projections**",
         "financial_start": "Start: {date}",
         "financial_end": "End: {date}",
+        "financial_expiration": "Expiration: {date}",
+        "financial_modified": "Last modified: {date}",
+        "financial_free_usage": "Free usage credits: {value} (not counted as capacity)",
+        "financial_contract_amended": "📝 This contract was modified on {date}. Usage and balance figures can change until month close.",
+        "alert_contract_amended": "📝 Contract for **{name}** was modified on {date} — usage and balances can change until month close",
         "financial_duration": "Duration: {days} days",
         "financial_elapsed": "Elapsed: {days} days",
         "financial_remaining": "Remaining: {days} days",
@@ -353,7 +360,7 @@ TRANSLATIONS = {
         "financial_overage_by_customer": "Overage spend by customer",
         "financial_overage_trend": "Daily overage spend",
         "financial_rates_header": "#### 🏷️ Effective Rates",
-        "financial_rates_caption": "Effective compute price per credit (after discounts) from PARTNER_RATE_SHEET_DAILY, averaged across each customer's accounts.",
+        "financial_rates_caption": "Effective compute price per credit (after discounts) from PARTNER_RATE_SHEET_DAILY, averaged across each customer's accounts. Consumption rates only; adjustment rows are excluded.",
         "financial_rates_unavailable": "SNOWFLAKE.BILLING.PARTNER_RATE_SHEET_DAILY is not readable in this account, so rates are not shown.",
         "financial_rates_no_data": "No rate data for the selected period.",
         "financial_rates_start": "Start of period",
@@ -426,6 +433,8 @@ TRANSLATIONS = {
         "overview_capacity": "キャパシティ残高",
         "overview_rollover": "ロールオーバー残高",
         "overview_free_usage": "無料使用残高",
+        "overview_marketplace_drawdown": "マーケットプレイス充当分",
+        "overview_marketplace_drawdown_help": "キャパシティ残高のうち Snowflake マーケットプレイスでの購入に使える金額。キャパシティ残高に含まれており、追加の残高ではありません。",
         "overview_burn_chart": "日次クレジット消費",
         "overview_feature_breakdown": "#### 🔬 機能別クレジット",
         "overview_account_breakdown": "#### 💻 アカウント別クレジット",
@@ -523,6 +532,11 @@ TRANSLATIONS = {
         "financial_projections": "**予測**",
         "financial_start": "開始: {date}",
         "financial_end": "終了: {date}",
+        "financial_expiration": "失効日: {date}",
+        "financial_modified": "最終更新日: {date}",
+        "financial_free_usage": "無料使用クレジット: {value}（キャパシティには含めません）",
+        "financial_contract_amended": "📝 この契約は {date} に変更されました。月次締めまで使用量・残高の数値は変わる可能性があります。",
+        "alert_contract_amended": "📝 **{name}** の契約が {date} に変更されました — 月次締めまで使用量・残高は変わる可能性があります",
         "financial_duration": "期間: {days} 日",
         "financial_elapsed": "経過: {days} 日",
         "financial_remaining": "残り: {days} 日",
@@ -626,7 +640,7 @@ TRANSLATIONS = {
         "financial_overage_by_customer": "顧客別超過コスト",
         "financial_overage_trend": "日次超過コスト",
         "financial_rates_header": "#### 🏷️ 実効単価",
-        "financial_rates_caption": "PARTNER_RATE_SHEET_DAILY の割引後コンピュート単価（顧客の全アカウント平均）。",
+        "financial_rates_caption": "PARTNER_RATE_SHEET_DAILY の割引後コンピュート単価（顧客の全アカウント平均）。消費（consumption）の単価のみで、調整行は除外しています。",
         "financial_rates_unavailable": "このアカウントでは SNOWFLAKE.BILLING.PARTNER_RATE_SHEET_DAILY を読み取れないため、単価は表示されません。",
         "financial_rates_no_data": "選択した期間の単価データがありません。",
         "financial_rates_start": "期間開始時",
@@ -738,6 +752,16 @@ DEMO_CONTRACT_INFO = {
     'SmallBiz Insights':    {'amount':  15000, 'days_ago': 330, 'duration': 365},
 }
 
+# Demo Marketplace Capacity Drawdown commitment (part of capacity, not extra balance)
+DEMO_MARKETPLACE_DRAWDOWN = {'Global Analytics Co': 25000}
+
+# Demo contract items besides the base capacity item: (CONTRACT_ITEM, days after
+# contract start, amount). Additional capacity is part of DEMO_CONTRACT_INFO's amount.
+DEMO_EXTRA_CONTRACT_ITEMS = {
+    'Acme Corporation':     [('additional capacity', 120, 30000)],
+    'DataDriven Solutions': [('free usage', 0, 5000)],
+}
+
 # Generic upsell use cases per feature — shown in the Feature Adoption tab
 FEATURE_USECASES = {
     "cortex":               "Build AI-powered apps, summarize documents, classify data, and generate content — no ML expertise or external tools needed",
@@ -779,9 +803,20 @@ SERVICE_TYPE_DISPLAY = {
     "SENSITIVE_DATA_CLASSIFICATION": "Sensitive Data Classification",
     "SERVERLESS_ALERTS": "Serverless Alerts",
     "AI_SERVICES": "Cortex AI",
+    "STORAGE_LIFECYCLE_POLICY_EXECUTION": "Storage Lifecycle Policies",
+    "ARCHIVE_STORAGE_WRITE": "Archive Storage Writes",
+    "ARCHIVE_STORAGE_RETRIEVAL_FILE_PROCESSING": "Archive Storage Retrieval",
+    "EGRESS_COST_OPTIMIZER": "Egress Cost Optimizer",
+    "OUTBOUND_PRIVATELINK_ENDPOINTS": "Outbound PrivateLink Endpoints",
+    "OUTBOUND_PRIVATELINK_DATA_PROCESSED": "Outbound PrivateLink Data Processed",
+    "INTERNAL_DATA_TRANSFER": "Internal Data Transfer",
+    "COPY_FILES": "Copy Files",
 }
 
-# Upsell talking points per SERVICE_TYPE, shown in the Feature Adoption tab
+# Upsell talking points per SERVICE_TYPE, shown in the Feature Adoption tab.
+# Only service types listed here are upsell candidates: charges that follow from
+# another feature (archive storage, PrivateLink data processed, internal data
+# transfer, COPY FILES) have a display name but no talking point.
 SERVICE_USECASES = {
     "en": {
         "WAREHOUSE_METERING": "Virtual warehouses for queries, transformations, Snowpark and Streamlit workloads",
@@ -801,6 +836,9 @@ SERVICE_USECASES = {
         "SENSITIVE_DATA_CLASSIFICATION": "Automatically find and tag PII and sensitive columns for governance",
         "SERVERLESS_ALERTS": "Data-driven alerts and notifications without a running warehouse",
         "AI_SERVICES": "Cortex AI functions, Analyst, Search and agents — AI on governed data with no data movement",
+        "STORAGE_LIFECYCLE_POLICY_EXECUTION": "Automatically archive or expire cold data with storage lifecycle policies to cut storage costs",
+        "EGRESS_COST_OPTIMIZER": "Cut egress costs when auto-fulfilling listings to many regions and clouds",
+        "OUTBOUND_PRIVATELINK_ENDPOINTS": "Reach external services and cloud APIs over private connectivity instead of the public internet",
     },
     "ja": {
         "WAREHOUSE_METERING": "クエリ、変換処理、Snowpark・Streamlit ワークロード用の仮想ウェアハウス",
@@ -820,6 +858,9 @@ SERVICE_USECASES = {
         "SENSITIVE_DATA_CLASSIFICATION": "PII・機密列を自動検出してタグ付けし、ガバナンスを強化",
         "SERVERLESS_ALERTS": "ウェアハウス不要のデータ駆動型アラートと通知",
         "AI_SERVICES": "Cortex AI 関数、Analyst、Search、エージェント — データを移動せずガバナンス下で AI を活用",
+        "STORAGE_LIFECYCLE_POLICY_EXECUTION": "ストレージライフサイクルポリシーでコールドデータを自動アーカイブ・削除し、ストレージコストを削減",
+        "EGRESS_COST_OPTIMIZER": "複数のリージョン・クラウドへのリスティング自動フルフィルメントでエグレスコストを削減",
+        "OUTBOUND_PRIVATELINK_ENDPOINTS": "外部サービスやクラウド API へパブリックインターネットを経由せずプライベート接続でアクセス",
     },
 }
 
@@ -853,6 +894,9 @@ DEMO_SERVICE_MAP = {
 
 # Alert when a customer's effective compute rate moves by at least this much
 RATE_CHANGE_ALERT_PCT = 0.5
+
+# Flag contracts modified (CONTRACT_MODIFIED_DATE) within this many days
+CONTRACT_AMENDED_DAYS = 30
 
 
 def service_display(service_type):
@@ -1051,6 +1095,7 @@ def generate_demo_balance_data(start_date, end_date):
 
         # Free usage is consumed before rollover; assume exhausted by bal_start
         free_bal = 0.0
+        mcd_commit = DEMO_MARKETPLACE_DRAWDOWN.get(customer['name'], 0.0)
 
         for date in date_range:
             # Draw-down order: free → rollover → capacity
@@ -1079,6 +1124,7 @@ def generate_demo_balance_data(start_date, end_date):
                 'CAPACITY_BALANCE':           round(capacity_bal,   2),
                 'ON_DEMAND_CONSUMPTION_BALANCE': 0,
                 'ROLLOVER_BALANCE':           round(rollover_bal,   2),
+                'MARKETPLACE_CAPACITY_DRAWDOWN_BALANCE': round(min(capacity_bal, mcd_commit), 2),
             })
 
     df = pd.DataFrame(data)
@@ -1086,7 +1132,10 @@ def generate_demo_balance_data(start_date, end_date):
     return df
 
 def generate_demo_contract_data():
-    """Generate realistic demo contract data for 5 customers"""
+    """Generate demo PARTNER_CONTRACT_ITEMS rows (one per contract item) for 5 customers.
+
+    A mid-term rate change is shown as a contract amendment on the same day.
+    """
     data = []
     today = datetime.now().date()
 
@@ -1094,16 +1143,26 @@ def generate_demo_contract_data():
         info  = DEMO_CONTRACT_INFO.get(customer['name'], {'amount': 50000, 'days_ago': 180, 'duration': 365})
         start = today - timedelta(days=info['days_ago'])
         end   = start + timedelta(days=info['duration'])
+        change = DEMO_RATE_CHANGES.get(customer['name'])
+        modified = today - timedelta(days=change['days_ago']) if change else start
 
-        data.append({
-            'SOLD_TO_CUSTOMER_NAME':    customer['name'],
-            'SOLD_TO_CONTRACT_NUMBER':  customer['contract'],
-            'START_DATE':               start,
-            'END_DATE':                 end,
-            'AMOUNT':                   info['amount'],
-            'CURRENCY':                 'USD',
-            'CONTRACT_ITEM':            'Snowflake Credits',
-        })
+        extras = DEMO_EXTRA_CONTRACT_ITEMS.get(customer['name'], [])
+        additional = sum(amount for item, _, amount in extras if item == 'additional capacity')
+        items = [('capacity', start, info['amount'] - additional)] + [
+            (item, start + timedelta(days=days), amount) for item, days, amount in extras]
+
+        for item, item_start, amount in items:
+            data.append({
+                'SOLD_TO_CUSTOMER_NAME':    customer['name'],
+                'SOLD_TO_CONTRACT_NUMBER':  customer['contract'],
+                'START_DATE':               item_start,
+                'END_DATE':                 end,
+                'EXPIRATION_DATE':          end,
+                'AMOUNT':                   amount,
+                'CURRENCY':                 'USD',
+                'CONTRACT_ITEM':            item,
+                'CONTRACT_MODIFIED_DATE':   modified,
+            })
 
     return pd.DataFrame(data)
 
@@ -1124,6 +1183,8 @@ def generate_demo_rate_data(start_date, end_date):
                         'REGION': acct['region'],
                         'SERVICE_TYPE': service_type,
                         'RATING_TYPE': rating_type,
+                        'BILLING_TYPE': 'consumption',
+                        'IS_ADJUSTMENT': False,
                         'CURRENCY': 'USD',
                         'EFFECTIVE_RATE': demo_effective_rate(customer, day, rating_type),
                     })
@@ -1282,12 +1343,16 @@ def clean_balance_data(df):
     
     # Fill null values for balance columns
     balance_columns = ['FREE_USAGE_BALANCE', 'CAPACITY_BALANCE', 
-                      'ON_DEMAND_CONSUMPTION_BALANCE', 'ROLLOVER_BALANCE']
+                      'ON_DEMAND_CONSUMPTION_BALANCE', 'ROLLOVER_BALANCE',
+                      'MARKETPLACE_CAPACITY_DRAWDOWN_BALANCE']
     for col in balance_columns:
         if col in df.columns:
             df[col] = df[col].fillna(0)
+        elif col == 'MARKETPLACE_CAPACITY_DRAWDOWN_BALANCE':
+            df[col] = 0.0
     
-    # Calculate total balance
+    # Calculate total balance. MARKETPLACE_CAPACITY_DRAWDOWN_BALANCE is the part of
+    # CAPACITY_BALANCE reserved for Marketplace purchases, so it is not added again.
     df['TOTAL_BALANCE'] = (df.get('FREE_USAGE_BALANCE', 0) + 
                           df.get('CAPACITY_BALANCE', 0) + 
                           df.get('ROLLOVER_BALANCE', 0))
@@ -1512,6 +1577,39 @@ def calculate_overall_run_rate(usage_df, balance_df=None, run_rate_days=7):
     
     return run_rate
 
+def summarize_contracts(items_df):
+    """Collapse PARTNER_CONTRACT_ITEMS rows (one per contract item) into one row per customer.
+
+    AMOUNT becomes the capacity purchased: every item except free usage, i.e. capacity
+    plus additional capacity. Free usage is kept in FREE_USAGE_AMOUNT. If a customer has
+    several active contracts (e.g. a renewal signed early), the one in effect today is
+    used, otherwise the next one to start.
+    """
+    if items_df.empty:
+        return items_df
+    today = datetime.now().date()
+    df = items_df.copy()
+    for col in ['EXPIRATION_DATE', 'CONTRACT_MODIFIED_DATE']:
+        if col not in df.columns:
+            df[col] = None
+    item = (df['CONTRACT_ITEM'] if 'CONTRACT_ITEM' in df.columns else pd.Series('', index=df.index))
+    is_free = item.fillna('').astype(str).str.strip().str.lower().eq('free usage')
+    df['CAPACITY_AMOUNT'] = df['AMOUNT'].where(~is_free, 0.0)
+    df['FREE_USAGE_AMOUNT'] = df['AMOUNT'].where(is_free, 0.0)
+
+    contracts = (df.groupby(['SOLD_TO_CUSTOMER_NAME', 'SOLD_TO_CONTRACT_NUMBER', 'CURRENCY'], dropna=False)
+                 .agg(START_DATE=('START_DATE', 'min'), END_DATE=('END_DATE', 'max'),
+                      EXPIRATION_DATE=('EXPIRATION_DATE', 'max'),
+                      CONTRACT_MODIFIED_DATE=('CONTRACT_MODIFIED_DATE', 'max'),
+                      AMOUNT=('CAPACITY_AMOUNT', 'sum'), FREE_USAGE_AMOUNT=('FREE_USAGE_AMOUNT', 'sum'))
+                 .reset_index())
+    in_effect = contracts[contracts['START_DATE'] <= today].sort_values('START_DATE', ascending=False)
+    upcoming = contracts[contracts['START_DATE'] > today].sort_values('START_DATE')
+    return (pd.concat([in_effect, upcoming])
+            .drop_duplicates('SOLD_TO_CUSTOMER_NAME')
+            .sort_values('SOLD_TO_CUSTOMER_NAME')
+            .reset_index(drop=True))
+
 def calculate_contract_usage_metrics(usage_df, contract_df, run_rate_days=30):
     """
     Calculate contract usage metrics including capacity, overage, and projections
@@ -1603,10 +1701,23 @@ def calculate_contract_usage_metrics(usage_df, contract_df, run_rate_days=30):
             'run_rate_period': run_rate_days,
             'currency': contract['CURRENCY'],
             'days_in_contract': days_in_contract,
-            'days_elapsed': days_elapsed
+            'days_elapsed': days_elapsed,
+            'expiration_date': contract.get('EXPIRATION_DATE'),
+            'modified_date': contract.get('CONTRACT_MODIFIED_DATE'),
+            'free_usage': contract.get('FREE_USAGE_AMOUNT', 0),
         }
     
     return metrics
+
+def recent_contract_amendments(contract_df, days=CONTRACT_AMENDED_DAYS):
+    """Customer -> latest CONTRACT_MODIFIED_DATE, for contracts changed after they started and within `days`"""
+    if contract_df is None or contract_df.empty or 'CONTRACT_MODIFIED_DATE' not in contract_df.columns:
+        return {}
+    cutoff = datetime.now().date() - timedelta(days=days)
+    modified = contract_df.dropna(subset=['CONTRACT_MODIFIED_DATE'])
+    modified = modified[(modified['CONTRACT_MODIFIED_DATE'] > modified['START_DATE']) &
+                        (modified['CONTRACT_MODIFIED_DATE'] >= cutoff)]
+    return modified.groupby('SOLD_TO_CUSTOMER_NAME')['CONTRACT_MODIFIED_DATE'].max().to_dict()
 
 # =============================================================================
 # COST ANALYTICS (pandas only — no Snowflake ML objects are created)
@@ -2078,7 +2189,8 @@ def load_balance_data(_session, start_date, end_date, customer_filter=None):
         FREE_USAGE_BALANCE,
         CAPACITY_BALANCE,
         ON_DEMAND_CONSUMPTION_BALANCE,
-        ROLLOVER_BALANCE
+        ROLLOVER_BALANCE,
+        MARKETPLACE_CAPACITY_DRAWDOWN_BALANCE
     FROM {BILLING_SCHEMA}.{VIEWS['BALANCE']}
     WHERE DATE BETWEEN ? AND ?
     """
@@ -2094,9 +2206,9 @@ def load_balance_data(_session, start_date, end_date, customer_filter=None):
 
 @st.cache_data(ttl=CACHE_TTL_SECONDS)
 def load_contract_data(_session, customer_filter=None):
-    """Load active contracts from PARTNER_CONTRACT_ITEMS, or demo data when _session is None"""
+    """Load active contracts from PARTNER_CONTRACT_ITEMS (one row per customer), or demo data when _session is None"""
     if _session is None:
-        return _filter_demo(generate_demo_contract_data(), customer_filter)
+        return summarize_contracts(_filter_demo(generate_demo_contract_data(), customer_filter))
 
     query = f"""
     SELECT 
@@ -2104,9 +2216,11 @@ def load_contract_data(_session, customer_filter=None):
         SOLD_TO_CONTRACT_NUMBER,
         START_DATE,
         END_DATE,
+        EXPIRATION_DATE,
         AMOUNT,
         CURRENCY,
-        CONTRACT_ITEM
+        CONTRACT_ITEM,
+        CONTRACT_MODIFIED_DATE
     FROM {BILLING_SCHEMA}.{VIEWS['CONTRACT']}
     WHERE END_DATE >= CURRENT_DATE
     """
@@ -2124,9 +2238,11 @@ def load_contract_data(_session, customer_filter=None):
     if not df.empty:
         df['START_DATE'] = pd.to_datetime(df['START_DATE']).dt.date
         df['END_DATE'] = pd.to_datetime(df['END_DATE']).dt.date
+        for col in ['EXPIRATION_DATE', 'CONTRACT_MODIFIED_DATE']:
+            df[col] = pd.to_datetime(df[col], errors='coerce').dt.date if col in df.columns else None
         df['AMOUNT'] = df['AMOUNT'].fillna(0)
 
-    return df
+    return summarize_contracts(df)
 
 @st.cache_data(ttl=CACHE_TTL_SECONDS)
 def load_customer_list(_session):
@@ -2158,6 +2274,8 @@ def load_rate_data(_session, start_date, end_date, customer_filter=None):
             REGION,
             SERVICE_TYPE,
             RATING_TYPE,
+            BILLING_TYPE,
+            IS_ADJUSTMENT,
             CURRENCY,
             EFFECTIVE_RATE
         FROM {BILLING_SCHEMA}.{VIEWS['RATES']}
@@ -2177,6 +2295,12 @@ def load_rate_data(_session, start_date, end_date, customer_filter=None):
         df['RATING_TYPE'] = df['RATING_TYPE'].fillna('other').astype(str).str.strip().str.lower()
         df['SERVICE_TYPE'] = df['SERVICE_TYPE'].fillna('').astype(str).str.strip().str.upper()
         df['EFFECTIVE_RATE'] = pd.to_numeric(df['EFFECTIVE_RATE'], errors='coerce')
+        df['BILLING_TYPE'] = (df['BILLING_TYPE'].fillna('consumption').astype(str).str.strip().str.lower()
+                              if 'BILLING_TYPE' in df.columns else 'consumption')
+        df['IS_ADJUSTMENT'] = (df['IS_ADJUSTMENT'].fillna(False).astype(bool)
+                               if 'IS_ADJUSTMENT' in df.columns else False)
+        # Rates for rebates, support credits and month-close adjustments would skew the averages
+        df = df[(df['BILLING_TYPE'] == 'consumption') & ~df['IS_ADJUSTMENT']]
     return df
 
 def create_enhanced_trend_chart(df):
@@ -2454,6 +2578,10 @@ def show_alerts_and_insights(usage_df, balance_df, contract_df=None, rates_summa
             elif days_left <= 0:
                 alerts.append({'type': 'error',
                     'message': t("alert_contract_expired", name=cname, days=abs(days_left))})
+
+        for cname, modified in recent_contract_amendments(contract_df).items():
+            alerts.append({'type': 'info',
+                'message': t("alert_contract_amended", name=cname, date=modified.strftime('%d/%m/%Y'))})
 
         # Check for overage (usage > capacity)
         if not usage_df.empty:
@@ -2826,12 +2954,14 @@ def main():
             total_capacity  = latest_bal['CAPACITY_BALANCE'].sum()
             total_rollover  = latest_bal['ROLLOVER_BALANCE'].sum()
             total_free      = latest_bal['FREE_USAGE_BALANCE'].sum()
+            total_mcd       = latest_bal['MARKETPLACE_CAPACITY_DRAWDOWN_BALANCE'].sum()
             days_depletion  = int(total_remaining / avg_daily) if avg_daily > 0 and total_remaining > 0 else None
         else:
             total_remaining = None
             total_capacity  = None
             total_rollover  = None
             total_free      = None
+            total_mcd       = 0
             days_depletion  = None
 
         # ── 4 KPI cards ───────────────────────────────────────────────────────
@@ -2854,13 +2984,17 @@ def main():
         # ── Balance breakdown ─────────────────────────────────────────────────
         if not balance_df.empty:
             st.markdown(t("overview_balance_header"))
-            b1, b2, b3 = st.columns(3)
-            with b1:
+            balance_cols = st.columns(4 if total_mcd > 0 else 3)
+            with balance_cols[0]:
                 st.metric(t("overview_capacity"), format_credits(total_capacity))
-            with b2:
+            with balance_cols[1]:
                 st.metric(t("overview_rollover"), format_credits(total_rollover))
-            with b3:
+            with balance_cols[2]:
                 st.metric(t("overview_free_usage"), format_credits(total_free))
+            if total_mcd > 0:
+                with balance_cols[3]:
+                    st.metric(t("overview_marketplace_drawdown"), format_credits(total_mcd),
+                              help=t("overview_marketplace_drawdown_help"))
         else:
             st.info(t("overview_no_balance"))
 
@@ -3481,6 +3615,9 @@ def main():
 
                 if metrics:
                     st.markdown(f"**{selected_customer}** — Contract #{metrics['contract_id']}")
+                    amended = recent_contract_amendments(contract_df).get(selected_customer)
+                    if amended:
+                        st.info(t("financial_contract_amended", date=amended.strftime('%d/%m/%Y')))
 
                     col1, col2, col3, col4 = st.columns(4)
                     with col1:
@@ -3593,6 +3730,12 @@ def main():
                             st.markdown(t("financial_timeline"))
                             st.write(f"- {t('financial_start', date=metrics['contract_start'].strftime('%d %B %Y'))}")
                             st.write(f"- {t('financial_end', date=metrics['contract_end'].strftime('%d %B %Y'))}")
+                            if pd.notna(metrics['expiration_date']):
+                                st.write(f"- {t('financial_expiration', date=metrics['expiration_date'].strftime('%d %B %Y'))}")
+                            if pd.notna(metrics['modified_date']):
+                                st.write(f"- {t('financial_modified', date=metrics['modified_date'].strftime('%d %B %Y'))}")
+                            if metrics['free_usage'] > 0:
+                                st.write(f"- {t('financial_free_usage', value=format_currency(metrics['free_usage'], metrics['currency']))}")
                             st.write(f"- {t('financial_duration', days=metrics['days_in_contract'])}")
                             st.write(f"- {t('financial_elapsed', days=metrics['days_elapsed'])}")
                             st.write(f"- {t('financial_remaining', days=(metrics['contract_end'] - datetime.now().date()).days)}")
@@ -3612,7 +3755,7 @@ def main():
             st.info(t("feature_no_data"))
         else:
             currency = usage_df['CURRENCY'].iloc[0] if not usage_df.empty else "USD"
-            all_known_features = set(SERVICE_TYPE_DISPLAY.keys())
+            upsell_candidates = set(SERVICE_USECASES["en"])
             used_globally = set(usage_df['SERVICE_TYPE'].unique())
 
             # ── Adoption matrix (all-customers view) ─────────────────────────
@@ -3739,7 +3882,7 @@ def main():
                 used_scope = used_globally
                 scope_label = t("feature_upsell_scope_all")
 
-            unused_features = sorted(all_known_features - used_scope)
+            unused_features = sorted(upsell_candidates - used_scope)
 
             if unused_features:
                 st.caption(scope_label)

@@ -48,11 +48,11 @@ To override auto-detection, set the `USE_DEMO_DATA` environment variable: `true`
 
 | Tab | Description |
 |-----|-------------|
-| 🏠 **Account Overview** | Credits-only summary, safe to share with customers |
+| 🏠 **Account Overview** | Credits-only summary, safe to share with customers. Shows the **Marketplace drawdown** part of capacity when a customer has one |
 | 📊 **Trends** | Portfolio health, alerts, daily cost trends, **cost anomalies** (per customer × service, z-score vs prior 28 days) and **customer growth** (last 30 vs prior 30 days) |
 | 🎯 **Usage Patterns** | Spend by feature, by account, by **rating type** (compute / storage / data transfer) and by **service per customer** |
-| 💰 **Financial Health** | Run rate, **on-demand (overage) spend**, **effective rates** per customer with rate-change alerts, **credits & other charges**, contract status with a **forecast range** and **renewal sizing** |
-| 🔬 **Feature Adoption** | Usage per `SERVICE_TYPE` per customer and upsell opportunities |
+| 💰 **Financial Health** | Run rate, **on-demand (overage) spend**, **effective rates** per customer with rate-change alerts, **credits & other charges**, contract status with a **forecast range**, **renewal sizing** and **recent contract amendments** |
+| 🔬 **Feature Adoption** | Usage per `SERVICE_TYPE` per customer and upsell opportunities (service types with a talking point only) |
 
 Usage totals count consumption only. Rebates, support credits and other non-consumption billing types are listed separately, and month-close adjustment rows are excluded unless **Include billing adjustments** is ticked in the sidebar.
 
@@ -108,11 +108,15 @@ Sharing a `?lang=ja` link with colleagues opens the dashboard in Japanese for th
 | View | Purpose | Required |
 |------|---------|----------|
 | `PARTNER_USAGE_IN_CURRENCY_DAILY` | Daily usage and cost per customer account, incl. `SERVICE_TYPE`, `BILLING_TYPE`, `RATING_TYPE`, `IS_ADJUSTMENT` and the `overage` usage-type prefix | Yes |
-| `PARTNER_REMAINING_BALANCE_DAILY` | Daily balance snapshots | Yes |
-| `PARTNER_CONTRACT_ITEMS` | Contract terms and capacity | Yes |
-| `PARTNER_RATE_SHEET_DAILY` | Effective (discounted) price per credit per customer, service and region | Optional: without it the Rates section says it is unavailable |
+| `PARTNER_REMAINING_BALANCE_DAILY` | Daily balance snapshots, incl. `MARKETPLACE_CAPACITY_DRAWDOWN_BALANCE` (part of capacity, shown separately and not added to the total) | Yes |
+| `PARTNER_CONTRACT_ITEMS` | Contract terms and capacity, incl. `EXPIRATION_DATE` and `CONTRACT_MODIFIED_DATE` (contracts modified in the last 30 days are flagged) | Yes |
+| `PARTNER_RATE_SHEET_DAILY` | Effective (discounted) price per credit per customer, service and region. Only consumption rows are used (`BILLING_TYPE = 'consumption'`, `IS_ADJUSTMENT = FALSE`) | Optional: without it the Rates section says it is unavailable |
 
-`SERVICE_TYPE` display names come from Snowflake's documented list, which is not exhaustive. `AI_SERVICES` (Cortex) is an assumed value. Any unlisted service type shows its raw name, so check the names against your live data once after deploying.
+Active contracts are those with `END_DATE` on or after today. `EXPIRATION_DATE` is shown in the contract details but not used for filtering, because Snowflake's docs don't describe how it differs from `END_DATE`.
+
+`PARTNER_CONTRACT_ITEMS` has one row per contract item, and the app combines them per customer. Capacity purchased is `capacity` plus `additional capacity`. `free usage` is shown separately and isn't counted as capacity. If a customer has more than one active contract (for example, a renewal signed early), the app uses the one in effect today.
+
+`SERVICE_TYPE` display names come from Snowflake's documented list, which is not exhaustive. `AI_SERVICES` (Cortex) is an assumed value. Any unlisted service type shows its raw name, so check the names against your live data once after deploying. Charges that follow from another feature (archive storage, PrivateLink data processed, internal data transfer, `COPY_FILES`) get a display name but are not suggested as upsells.
 
 ---
 
